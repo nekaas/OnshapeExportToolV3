@@ -1,0 +1,25 @@
+{
+  "organizations": [
+    {
+      "credentials": [
+        {
+          "access_key": "s",
+          "enabled": true,
+          "environment": "production",
+          "id": "1be4bce874fa4b20a0ce0d9fec62f722",
+          "name": "Primary",
+          "notes": "",
+          "priority": 1,
+          "secret_key": "s"
+        }
+      ],
+      "description": "s",
+      "enabled": true,
+      "id": "357e1343490b41d6899ae587d0aa33cb",
+      "name": "s",
+      "notes": "",
+      "priority": 1,
+      "type": "company"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if setup %}Set Up{% else %}Sign In{% endif %} · Onshape Export Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script>
+      (function () { try { if (localStorage.getItem("oem-theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {} })();
+    </script>
+    <style>svg { max-width: 100%; max-height: 100%; }</style>
+    <link href="/static/styles.css?v={{ asset_version }}" rel="stylesheet" />
+  </head>
+  <body class="app-body auth-body">
+    <main class="auth-wrap">
+      <div class="auth-card glass">
+        <div class="auth-brand">
+          <div class="brand-mark">{% include "_logo.svg" %}</div>
+          <div>
+            <div class="brand-title">Onshape Export Manager</div>
+            <div class="brand-sub">{% if setup %}First-run setup{% else %}Sign in to continue{% endif %}</div>
+          </div>
+        </div>
+
+        {% if setup %}
+        <p class="auth-intro">Create the owner account. This is the only account that can manage the appliance.</p>
+        {% endif %}
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login" class="auth-form">
+          <label class="field">
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" required autofocus />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="{% if setup %}new-password{% else %}current-password{% endif %}" required minlength="{% if setup %}8{% else %}1{% endif %}" />
+          </label>
+
+          {% if setup %}
+          <p class="auth-hint">Password must be at least 8 characters.</p>
+          {% endif %}
+
+          {% if totp_enabled and not setup %}
+          <label class="field">
+            <span>Two-factor code</span>
+            <input type="text" name="totp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" placeholder="123456" />
+          </label>
+          {% endif %}
+
+          {% if not setup %}
+          <label class="auth-remember">
+            <input type="checkbox" name="remember" value="1" />
+            <span>Remember me for 30 days</span>
+          </label>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary auth-submit">
+            {% if setup %}Create account &amp; continue{% else %}Sign in{% endif %}
+          </button>
+        </form>
+      </div>
+      <div class="auth-foot">v{{ version }} · secured with scrypt + session tokens</div>
+    </main>
+  </body>
+</html>

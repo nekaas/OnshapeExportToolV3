@@ -1,0 +1,241 @@
+{
+  "profiles": [
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl"
+      ],
+      "name": "STL",
+      "options": {
+        "mode": "binary",
+        "resolution": "medium",
+        "units": "millimeter"
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "step"
+      ],
+      "name": "STEP",
+      "options": {
+        "formatName": "STEP",
+        "stepVersionString": "AP242",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "obj"
+      ],
+      "name": "OBJ",
+      "options": {
+        "formatName": "OBJ",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "iges"
+      ],
+      "name": "IGES",
+      "options": {
+        "formatName": "IGES",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "parasolid"
+      ],
+      "name": "Parasolid",
+      "options": {
+        "formatName": "PARASOLID",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl",
+        "obj"
+      ],
+      "name": "Mesh Bundle",
+      "options": {
+        "obj": {
+          "formatName": "OBJ",
+          "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "medium",
+          "units": "millimeter"
+        }
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "step",
+        "parasolid",
+        "iges"
+      ],
+      "name": "CAD Bundle",
+      "options": {
+        "iges": {
+          "formatName": "IGES",
+          "storeInDocument": false
+        },
+        "parasolid": {
+          "formatName": "PARASOLID",
+          "storeInDocument": false
+        },
+        "step": {
+          "formatName": "STEP",
+          "stepVersionString": "AP242",
+          "storeInDocument": false
+        }
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl",
+        "step",
+        "obj",
+        "parasolid",
+        "iges"
+      ],
+      "name": "Multi Format",
+      "options": {
+        "iges": {
+          "formatName": "IGES",
+          "storeInDocument": false
+        },
+        "obj": {
+          "formatName": "OBJ",
+          "storeInDocument": false
+        },
+        "parasolid": {
+          "formatName": "PARASOLID",
+          "storeInDocument": false
+        },
+        "step": {
+          "formatName": "STEP",
+          "stepVersionString": "AP242",
+          "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "medium",
+          "units": "millimeter"
+        }
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": true,
+        "machine_profile": "",
+        "open_bambu_studio": true,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl"
+      ],
+      "name": "Bambu STL",
+      "options": {
+        "mode": "binary",
+        "resolution": "medium",
+        "units": "millimeter"
+      }
+    }
+  ]
+}

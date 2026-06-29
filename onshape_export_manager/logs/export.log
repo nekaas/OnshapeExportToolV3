@@ -1,0 +1,6 @@
+2026-06-26 17:28:27 INFO     [onshape_export_manager.export] Starting manual export label=Adriana API profile=STEP account=Adrians
+2026-06-26 17:29:34 INFO     [onshape_export_manager.export] label=Adriana API account=Adrians profile=STEP files_exported=9 failed_files=0 skipped_files=0 retries=0 duration_seconds=67.203
+2026-06-26 17:33:52 INFO     [onshape_export_manager.export] Starting manual export label=Adriana API profile=STL account=Adrians
+2026-06-26 17:34:14 INFO     [onshape_export_manager.export] label=Adriana API account=Adrians profile=STL files_exported=9 failed_files=0 skipped_files=0 retries=0 duration_seconds=22.375
+2026-06-26 17:50:57 INFO     [onshape_export_manager.export] Starting manual export label=Adriana API profile=Bambu STL account=Adrians
+2026-06-26 17:51:19 INFO     [onshape_export_manager.export] label=Adriana API account=Adrians profile=Bambu STL files_exported=9 failed_files=0 skipped_files=0 retries=0 duration_seconds=22.265

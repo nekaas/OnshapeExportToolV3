@@ -1,0 +1,13 @@
+{
+  "labels": [
+    {
+      "friendly_name": "Adriana API",
+      "onshape_label_id": "6a3d2ee060504cc7bfa7ce35",
+      "assigned_accounts": ["Adrians"],
+      "export_location": "exports",
+      "export_profile": "STL",
+      "scheduler": null,
+      "enabled": true
+    }
+  ]
+}

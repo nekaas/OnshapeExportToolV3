@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Setup · Onshape Export Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script>
+      (function () { try { if (localStorage.getItem("oem-theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {} })();
+      function wizard() {
+        const post = (url, body) =>
+          fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
+            .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok || d.error) throw new Error(d.error || ("HTTP " + r.status)); return d; });
+        return {
+          step: 1,
+          busy: false,
+          error: "",
+          owner: { username: "", password: "", confirm: "" },
+          storage: { path: "" },
+          org: { name: "", type: "company", description: "", id: null },
+          cred: { name: "Primary", access_key: "", secret_key: "", environment: "production", priority: 1, id: null },
+          label: { friendly_name: "", onshape_label_id: "", export_profile: "STL" },
+          profile: { name: "", formats: "stl,step" },
+          test: { state: "", latency: null, msg: "" },
+          remote: {},
+          orgTypes: ["school", "company", "department", "customer", "workshop", "team", "other"],
+          steps: [
+            "Administrator", "Storage", "Organization", "API Credentials",
+            "Labels", "Export Profile", "Test", "Remote Access", "Finish",
+          ],
+
+          init() {
+            fetch("/api/setup/status").then((r) => r.json()).then((s) => {
+              this.storage.path = s.exports_dir || "";
+              if (s.configured) this.step = Math.max(this.step, 2);
+            });
+          },
+
+          go(n) { this.error = ""; this.step = n; if (n === 8) this.loadRemote(); },
+          run(fn) { this.busy = true; this.error = ""; Promise.resolve(fn()).catch((e) => (this.error = e.message)).finally(() => (this.busy = false)); },
+
+          createOwner() {
+            if (this.owner.password.length < 8) return (this.error = "Password must be at least 8 characters.");
+            if (this.owner.password !== this.owner.confirm) return (this.error = "Passwords do not match.");
+            this.run(() => post("/api/setup/owner", { username: this.owner.username, password: this.owner.password }).then(() => this.go(2)));
+          },
+          saveStorage() { this.run(() => post("/api/setup/storage", { path: this.storage.path }).then(() => this.go(3))); },
+          createOrg() { this.run(() => post("/api/organizations", this.org).then((d) => { this.org.id = d.id; this.go(4); })); },
+          addCred() {
+            if (!this.org.id) return (this.error = "Create an organization first.");
+            this.run(() => post(`/api/organizations/${this.org.id}/credentials`, this.cred).then((d) => { this.cred.id = d.id; this.go(5); }));
+          },
+          createLabel() {
+            if (!this.label.friendly_name) return this.go(6);
+            this.run(() => post("/api/labels", this.label).then(() => this.go(6)));
+          },
+          createProfile() {
+            if (!this.profile.name) return this.go(7);
+            this.run(() => post("/api/profiles", this.profile).then(() => this.go(7)));
+          },
+          runTest() {
+            if (!this.org.id || !this.cred.id) { this.test = { state: "skip", msg: "No credential to test." }; return; }
+            this.test = { state: "running", msg: "Contacting Onshape…" };
+            post(`/api/organizations/${this.org.id}/credentials/${this.cred.id}/test`, {})
+              .then((d) => (this.test = d.ok ? { state: "ok", latency: d.latency_ms, msg: "Connected" } : { state: "fail", msg: d.error || "Failed" }))
+              .catch((e) => (this.test = { state: "fail", msg: e.message }));
+          },
+          loadRemote() { fetch("/api/remote-access").then((r) => r.json()).then((d) => (this.remote = d)).catch(() => {}); },
+          finish() { this.run(() => post("/api/setup/complete", {}).then(() => (window.location.href = "/"))); },
+        };
+      }
+    </script>
+    <style>svg { max-width: 100%; max-height: 100%; }</style>
+    <link href="/static/styles.css?v={{ asset_version }}" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+  </head>
+  <body class="app-body wizard-body" x-data="wizard()" x-init="init()">
+    <div class="wizard-wrap">
+      <div class="wizard-head">
+        <div class="brand-mark">{% include "_logo.svg" %}</div>
+        <div>
+          <div class="brand-title">Welcome to Onshape Export Manager</div>
+          <div class="brand-sub">Let's get your appliance set up — no config files required.</div>
+        </div>
+      </div>
+
+      <div class="wizard-steps">
+        <template x-for="(title, i) in steps" :key="title">
+          <div class="wstep" :class="{ active: step === i + 1, done: step > i + 1 }">
+            <span class="wstep-dot" x-text="step > i + 1 ? '✓' : (i + 1)"></span>
+            <span class="wstep-label" x-text="title"></span>
+          </div>
+        </template>
+      </div>
+
+      <div class="card glass wizard-panel">
+        <div class="auth-error" x-show="error" x-text="error"></div>
+
+        <!-- 1. Administrator -->
+        <div x-show="step === 1">
+          <h2 class="card-title">Create the administrator account</h2>
+          <p class="card-sub">This single owner account secures the dashboard.</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label class="field"><span>Username</span><input x-model="owner.username" autocomplete="username" /></label>
+            <label class="field"><span>Password</span><input type="password" x-model="owner.password" autocomplete="new-password" /></label>
+            <label class="field"><span>Confirm password</span><input type="password" x-model="owner.confirm" autocomplete="new-password" /></label>
+          </div>
+          <div class="wizard-actions"><button class="btn btn-primary" @click="createOwner()" :disabled="busy">Create &amp; continue</button></div>
+        </div>
+
+        <!-- 2. Storage -->
+        <div x-show="step === 2">
+          <h2 class="card-title">Where should exports be stored?</h2>
+          <p class="card-sub">Absolute path on this machine. On a Pi, an external USB or NAS mount works well.</p>
+          <label class="field" style="margin-top:16px"><span>Storage location</span><input x-model="storage.path" placeholder="/home/pi/exports" /></label>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(1)">Back</button>
+            <button class="btn btn-primary" @click="saveStorage()" :disabled="busy">Save &amp; continue</button>
+          </div>
+        </div>
+
+        <!-- 3. Organization -->
+        <div x-show="step === 3">
+          <h2 class="card-title">Create your first organization</h2>
+          <p class="card-sub">A school, company, department, or customer that owns API credentials.</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label class="field"><span>Name</span><input x-model="org.name" placeholder="Engineering School" /></label>
+            <label class="field"><span>Type</span><select x-model="org.type"><template x-for="t in orgTypes" :key="t"><option x-text="t"></option></template></select></label>
+            <label class="field" style="grid-column:1/-1"><span>Description</span><input x-model="org.description" /></label>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(2)">Back</button>
+            <button class="btn btn-primary" @click="createOrg()" :disabled="busy">Create &amp; continue</button>
+          </div>
+        </div>
+
+        <!-- 4. Credentials -->
+        <div x-show="step === 4">
+          <h2 class="card-title">Add an API credential</h2>
+          <p class="card-sub">Use <code>env:VARIABLE</code> to read keys from environment variables, or paste them directly.</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label class="field"><span>Credential name</span><input x-model="cred.name" placeholder="Primary" /></label>
+            <label class="field"><span>Environment</span><input x-model="cred.environment" /></label>
+            <label class="field"><span>Access key</span><input x-model="cred.access_key" placeholder="env:ONSHAPE_ACCESS_KEY" /></label>
+            <label class="field"><span>Secret key</span><input type="password" x-model="cred.secret_key" placeholder="env:ONSHAPE_SECRET_KEY" /></label>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(3)">Back</button>
+            <button class="btn btn-primary" @click="addCred()" :disabled="busy">Add &amp; continue</button>
+          </div>
+        </div>
+
+        <!-- 5. Labels -->
+        <div x-show="step === 5">
+          <h2 class="card-title">Create a label <span class="optional">optional</span></h2>
+          <p class="card-sub">Map an Onshape label (24-character ID) to an export profile.</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label class="field"><span>Friendly name</span><input x-model="label.friendly_name" placeholder="Customer A" /></label>
+            <label class="field"><span>Export profile</span><input x-model="label.export_profile" placeholder="STL" /></label>
+            <label class="field" style="grid-column:1/-1"><span>Onshape label ID</span><input x-model="label.onshape_label_id" placeholder="24-character id" /></label>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(4)">Back</button>
+            <button class="btn btn-ghost" @click="go(6)">Skip</button>
+            <button class="btn btn-primary" @click="createLabel()" :disabled="busy">Continue</button>
+          </div>
+        </div>
+
+        <!-- 6. Export profile -->
+        <div x-show="step === 6">
+          <h2 class="card-title">Create an export profile <span class="optional">optional</span></h2>
+          <p class="card-sub">Combine any Part Studio formats (the built-in STL/STEP/OBJ profiles already exist).</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label class="field"><span>Profile name</span><input x-model="profile.name" placeholder="Shop Bundle" /></label>
+            <label class="field"><span>Formats</span><input x-model="profile.formats" placeholder="stl,step,obj" /></label>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(5)">Back</button>
+            <button class="btn btn-ghost" @click="go(7)">Skip</button>
+            <button class="btn btn-primary" @click="createProfile()" :disabled="busy">Continue</button>
+          </div>
+        </div>
+
+        <!-- 7. Test -->
+        <div x-show="step === 7">
+          <h2 class="card-title">Test the connection</h2>
+          <p class="card-sub">Verify the credential can reach the Onshape API.</p>
+          <div class="test-result" :class="'test-' + test.state" x-show="test.state">
+            <strong x-text="test.state === 'ok' ? 'Connected' : (test.state === 'running' ? 'Testing…' : (test.state === 'skip' ? 'Skipped' : 'Failed'))"></strong>
+            <span x-show="test.latency" x-text="' · ' + test.latency + ' ms'"></span>
+            <div class="test-msg" x-show="test.msg" x-text="test.msg"></div>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(6)">Back</button>
+            <button class="btn btn-ghost" @click="runTest()">Run test</button>
+            <button class="btn btn-primary" @click="go(8)">Continue</button>
+          </div>
+        </div>
+
+        <!-- 8. Remote access -->
+        <div x-show="step === 8">
+          <h2 class="card-title">Remote access</h2>
+          <p class="card-sub">Reach this appliance from anywhere. Detected methods:</p>
+          <div class="url-list" style="margin-top:14px">
+            <template x-for="url in remote.local_urls || []" :key="url"><div class="url-pill" x-text="url"></div></template>
+            <template x-for="url in (remote.tailscale && remote.tailscale.urls) || []" :key="url"><div class="url-pill ts" x-text="'Tailscale · ' + url"></div></template>
+          </div>
+          <p class="card-sub" style="margin-top:14px">Tip: install Tailscale for zero-config HTTPS access, or see <code>deploy/reverse-proxy.md</code>.</p>
+          <div class="wizard-actions">
+            <button class="btn btn-ghost" @click="go(7)">Back</button>
+            <button class="btn btn-primary" @click="go(9)">Continue</button>
+          </div>
+        </div>
+
+        <!-- 9. Finish -->
+        <div x-show="step === 9">
+          <div class="wizard-done">
+            <div class="wizard-check">✓</div>
+            <h2 class="card-title">You're all set</h2>
+            <p class="card-sub">Your appliance is configured. Open the dashboard to start exporting.</p>
+          </div>
+          <div class="wizard-actions" style="justify-content:center">
+            <button class="btn btn-primary" @click="finish()" :disabled="busy">Go to Dashboard</button>
+          </div>
+        </div>
+      </div>
+      <div class="auth-foot">v{{ version }}</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+{% block content %}
+<div x-data="sectionPage('{{ page }}')" x-init="load()" class="page">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-search" x-show="hasTable">
+      <span x-html="icons.search"></span>
+      <input type="text" placeholder="Filter…" x-model="filter" />
+    </div>
+    <div class="toolbar-actions">
+      <template x-for="tab in tabs" :key="tab">
+        <button class="chip" :class="{ active: activeTab === tab }" @click="setTab(tab)" x-text="tab"></button>
+      </template>
+      <button class="btn btn-ghost" @click="load()" :class="{ spinning: loading }">
+        <span x-html="icons.refresh"></span><span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Logs view -->
+  <template x-if="page === 'logs'">
+    <div class="card glass logs-card">
+      <div class="log-tabs">
+        <template x-for="area in logAreas" :key="area">
+          <button class="chip" :class="{ active: activeLog === area }" @click="selectLog(area)" x-text="area"></button>
+        </template>
+      </div>
+      <pre class="log-view" x-ref="logView"><template x-for="(line, i) in logLines" :key="i"><div class="log-line" :class="logClass(line)" x-text="line"></div></template></pre>
+      <div class="empty" x-show="!logLines.length && !loading">No log entries.</div>
+    </div>
+  </template>
+
+  <!-- Manual export view -->
+  <template x-if="page === 'manual-export'">
+    <div class="manual-workflow" x-init="$nextTick(() => initManualPlanner())">
+      <section class="manual-command glass">
+        <div class="manual-command-head">
+          <div>
+            <h2 class="manual-title">Manual Export</h2>
+            <div class="manual-subline">
+              <span class="badge" :class="worker.running ? 'badge-ok' : 'badge-muted'"
+                    x-text="worker.running ? 'Worker running' : 'Worker idle'"></span>
+              <span x-show="preview && preview.window" x-text="preview.window.duration_label"></span>
+            </div>
+          </div>
+          <div class="manual-command-actions">
+            <button class="btn btn-ghost" @click="previewExport()" :class="{ spinning: previewBusy }">
+              <span x-html="icons.check"></span><span>Preview</span>
+            </button>
+            <button class="btn btn-primary" @click="runExport()" :class="{ spinning: exportBusy }"
+                    :disabled="!canRunExport">
+              <span x-html="icons.bolt"></span><span>Queue Export</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="manual-picker-grid">
+          <label class="field">
+            <span>Label</span>
+            <select x-model="manual.label" @change="onManualSelectionChanged()">
+              <template x-for="l in rows" :key="l.friendly_name">
+                <option :value="l.friendly_name" x-text="l.friendly_name"></option>
+              </template>
+            </select>
+          </label>
+          <label class="field">
+            <span>Export Profile</span>
+            <select x-model="manual.profile" @change="onManualSelectionChanged()">
+              <option value="">Label default</option>
+              <template x-for="p in profiles" :key="p.name">
+                <option :value="p.name" x-text="p.name"></option>
+              </template>
+            </select>
+          </label>
+          <label class="field">
+            <span>Destination</span>
+            <input x-model="manual.destination" @input.debounce.300ms="previewExport()" placeholder="Label export location" />
+          </label>
+        </div>
+      </section>
+
+      <section class="manual-grid">
+        <div class="manual-panel glass">
+          <div class="manual-panel-head">
+            <h3>Date Window</h3>
+            <div class="segmented">
+              <button :class="{ active: manual.mode === 'range' }" @click="setManualMode('range')">Range</button>
+              <button :class="{ active: manual.mode === 'single' }" @click="setManualMode('single')">Single Day</button>
+            </div>
+          </div>
+
+          <div class="preset-grid">
+            <template x-for="preset in datePresets" :key="preset.key">
+              <button class="preset-btn" :class="{ active: manual.preset === preset.key }"
+                      @click="applyDatePreset(preset.key)" x-text="preset.label"></button>
+            </template>
+          </div>
+
+          <div class="manual-date-grid" x-show="manual.mode === 'range'">
+            <label class="field">
+              <span>Start</span>
+              <input x-ref="manualStartPicker" type="text" readonly placeholder="Choose start" />
+            </label>
+            <label class="field">
+              <span>End</span>
+              <input x-ref="manualEndPicker" type="text" readonly placeholder="Choose end" />
+            </label>
+          </div>
+
+          <div class="manual-date-grid" x-show="manual.mode === 'single'">
+            <label class="field">
+              <span>Date</span>
+              <input x-ref="manualSinglePicker" type="text" readonly placeholder="Choose date" />
+            </label>
+          </div>
+
+          <div class="manual-template-row">
+            <label class="field template-select">
+              <span>Saved Templates</span>
+              <select x-model="manual.templateId" @change="applySavedTemplate(manual.templateId)">
+                <option value="">Choose template</option>
+                <template x-for="tpl in manualTemplates" :key="tpl.id">
+                  <option :value="tpl.id" x-text="tpl.name"></option>
+                </template>
+              </select>
+            </label>
+            <button class="btn btn-ghost" @click="saveManualTemplate()">
+              <span x-html="icons.save"></span><span>Save</span>
+            </button>
+            <button class="btn btn-ghost" @click="toggleFavoriteTemplate(manual.templateId)"
+                    :disabled="!manual.templateId">
+              <span x-html="icons.star"></span><span>Favorite</span>
+            </button>
+          </div>
+
+          <div class="template-strip" x-show="favoriteTemplates.length">
+            <span class="strip-label">Favorites</span>
+            <template x-for="tpl in favoriteTemplates" :key="tpl.id">
+              <button class="template-chip favorite" @click="applyTemplate(tpl)">
+                <span x-html="icons.star"></span><span x-text="tpl.name"></span>
+              </button>
+            </template>
+          </div>
+
+          <div class="template-strip" x-show="recentTemplates.length">
+            <span class="strip-label">Recent</span>
+            <template x-for="tpl in recentTemplates" :key="tpl.id">
+              <button class="template-chip" @click="applyTemplate(tpl)" x-text="tpl.name"></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="manual-panel glass">
+          <div class="manual-panel-head">
+            <h3>Export Preview</h3>
+            <span class="badge" :class="preview && preview.valid ? 'badge-ok' : 'badge-muted'"
+                  x-text="preview && preview.valid ? 'Ready' : 'Needs preview'"></span>
+          </div>
+
+          <div class="estimate-grid">
+            <template x-for="card in estimateCards" :key="card.key">
+              <div class="estimate-card">
+                <span class="estimate-icon" x-html="card.icon"></span>
+                <strong x-text="card.value"></strong>
+                <span x-text="card.label"></span>
+              </div>
+            </template>
+          </div>
+
+          <div class="summary-list" x-show="preview && preview.valid">
+            <div><span>Label</span><strong x-text="preview.label.name"></strong></div>
+            <div><span>Profile</span><strong x-text="preview.profile.name"></strong></div>
+            <div><span>Window</span><strong x-text="preview.window.start_display + ' → ' + preview.window.end_display"></strong></div>
+            <div><span>Formats</span><strong x-text="preview.formats.map((f) => f.display_name).join(', ')"></strong></div>
+          </div>
+
+          <div class="validation-list">
+            <template x-for="check in previewChecks" :key="check.key">
+              <div class="validation-row" :class="'check-' + check.status">
+                <span class="validation-dot"></span>
+                <div>
+                  <strong x-text="check.label"></strong>
+                  <span x-text="check.detail"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="manual-timeline glass" x-show="previewTimeline.length">
+        <template x-for="step in previewTimeline" :key="step.label">
+          <div class="manual-step" :class="'step-' + step.status">
+            <div class="manual-step-mark" x-html="step.status === 'done' ? icons.check : icons.clock"></div>
+            <div>
+              <strong x-text="step.label"></strong>
+              <span x-text="step.detail"></span>
+            </div>
+          </div>
+        </template>
+      </section>
+    </div>
+  </template>
+
+  <!-- Generic data table -->
+  <template x-if="hasTable">
+    <div class="card glass">
+      <div class="table-wrap" @click="page === 'queue' && onQueueAction($event)">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <template x-for="col in columns" :key="col.key">
+                <th @click="sortBy(col.key)" :class="{ sortable: true, sorted: sortKey === col.key }">
+                  <span x-text="col.label"></span>
+                  <span class="sort-caret" x-show="sortKey === col.key" x-text="sortDir === 'asc' ? '↑' : '↓'"></span>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(row, i) in visibleRows" :key="i">
+              <tr>
+                <template x-for="col in columns" :key="col.key">
+                  <td x-html="renderCell(col, row)"></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <div class="empty" x-show="!visibleRows.length && !loading" x-text="emptyText"></div>
+      <div class="table-foot" x-show="visibleRows.length">
+        <span x-text="visibleRows.length + ' of ' + rows.length"></span>
+      </div>
+    </div>
+  </template>
+
+  <!-- Settings view -->
+  <template x-if="page === 'settings'">
+    <div class="settings-grid">
+      <template x-for="group in settingsGroups" :key="group.title">
+        <div class="card glass">
+          <div class="card-head"><h2 class="card-title" x-text="group.title"></h2></div>
+          <dl class="kv">
+            <template x-for="row in group.rows" :key="row.k">
+              <div class="kv-row"><dt x-text="row.k"></dt><dd x-text="row.v"></dd></div>
+            </template>
+          </dl>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <!-- Organizations view -->
+  <template x-if="page === 'organizations'">
+    <div class="page" style="gap:18px">
+      <div class="card glass">
+        <div class="card-head">
+          <h2 class="card-title">New Organization</h2>
+          <button class="btn btn-ghost btn-sm" @click="importAccounts()">Import from Accounts</button>
+        </div>
+        <div class="form-grid">
+          <label class="field"><span>Name</span><input x-model="newOrg.name" placeholder="Engineering School" /></label>
+          <label class="field"><span>Type</span>
+            <select x-model="newOrg.type">
+              <template x-for="t in orgTypes" :key="t"><option x-text="t"></option></template>
+            </select>
+          </label>
+          <label class="field" style="grid-column:1/-1"><span>Description</span>
+            <input x-model="newOrg.description" placeholder="High School · Engineering Team" /></label>
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="createOrg()">Create Organization</button>
+      </div>
+
+      <template x-for="org in orgs" :key="org.id">
+        <div class="card glass">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title" x-text="org.name"></h2>
+              <p class="card-sub">
+                <span class="badge badge-muted" x-text="org.type"></span>
+                <span x-text="org.credential_count + ' credential' + (org.credential_count === 1 ? '' : 's')"></span>
+                <span x-show="org.description" x-text="' · ' + org.description"></span>
+              </p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn btn-ghost btn-sm" @click="duplicateOrg(org.id)">Duplicate</button>
+              <button class="btn btn-ghost btn-sm" @click="deleteOrg(org.id)">Delete</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Credential</th><th>Environment</th><th>Health</th><th>Priority</th><th>Today</th><th>Access Key</th><th></th></tr></thead>
+              <tbody>
+                <template x-for="c in org.credentials" :key="c.id">
+                  <tr>
+                    <td><strong x-text="c.name"></strong></td>
+                    <td x-text="c.environment"></td>
+                    <td><span class="badge" :class="healthClass(c.health)" x-text="c.health"></span></td>
+                    <td x-text="c.priority"></td>
+                    <td x-text="c.requests_today"></td>
+                    <td><code x-text="c.access_key"></code></td>
+                    <td><button class="btn btn-ghost btn-sm" @click="deleteCredential(org.id, c.id)">✕</button></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="empty" x-show="!org.credentials.length" style="padding:18px">No credentials yet — add one below.</div>
+          <details class="cred-add">
+            <summary>+ Add credential</summary>
+            <div class="form-grid" style="margin-top:12px">
+              <label class="field"><span>Name</span><input x-model="credForm.name" placeholder="Primary" /></label>
+              <label class="field"><span>Environment</span><input x-model="credForm.environment" placeholder="production" /></label>
+              <label class="field"><span>Access Key</span><input x-model="credForm.access_key" placeholder="env:ONSHAPE_ACCESS_KEY" /></label>
+              <label class="field"><span>Secret Key</span><input type="password" x-model="credForm.secret_key" placeholder="env:ONSHAPE_SECRET_KEY" /></label>
+              <label class="field"><span>Priority (1 = primary)</span><input type="number" min="1" x-model.number="credForm.priority" /></label>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px" @click="addCredential(org.id)">Add Credential</button>
+          </details>
+        </div>
+      </template>
+      <div class="empty" x-show="!orgs.length && !loading">No organizations yet. Create one above, or import from your existing accounts.</div>
+    </div>
+  </template>
+
+  <!-- System monitoring view -->
+  <template x-if="page === 'system'">
+    <div class="page" style="gap:18px">
+      <section class="stat-grid">
+        <template x-for="card in systemCards" :key="card.key">
+          <div class="stat-card glass" :class="card.accent">
+            <div class="stat-card-top"><span class="stat-icon" x-html="card.icon"></span>
+              <span class="stat-trend" x-show="card.badge" x-text="card.badge"></span></div>
+            <div class="stat-value" x-text="card.value"></div>
+            <div class="stat-label" x-text="card.label"></div>
+          </div>
+        </template>
+      </section>
+
+      <section class="grid-2">
+        <div class="card glass">
+          <div class="card-head"><h2 class="card-title">Remote Access</h2>
+            <span class="badge" :class="remote.recommended_url ? 'badge-ok' : 'badge-muted'"
+                  x-text="remote.recommended_url ? 'Reachable' : 'Local only'"></span></div>
+          <dl class="kv">
+            <template x-for="row in remoteRows" :key="row.k">
+              <div class="kv-row"><dt x-text="row.k"></dt>
+                <dd><span class="badge" :class="row.cls" x-show="row.badge" x-text="row.badge"></span>
+                  <span x-text="row.v"></span></dd></div>
+            </template>
+          </dl>
+        </div>
+        <div class="card glass">
+          <div class="card-head"><h2 class="card-title">Access URLs</h2></div>
+          <div class="url-list">
+            <template x-for="url in remote.local_urls || []" :key="url">
+              <a class="url-pill" :href="url" target="_blank" x-text="url"></a>
+            </template>
+            <template x-for="url in (remote.tailscale && remote.tailscale.urls) || []" :key="url">
+              <a class="url-pill ts" :href="url" target="_blank" x-text="'Tailscale · ' + url"></a>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <section class="card glass">
+        <div class="card-head">
+          <h2 class="card-title">Export Worker</h2>
+          <span class="badge" :class="(system.worker && system.worker.running) ? 'badge-ok' : 'badge-muted'"
+                x-text="(system.worker && system.worker.running) ? 'Running' : 'Stopped'"></span>
+        </div>
+        <dl class="kv">
+          <div class="kv-row"><dt>Last tick</dt><dd x-text="system.worker && system.worker.last_tick_at ? formatTime(system.worker.last_tick_at) : '—'"></dd></div>
+          <div class="kv-row"><dt>Jobs processed</dt><dd x-text="(system.worker && system.worker.jobs_processed) || 0"></dd></div>
+          <div class="kv-row"><dt>Jobs failed</dt><dd x-text="(system.worker && system.worker.jobs_failed) || 0"></dd></div>
+          <div class="kv-row" x-show="system.worker && system.worker.active_label"><dt>Active job</dt><dd x-text="system.worker && system.worker.active_label"></dd></div>
+          <div class="kv-row" x-show="system.worker && system.worker.last_error"><dt>Last error</dt><dd x-text="system.worker && system.worker.last_error"></dd></div>
+        </dl>
+        <div class="toolbar-actions" style="margin-top:14px">
+          <button class="btn btn-primary btn-sm" @click="workerControl('start')"
+                  x-show="!(system.worker && system.worker.running)">Start Worker</button>
+          <button class="btn btn-ghost btn-sm" @click="workerControl('stop')"
+                  x-show="system.worker && system.worker.running">Stop Worker</button>
+        </div>
+      </section>
+
+      <section class="card glass">
+        <div class="card-head"><h2 class="card-title">Backups</h2>
+          <button class="btn btn-primary btn-sm" @click="createBackup()" :class="{ spinning: backupBusy }">
+            <span x-html="icons.refresh"></span><span>Create Backup</span></button></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Size</th><th>Files</th><th>Created</th></tr></thead>
+            <tbody>
+              <template x-for="b in backups" :key="b.name">
+                <tr><td><code x-text="b.name"></code></td><td x-text="b.size_human"></td>
+                  <td x-text="b.entry_count"></td><td x-text="formatTime(b.created_at)"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty" x-show="!backups.length">No backups yet. Create one to snapshot config and database.</div>
+      </section>
+    </div>
+  </template>
+
+  <!-- Activity / live event feed view -->
+  <template x-if="page === 'activity'">
+    <div class="page" style="gap:18px">
+      <section class="stat-grid">
+        <template x-for="card in activityCards" :key="card.key">
+          <div class="stat-card glass" :class="card.accent">
+            <div class="stat-card-top"><span class="stat-icon" x-html="card.icon"></span></div>
+            <div class="stat-value" x-text="card.value"></div>
+            <div class="stat-label" x-text="card.label"></div>
+          </div>
+        </template>
+      </section>
+
+      <div class="card glass">
+        <div class="card-head">
+          <h2 class="card-title">Live Activity</h2>
+          <div class="toolbar-actions">
+            <span class="live-indicator" :class="{ live: wsConnected }">
+              <span class="dot"></span>
+              <span x-text="wsConnected ? 'Streaming' : 'Polling'"></span>
+            </span>
+            <select x-model="activityCategory" @change="loadActivity()" class="chip-select">
+              <option value="">All categories</option>
+              <template x-for="c in activityCategories" :key="c"><option :value="c" x-text="c"></option></template>
+            </select>
+            <select x-model="activitySeverity" @change="loadActivity()" class="chip-select">
+              <option value="">All levels</option>
+              <template x-for="s in activitySeverities" :key="s"><option :value="s" x-text="s"></option></template>
+            </select>
+          </div>
+        </div>
+        <div class="event-feed">
+          <template x-for="ev in events" :key="ev.id || ev.event_id">
+            <div class="event-row" :class="'sev-' + ev.severity">
+              <span class="event-dot" :class="'sev-' + ev.severity"></span>
+              <div class="event-main">
+                <div class="event-msg" x-text="ev.message || ev.type"></div>
+                <div class="event-meta">
+                  <span class="badge badge-muted" x-text="ev.category"></span>
+                  <span class="event-type" x-text="ev.type"></span>
+                  <span class="event-actor" x-text="ev.actor"></span>
+                </div>
+              </div>
+              <span class="event-time" :title="ev.timestamp" x-text="formatTime(ev.timestamp)"></span>
+            </div>
+          </template>
+        </div>
+        <div class="empty" x-show="!events.length && !loading">No activity recorded yet.</div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Notifications view -->
+  <template x-if="page === 'notifications'">
+    <div class="page" style="gap:18px">
+      <div class="card glass">
+        <div class="card-head">
+          <h2 class="card-title">Add Notification Channel</h2>
+        </div>
+        <p class="card-sub">Send events to Discord, Slack, Microsoft Teams, email, or any webhook. No config files to edit.</p>
+        <div class="form-grid">
+          <label class="field"><span>Name</span><input x-model="notifForm.name" placeholder="Team Discord" /></label>
+          <label class="field"><span>Kind</span>
+            <select x-model="notifForm.kind">
+              <template x-for="k in notifKinds" :key="k"><option x-text="k"></option></template>
+            </select>
+          </label>
+          <label class="field" style="grid-column:1/-1">
+            <span x-text="notifForm.kind === 'email' ? 'Recipient address(es), comma-separated' : 'Webhook URL'"></span>
+            <input x-model="notifForm.target" :placeholder="notifForm.kind === 'email' ? 'alerts@example.com' : 'https://discord.com/api/webhooks/…'" />
+          </label>
+          <label class="field"><span>Minimum severity</span>
+            <select x-model="notifForm.min_severity">
+              <template x-for="s in notifSeverities" :key="s"><option x-text="s"></option></template>
+            </select>
+          </label>
+          <label class="field"><span>Enabled</span>
+            <select x-model="notifForm.enabled">
+              <option :value="true">Yes</option><option :value="false">No</option>
+            </select>
+          </label>
+        </div>
+        <template x-if="notifForm.kind === 'email'">
+          <div class="form-grid" style="margin-top:12px">
+            <label class="field"><span>SMTP host</span><input x-model="notifForm.options.smtp_host" placeholder="smtp.gmail.com" /></label>
+            <label class="field"><span>SMTP port</span><input type="number" x-model.number="notifForm.options.smtp_port" placeholder="587" /></label>
+            <label class="field"><span>SMTP username</span><input x-model="notifForm.options.smtp_username" placeholder="you@example.com" /></label>
+            <label class="field"><span>SMTP password</span><input type="password" x-model="notifForm.options.smtp_password" placeholder="app password" /></label>
+          </div>
+        </template>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="saveNotification()">
+          <span x-text="notifForm.id ? 'Save Changes' : 'Add Channel'"></span>
+        </button>
+        <button class="btn btn-ghost btn-sm" style="margin-top:14px" x-show="notifForm.id" @click="resetNotifForm()">Cancel</button>
+      </div>
+
+      <div class="card glass">
+        <div class="card-head"><h2 class="card-title">Channels</h2>
+          <span class="badge" :class="notifEnabled ? 'badge-ok' : 'badge-muted'" x-text="notifEnabled ? 'Notifications on' : 'Notifications off'"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Kind</th><th>Target</th><th>Min Severity</th><th>Enabled</th><th></th></tr></thead>
+            <tbody>
+              <template x-for="ch in notifChannels" :key="ch.id">
+                <tr>
+                  <td><strong x-text="ch.name"></strong></td>
+                  <td><span class="badge badge-muted" x-text="ch.kind"></span></td>
+                  <td><code x-text="(ch.target || '').slice(0, 48)"></code></td>
+                  <td x-text="ch.min_severity"></td>
+                  <td><span class="badge" :class="ch.enabled ? 'badge-ok' : 'badge-muted'" x-text="ch.enabled ? 'Yes' : 'No'"></span></td>
+                  <td class="row-actions">
+                    <button class="btn btn-ghost btn-sm" @click="testNotification(ch.id)">Test</button>
+                    <button class="btn btn-ghost btn-sm" @click="editNotification(ch)">Edit</button>
+                    <button class="btn btn-ghost btn-sm" @click="deleteNotification(ch.id)">✕</button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty" x-show="!notifChannels.length && !loading">No channels yet. Add one above to start receiving alerts.</div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Plugins view -->
+  <template x-if="page === 'plugins'">
+    <div class="card glass">
+      <div class="card-head"><h2 class="card-title">Plugin System</h2></div>
+      <p class="card-sub">Extend exports, storage, notifications, post-processing, validators, and reports.</p>
+      <div class="plugin-grid">
+        <template x-for="p in pluginHooks" :key="p.name">
+          <div class="plugin-card">
+            <div class="plugin-icon" x-html="icons.puzzle"></div>
+            <div class="plugin-name" x-text="p.name"></div>
+            <div class="plugin-desc" x-text="p.desc"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+</div>
+{% endblock %}

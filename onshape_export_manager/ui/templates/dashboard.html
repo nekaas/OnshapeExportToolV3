@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<div x-data="dashboardPage" x-init="load()" class="page">
+  <!-- Stat cards -->
+  <section class="stat-grid">
+    <template x-for="card in cards" :key="card.key">
+      <div class="stat-card glass" :class="card.accent">
+        <div class="stat-card-top">
+          <span class="stat-icon" x-html="card.icon"></span>
+          <span class="stat-trend" x-show="card.badge" x-text="card.badge"></span>
+        </div>
+        <div class="stat-value" x-text="card.value"></div>
+        <div class="stat-label" x-text="card.label"></div>
+      </div>
+    </template>
+  </section>
+
+  <!-- Charts row -->
+  <section class="grid-2">
+    <div class="card glass">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Export Activity</h2>
+          <p class="card-sub">Successful vs failed exports · last 14 days</p>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="swatch swatch-success"></i>Success</span>
+          <span class="legend-item"><i class="swatch swatch-fail"></i>Failed</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas x-ref="activityChart"></canvas></div>
+    </div>
+
+    <div class="card glass">
+      <div class="card-head">
+        <h2 class="card-title">Account Health</h2>
+      </div>
+      <div class="chart-wrap chart-wrap-sm"><canvas x-ref="healthChart"></canvas></div>
+      <div class="health-legend">
+        <template x-for="item in healthLegend" :key="item.label">
+          <div class="health-legend-row">
+            <span class="health-dot" :style="`background:${item.color}`"></span>
+            <span class="health-name" x-text="item.label"></span>
+            <span class="health-count" x-text="item.count"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secondary row -->
+  <section class="grid-3">
+    <div class="card glass">
+      <div class="card-head"><h2 class="card-title">Success Rate</h2></div>
+      <div class="gauge">
+        <div class="gauge-value" x-text="(metrics.exports?.success_rate ?? 0) + '%'"></div>
+        <div class="gauge-bar"><div class="gauge-fill" :style="`width:${metrics.exports?.success_rate ?? 0}%`"></div></div>
+        <div class="gauge-sub">
+          <span x-text="metrics.summary?.successful_exports ?? 0"></span> successful ·
+          <span x-text="metrics.summary?.failed_exports ?? 0"></span> failed
+        </div>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <div class="card-head"><h2 class="card-title">Queue</h2></div>
+      <div class="queue-bars">
+        <template x-for="row in queueRows" :key="row.label">
+          <div class="queue-row">
+            <span class="queue-label" x-text="row.label"></span>
+            <div class="queue-track"><div class="queue-fill" :class="row.cls" :style="`width:${row.pct}%`"></div></div>
+            <span class="queue-count" x-text="row.count"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <div class="card-head"><h2 class="card-title">Storage</h2></div>
+      <div class="storage">
+        <div class="storage-value" x-text="metrics.disk?.human ?? '0 B'"></div>
+        <div class="storage-sub"><span x-text="metrics.disk?.file_count ?? 0"></span> exported files</div>
+        <div class="storage-meta">
+          <div><span class="muted">Avg duration</span><strong x-text="(metrics.exports?.average_duration_seconds ?? 0) + 's'"></strong></div>
+          <div><span class="muted">Total files</span><strong x-text="metrics.exports?.total_files ?? 0"></strong></div>
+          <div><span class="muted">DB schema</span><strong x-text="'v' + (metrics.database?.schema_version ?? 0)"></strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent history -->
+  <section class="card glass">
+    <div class="card-head">
+      <h2 class="card-title">Recent Exports</h2>
+      <a href="/history" class="link">View all →</a>
+    </div>
+    <div class="timeline" x-show="recent.length">
+      <template x-for="item in recent" :key="item.id">
+        <div class="timeline-row">
+          <span class="timeline-dot" :class="item.success ? 'ok' : 'fail'"></span>
+          <div class="timeline-main">
+            <div class="timeline-title">
+              <span x-text="item.label_name"></span>
+              <span class="badge" :class="item.success ? 'badge-ok' : 'badge-fail'" x-text="item.success ? 'Success' : 'Failed'"></span>
+            </div>
+            <div class="timeline-meta">
+              <span x-text="item.export_profile"></span> ·
+              <span x-text="item.account_name"></span> ·
+              <span x-text="item.file_count + ' files'"></span> ·
+              <span x-text="item.duration_seconds + 's'"></span>
+            </div>
+          </div>
+          <div class="timeline-time" x-text="formatTime(item.started_at)"></div>
+        </div>
+      </template>
+    </div>
+    <div class="empty" x-show="!recent.length && !loading">No exports recorded yet. Run your first export from <a href="/manual-export" class="link">Manual Export</a>.</div>
+  </section>
+</div>
+{% endblock %}

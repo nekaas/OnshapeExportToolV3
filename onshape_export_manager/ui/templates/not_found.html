@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block heading %}Not Found{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="notfound card glass">
+    <div class="notfound-code">404</div>
+    <h2 class="notfound-title">Page not found</h2>
+    <p class="notfound-sub">The page <code>/{{ page_name }}</code> does not exist.</p>
+    <a href="/" class="btn btn-primary">Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

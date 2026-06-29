@@ -1,0 +1,26 @@
+# Reference systemd unit for Onshape Export Manager (Server Mode).
+#
+# deploy/install.sh generates this file automatically with the correct paths.
+# To install manually, copy to /etc/systemd/system/, edit the paths/user, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now onshape-export-manager
+#
+[Unit]
+Description=Onshape Export Manager (headless server)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/onshape-export-manager
+Environment=OEM_MODE=server
+Environment=OEM_PORT=8080
+ExecStart=/opt/onshape-export-manager/.venv/bin/python /opt/onshape-export-manager/app.py --mode server
+Restart=on-failure
+RestartSec=5
+Nice=5
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

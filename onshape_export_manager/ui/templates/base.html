@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ page_title }} · Onshape Export Manager{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Light mode is the default; apply the saved preference before paint.
+      (function () {
+        try {
+          if (localStorage.getItem("oem-theme") === "dark") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              brand: {
+                50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
+                400: "#818cf8", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca",
+                800: "#3730a3", 900: "#312e81",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Safety net: keep every inline icon bounded even if styles.css fails to
+         load. Icon SVGs carry intrinsic width/height attributes, so we only
+         need to cap them and make their containers shrink-to-fit. */
+      svg { max-width: 100%; max-height: 100%; }
+      .brand-mark,
+      .nav-icon,
+      .stat-icon,
+      .icon-btn,
+      .toast-icon,
+      .plugin-icon,
+      .search-trigger,
+      .toolbar-search,
+      .palette-input { display: inline-flex; align-items: center; justify-content: center; }
+      .brand-mark { width: 38px; height: 38px; }
+      .nav-icon { width: 20px; height: 20px; }
+      .nav-icon svg { width: 20px; height: 20px; }
+      .brand-mark svg { width: 38px; height: 38px; }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet" />
+    <link href="/static/styles.css?v={{ asset_version }}" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- app.js must register Alpine components before Alpine starts, so it loads first. -->
+    <script defer src="/static/app.js?v={{ asset_version }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+  </head>
+  <body class="app-body" x-data="appShell" :class="{ 'sidebar-collapsed': collapsed }">
+    <!-- Sidebar -->
+    <aside class="sidebar glass" :class="{ 'mobile-open': mobileOpen }">
+      <div class="sidebar-brand">
+        <div class="brand-mark">{% include "_logo.svg" %}</div>
+        <div class="brand-text">
+          <span class="brand-title">Onshape</span>
+          <span class="brand-sub">Export Manager</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        {% for item in nav_items %}
+        <a
+          href="/{{ item.slug }}"
+          class="nav-link {% if item.slug == page %}active{% endif %}"
+          title="{{ item.label }}"
+        >
+          <span class="nav-icon">{% include 'icons/' + item.icon + '.svg' ignore missing %}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+        {% endfor %}
+      </nav>
+
+      <div class="sidebar-footer">
+        {% if authenticated %}
+        <a href="/logout" class="nav-link logout-link" title="Sign out">
+          <span class="nav-icon" x-html="icons.logout"></span>
+          <span class="nav-label">Sign out</span>
+        </a>
+        {% endif %}
+        <button class="nav-link collapse-toggle" @click="toggleSidebar()" title="Toggle sidebar">
+          <span class="nav-icon" x-html="collapsed ? icons.expand : icons.collapse"></span>
+          <span class="nav-label">Collapse</span>
+        </button>
+        <div class="version-pill">v{{ version }}</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-area">
+      <header class="topbar glass">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-only" @click="mobileOpen = !mobileOpen" title="Menu">
+            <span x-html="icons.menu"></span>
+          </button>
+          <h1 class="page-heading">{% block heading %}{{ page_title }}{% endblock %}</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="search-trigger" @click="openPalette()">
+            <span x-html="icons.search"></span>
+            <span class="search-trigger-text">Search everything…</span>
+            <kbd>⌘K</kbd>
+          </button>
+          <div class="live-indicator" :class="{ live: connected }" title="Live updates">
+            <span class="dot"></span>
+            <span x-text="connected ? 'Live' : 'Offline'"></span>
+          </div>
+          <button class="icon-btn" @click="toggleTheme()" title="Toggle theme">
+            <span x-show="isDark" x-html="icons.sun"></span>
+            <span x-show="!isDark" x-html="icons.moon"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">{% block content %}{% endblock %}</main>
+    </div>
+
+    <!-- Command palette -->
+    <div class="palette-overlay" x-show="palette.open" x-transition.opacity @keydown.escape.window="closePalette()" @click.self="closePalette()" style="display:none">
+      <div class="palette glass" @click.stop>
+        <div class="palette-input">
+          <span x-html="icons.search"></span>
+          <input
+            type="text"
+            placeholder="Search accounts, labels, profiles, history…"
+            x-model="palette.query"
+            @input.debounce.200ms="runSearch()"
+            x-ref="paletteInput"
+          />
+          <kbd>esc</kbd>
+        </div>
+        <div class="palette-results">
+          <template x-if="palette.loading">
+            <div class="palette-empty">Searching…</div>
+          </template>
+          <template x-if="!palette.loading && palette.query && palette.groups.length === 0">
+            <div class="palette-empty">No results for "<span x-text="palette.query"></span>"</div>
+          </template>
+          <template x-for="group in palette.groups" :key="group.title">
+            <div class="palette-group">
+              <div class="palette-group-title" x-text="group.title + ' · ' + group.count"></div>
+              <template x-for="(item, i) in group.items" :key="group.title + i">
+                <a :href="item.href" class="palette-item">
+                  <div class="palette-item-title" x-text="item.title"></div>
+                  <div class="palette-item-sub" x-text="item.subtitle"></div>
+                </a>
+              </template>
+            </div>
+          </template>
+          <template x-if="!palette.query">
+            <div class="palette-hint">
+              <div class="palette-group-title">Quick actions</div>
+              <a href="/manual-export" class="palette-item"><div class="palette-item-title">Run manual export</div></a>
+              <a href="/queue" class="palette-item"><div class="palette-item-title">View queue</div></a>
+              <a href="/history" class="palette-item"><div class="palette-item-title">Export history</div></a>
+              <a href="/logs" class="palette-item"><div class="palette-item-title">Open logs</div></a>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-stack">
+      <template x-for="toast in toasts" :key="toast.id">
+        <div class="toast" :class="'toast-' + toast.kind" x-transition>
+          <span class="toast-icon" x-html="toastIcon(toast.kind)"></span>
+          <div class="toast-body">
+            <div class="toast-title" x-text="toast.title"></div>
+            <div class="toast-msg" x-show="toast.message" x-text="toast.message"></div>
+          </div>
+          <button class="toast-close" @click="dismissToast(toast.id)">&times;</button>
+        </div>
+      </template>
+    </div>
+
+    <div class="mobile-scrim" x-show="mobileOpen" @click="mobileOpen=false" x-transition.opacity style="display:none"></div>
+  </body>
+</html>
