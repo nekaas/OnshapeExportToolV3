@@ -1,148 +1,188 @@
-<div align="center">
-
 # Onshape Export Manager
 
-**Your Onshape parts, exported automatically. Set it up once. It runs forever.**
-
-[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
-[![Tests](https://img.shields.io/badge/tests-165%20passing-brightgreen.svg)]()
-
-</div>
+> **Automated Onshape CAD export appliance.** Connects to Onshape API accounts, matches documents by labels, and exports them in multiple formats — on a schedule or on demand. Runs as a desktop app, headless server, or Raspberry Pi appliance.
 
 ---
 
-## What Is This?
+## What This Application Is
 
-The Onshape Export Manager is a **self-hosted desktop appliance** that automates CAD file exports from [Onshape](https://www.onshape.com/). Tag your documents in Onshape, set up the app once, and your STL, STEP, OBJ, and other CAD files are exported automatically — on a schedule or on demand.
+A self-contained export automation tool for Onshape CAD documents. You configure Onshape API accounts, create Groups that map Onshape document labels to export settings, and the system handles the rest — fetching documents, converting formats, and organizing output.
 
-It runs on a **Raspberry Pi** (or any Linux/macOS machine) and provides a polished, browser-based dashboard for management. Think of it like a network printer for your CAD files.
+**It is not** a CAD viewer, an Onshape plugin, or a cloud service. It runs on your hardware, talks directly to Onshape's REST API, and stores exports locally.
 
-### Who Is This For?
+---
 
-- **3D printing labs & makerspaces** — Keep STLs current for Bambu Studio, PrusaSlicer, or Cura
-- **Engineering teams** — Auto-export STEP/Parasolid for downstream CAD/CAM workflows
-- **Educators** — Batch export and archive student project portfolios
-- **Manufacturing shops** — Nightly production part exports for toolpath generation
-- **Hobbyists** — Set-and-forget STL exports on a $35 Raspberry Pi
+## Who It's For
+
+- **CAD teams** exporting Onshape documents to STL/STEP for manufacturing
+- **3D printing farms** needing automated STL batch exports
+- **Engineers** who want scheduled, hands-off exports
+- **IT/DevOps** running headless on Raspberry Pi or server hardware
+
+---
+
+## How Users Think
+
+1. "I have Onshape documents tagged with labels — export them nightly."
+2. "I need to export this label's documents right now."
+3. "Which API key is healthy? Which exports failed?"
+4. "Show me everything, organized by account."
+
+---
+
+## Core Concepts
+
+### Onshape Account
+
+An API credential pair (access key + secret key) for one Onshape instance. Each account has a health status (`healthy`, `degraded`, `rate_limited`, `failed`, `disabled`), usage tracking, and failure counting. Accounts can be organized into Organizations for credential management at scale.
+
+**Config file:** `config/accounts.json` (flat list) or `config/organizations.json` (hierarchical orgs with credentials)
+
+### Group
+
+A Group connects an Onshape document label to export settings. It answers: "When documents tagged with label X are found, export them using profile Y with account Z."
+
+A Group has:
+- **Friendly name** — human-readable (e.g., "Robotics Team")
+- **Onshape Label ID** — 24-character hex ID from Onshape's `/api/documents/{did}/labels`
+- **Assigned accounts** — which Onshape API accounts to use
+- **Export profile** — which format/profile to apply
+- **Schedule** — optional recurring interval
+- **Enabled/disabled** toggle
+
+**Config file:** `config/labels.json`
+
+Groups belong to Accounts in the UI tree view, but technically a Group can be assigned to multiple accounts.
+
+### Export Profile
+
+Defines WHAT format(s) to export and HOW. Includes:
+- **Name** — e.g., "STL", "STEP", "Multi Format"
+- **Formats** — one or more `ExportFormat` values (STL, STEP, PARASOLID, OBJ, IGES, DXF, PDF, CUSTOM)
+- **Format options** — per-format settings (resolution, units, etc.)
+- **Bambu settings** — optional Bambu Studio integration (3MF creation, auto-arrange)
+
+**Config file:** `config/export_profiles.json`
+
+### Manual Export
+
+A user-initiated export run. You select one or more Groups, optionally override the profile and date range, and queue the export. The system previews estimated document count and API calls before you commit.
+
+### Scheduler
+
+Runs exports on a recurring interval per Group. Intervals: `15min`, `30min`, `hourly`, `daily`, `weekly`, `monthly`. Each scheduled job creates queue entries that workers pick up.
+
+### Worker
+
+Background thread pool (default 4 threads) that polls the export queue every 5 seconds. Each worker:
+1. Claims the next pending queue entry atomically
+2. Resolves the Group → account → profile → Onshape API
+3. Fetches documents matching the label
+4. Iterates through Part Studios and Assemblies
+5. Exports each in the configured format(s)
+6. Records results in export history
+
+Workers support config caching (5s TTL), graceful shutdown (30s timeout), and job chaining (up to 3 depth).
+
+### Notifications
+
+Pluggable notification channels: Discord, Slack, Teams, Email, Webhook. Each channel filters by severity (info, success, warning, error, critical) and event categories.
+
+---
+
+## How the UI Is Organized
+
+| Page | Purpose |
+|------|---------|
+| **Dashboard** | Overview — cards, charts, system health, recent exports |
+| **API Keys** | Manage Onshape API accounts (organizations + credentials) |
+| **Groups** | Tree view: Accounts → Groups. Create, delete, move, enable/disable, batch export |
+| **Export** | Manual export — tree selector for batch + detailed form with preview |
+| **History** | Export history table — filterable, sortable |
+| **Settings** | General (theme, worker), Notifications, Backups, Remote Access, Logs, About |
+
+---
+
+## How Raspberry Pi Mode Works
+
+When running on a Raspberry Pi as a headless appliance:
+- Binds to `0.0.0.0` (accessible from LAN)
+- System health metrics exposed (CPU, RAM, disk, temperature)
+- Managed via `systemctl` or `deploy/manage.sh`
+- Optional Tailscale/Cloudflare Tunnel integration for remote access
+- Terminal UI mode (`--tui`) for on-device monitoring
+
+---
+
+## How Desktop Mode Works
+
+- Binds to `localhost` only
+- Opens browser automatically on startup
+- Intended for single-user, on-machine use
+- All data stored locally under the project directory
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python 3.13, FastAPI, uvicorn |
+| Database | SQLite (WAL mode, versioned migrations v1→v3) |
+| Frontend | Jinja2 templates, Alpine.js 3.13, Chart.js 4.4, Tailwind CSS (CDN) |
+| Config | JSON files with Pydantic validation |
+| Auth | scrypt password hashing, TOTP 2FA, session tokens |
+| Terminal | Rich, textual, qrcode |
+| Testing | pytest 9.1, httpx 0.27 |
+
+---
+
+## How to Extend
+
+1. **Add export format** — Add to `ExportFormat` enum, implement translator in `export_formats.py`
+2. **Add notification channel** — Implement in `notifications.py`, add to `NotificationKinds`
+3. **Add UI page** — Add to `NAV_ITEMS` in `web.py`, create template in `ui/templates/`, add Alpine.js data in `app.js`
+4. **Add config section** — Create Pydantic model in `configuration.py`, add to `AppConfig`
+
+**Key principle:** All state lives in JSON config files + SQLite. No external services required.
+
+---
+
+## Project Layout
+
+```
+onshape_export_manager/
+├── app.py, web.py, cli.py          # Entry points
+├── core/                           # Business logic (30+ modules)
+├── config/                         # JSON config files
+├── ui/                             # Web UI (templates + static)
+├── terminal/                       # Terminal UI (commands, wizard)
+├── database/                       # SQLite DB + export output
+├── logs/                           # Log files
+└── tests/                          # 183 tests
+```
 
 ---
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/onshape-export-manager.git
-cd onshape-export-manager
-python -m venv .venv && source .venv/bin/activate
+# Install
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python app.py                          # desktop mode — opens browser
-python app.py --mode server --host 0.0.0.0 --port 8080   # server mode
+
+# Run (first time — opens setup wizard)
+python app.py --mode desktop
+
+# Run (headless server)
+python app.py --mode server --port 8080
+
+# Run tests
+python -m pytest tests/ -q
 ```
-
-Open `http://localhost:8080` → Create admin account → Add API key → Create label → Export!
-
-Files land in `./exports/{Label}/{date}/{FORMAT}/`.
-
----
-
-## Core Features
-
-- **Multi-format export**: STL (binary/ASCII), STEP, OBJ, IGES, Parasolid, DXF, PDF
-- **Multi-account pool**: Load-balance across API keys with automatic rate-limit failover
-- **Scheduled exports**: Set daily/weekly/monthly schedules per label
-- **Managed queue**: Every export with retry, exponential backoff, and cancel/retry controls
-- **Real-time dashboard**: Live charts, account health, export activity, SSE streaming
-- **Notifications**: Discord, Slack, Teams, Email, and webhook alerts
-- **Backup & Restore**: ZIP-based config/database backups with safety snapshots
-- **CLI & API**: Full command-line interface and 50+ REST endpoints
-
----
-
-## Documentation
-
-| Document | Purpose |
-|---|---|
-| [README.md](README.md) | Project overview and quick start |
-| [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | Complete subsystem guide for developers |
-| [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) | Architecture reference — data models, API, threading |
-| [UX_AUDIT.md](UX_AUDIT.md) | 55 usability issues, ranked by severity |
-| [UI_GUIDELINES.md](UI_GUIDELINES.md) | Design system — typography, colors, components, a11y |
-| [USER_WORKFLOWS.md](USER_WORKFLOWS.md) | Every user workflow documented |
-| [MASTER_UI_REDESIGN_PLAN.md](MASTER_UI_REDESIGN_PLAN.md) | 10-phase UX redesign roadmap |
-| [MASTER_IMPROVEMENT_PLAN.md](MASTER_IMPROVEMENT_PLAN.md) | 58-item technical improvement backlog |
-| [PROJECT_AUDIT.md](PROJECT_AUDIT.md) | Honest engineering review of the codebase |
-| [TECHNICAL_DEBT.md](TECHNICAL_DEBT.md) | 31 architectural shortcuts and code smells |
-| [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) | Feature roadmap |
-| [SECURITY.md](SECURITY.md) | Security architecture |
-| [FEATURE_INVENTORY.md](FEATURE_INVENTORY.md) | Feature audit against core mission |
-
----
-
-## Architecture
-
-```
-Browser (Alpine.js + Chart.js + Tailwind)
-        │ HTTP / SSE / WebSocket
-FastAPI (50+ endpoints + Jinja2 templates)
-        │
-Core Services (Queue · Scheduler · ExportEngine · ApiPool · Notifications · Audit)
-        │
-BackgroundWorker (daemon thread, asyncio loop, 5s tick)
-        │
-SQLite (WAL mode — history, queue, scheduler, events, telemetry)
-```
-
-For full details: [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md), [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md).
-
----
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-python -m pytest tests/ -q                          # 165 tests
-python -m pytest tests/ --cov=onshape_export_manager --cov-report=html
-```
-
-### Project Structure
-
-```
-onshape_export_manager/
-├── app.py              # Application container (service wiring)
-├── cli.py              # CLI (argparse)
-├── web.py              # FastAPI (routes, auth, SSE, WS)
-├── core/               # 28 service modules (100-300 lines each)
-├── ui/static/          # app.js + styles.css
-├── ui/templates/       # Jinja2 templates
-├── config/             # JSON config files
-├── tests/              # pytest (24 test files)
-└── deploy/             # systemd, install scripts, reverse proxy guide
-```
-
----
-
-## Deployment
-
-### Raspberry Pi (systemd)
-```bash
-sudo bash deploy/install.sh
-bash deploy/manage.sh start|stop|status|logs
-```
-
-### Docker
-```bash
-docker build -t onshape-export-manager .
-docker run -p 8080:8080 -v ./exports:/app/exports -v ./config:/app/config onshape-export-manager
-```
-
-### Remote Access
-Works with Tailscale, Cloudflare Tunnel, Nginx, Caddy. See [deploy/reverse-proxy.md](deploy/reverse-proxy.md).
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
-
-*Built for makers, engineers, and educators who want their CAD files where they need them, when they need them.*
+Proprietary. All rights reserved.
