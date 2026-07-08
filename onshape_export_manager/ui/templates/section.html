@@ -210,10 +210,10 @@
           </div>
 
           <div class="summary-list" x-if="preview && preview.valid">
-            <div><span>Label</span><strong x-text="preview.label.name"></strong></div>
-            <div><span>Profile</span><strong x-text="preview.profile.name"></strong></div>
-            <div><span>Window</span><strong x-text="preview.window.start_display + ' → ' + preview.window.end_display"></strong></div>
-            <div><span>Formats</span><strong x-text="preview.formats.map((f) => f.display_name).join(', ')"></strong></div>
+            <div><span>Label</span><strong x-text="preview?.label?.name || '—'"></strong></div>
+            <div><span>Profile</span><strong x-text="preview?.profile?.name || '—'"></strong></div>
+            <div><span>Window</span><strong x-text="(preview?.window?.start_display || '—') + ' → ' + (preview?.window?.end_display || '—')"></strong></div>
+            <div><span>Formats</span><strong x-text="(preview?.formats || []).map((f) => f.display_name).join(', ') || '—'"></strong></div>
           </div>
 
           <div class="validation-list">
