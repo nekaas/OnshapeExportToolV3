@@ -1491,11 +1491,12 @@ function sectionPage(page) {
 // -- Tree Selector (Account → Groups hierarchy) ------------------------------
 
 let treeSelector = () => ({
-  accounts: [],
+  organisations: [],
+  accounts: [],  // backward compat alias
   loading: true,
-  expanded: {},       // account_name → bool
+  expanded: {},       // org_name → bool
   selected: {},       // group friendly_name → bool
-  selectAllAccounts: {},
+  selectAllOrgs: {},
   icons: ICONS,
 
   // Group creation form

@@ -47,7 +47,7 @@
           </div>
         </div>
         <div x-show="!loading" style="max-height:300px;overflow-y:auto">
-          <template x-for="account in accounts" :key="account.name">
+          <template x-for="org in accounts" :key="org.name">
             <div style="border-bottom:1px solid var(--border-light);padding:6px 0">
               <div @click="toggle(account.name)"
                    style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0">
@@ -290,13 +290,13 @@
     </template>
   </template>
 
-  <!-- ── Groups (tree: Accounts → Groups hierarchy) ── -->
-  <template x-if="page === 'labels'" x-data="treeSelector">
+  <!-- ── Organisations (tree: Organisations → Groups hierarchy) ── -->
+  <template x-if="page === 'organizations'" x-data="treeSelector">
     <div class="page" style="gap:16px">
 
       <!-- Header -->
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-        <h2 style="font-size:1.25rem;font-weight:700;margin:0">Groups</h2>
+        <h2 style="font-size:1.25rem;font-weight:700;margin:0">Organisations</h2>
         <div style="display:flex;align-items:center;gap:12px">
           <span class="badge badge-muted" x-show="loading" style="display:none" x-transition></span>
           <span class="badge badge-ok" x-show="!loading && selectedCount > 0"
@@ -360,34 +360,34 @@
 
       <!-- Tree -->
       <div x-show="!loading">
-        <template x-for="account in accounts" :key="account.name">
+        <template x-for="org in organisations" :key="org.name">
           <div class="tree-account card glass" style="padding:0;overflow:hidden">
             <div class="tree-account-header"
-                 @click="toggle(account.name)"
+                 @click="toggle(org.name)"
                  style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border-light)">
-              <span class="tree-caret" :class="{ open: expanded[account.name] }"
+              <span class="tree-caret" :class="{ open: expanded[org.name] }"
                     style="display:inline-block;transition:transform .2s;font-size:10px"
-                    :style="expanded[account.name] ? 'transform:rotate(90deg)' : ''">▶</span>
+                    :style="expanded[org.name] ? 'transform:rotate(90deg)' : ''">▶</span>
               <input type="checkbox"
-                     :checked="selectAllAccounts[account.name]"
+                     :checked="selectAllOrgs[org.name]"
                      @click.stop
-                     @change="toggleAccount(account.name)"
+                     @change="toggleOrg(org.name)"
                      style="margin:0" />
-              <span class="tree-account-name" x-text="account.name"
+              <span class="tree-account-name" x-text="org.name"
                     style="font-weight:700;font-size:0.95rem"></span>
-              <span class="badge" :class="'badge-' + account.health"
-                    x-text="account.health"
+              <span class="badge" :class="org.credentials_healthy > 0 ? 'badge-ok' : 'badge-muted'"
+                    x-text="org.credentials_healthy + '/' + org.credential_count + ' keys'"
                     style="font-size:0.68rem"></span>
-              <span x-show="account.description" x-text="account.description"
-                    style="font-size:0.75rem;color:var(--text-dim)"></span>
-              <span class="tree-count" x-text="account.group_count + ' groups'"
+              <span x-show="org.type" x-text="org.type"
+                    style="font-size:0.7rem;color:var(--text-dim);text-transform:capitalize"></span>
+              <span class="tree-count" x-text="org.group_count + ' groups'"
                     style="margin-left:auto;font-size:0.75rem;color:var(--text-dim)"></span>
             </div>
 
-            <!-- Groups within this account -->
-            <div class="tree-groups" x-show="expanded[account.name]"
+            <!-- Groups within this Organisation -->
+            <div class="tree-groups" x-show="expanded[org.name]"
                  style="padding:4px 0">
-              <template x-for="group in account.groups" :key="group.friendly_name">
+              <template x-for="group in org.groups" :key="group.friendly_name">
                 <div class="tree-group"
                      style="display:flex;align-items:center;gap:10px;padding:8px 16px 8px 36px;transition:background .15s"
                      @mouseenter="$el.style.background='var(--hover-bg)'"
@@ -414,9 +414,9 @@
                           @change="moveGroup(group.friendly_name, $event.target.value)"
                           style="font-size:0.62rem;margin-left:auto;padding:2px 4px;border-radius:4px;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border-light)">
                     <option value="">Move to…</option>
-                    <template x-for="a in accounts" :key="a.name">
-                      <option :value="a.name" x-text="a.name"
-                              :selected="a.name === account.name"></option>
+                    <template x-for="o in organisations" :key="o.name">
+                      <option :value="o.name" x-text="o.name"
+                              :selected="o.name === org.name"></option>
                     </template>
                   </select>
                   <!-- Delete -->
@@ -426,13 +426,13 @@
                 </div>
               </template>
               <!-- Empty & Create -->
-              <div x-show="account.groups.length === 0"
+              <div x-show="org.groups.length === 0"
                    style="padding:20px 16px 20px 36px;color:var(--text-dim);font-size:0.82rem">
-                <span x-text="'No groups in ' + account.name"></span>
+                <span x-text="'No groups in ' + org.name"></span>
               </div>
               <div style="padding:8px 16px 8px 36px">
                 <button class="btn btn-ghost btn-sm" style="font-size:0.72rem"
-                        @click.stop="openCreateForm(account.name); expanded[account.name] = true">
+                        @click.stop="openCreateForm(org.name); expanded[org.name] = true">
                   + Create Group
                 </button>
               </div>
@@ -441,12 +441,13 @@
         </template>
 
         <!-- Empty state -->
-        <div x-show="accounts.length === 0" class="card glass" style="text-align:center;padding:40px 28px">
-          <div style="font-size:2rem;margin-bottom:12px">📦</div>
-          <h2 style="font-size:1.15rem;font-weight:700;margin:0 0 6px">No Accounts Configured</h2>
+        <div x-show="organisations.length === 0" class="card glass" style="text-align:center;padding:40px 28px">
+          <div style="font-size:2rem;margin-bottom:12px">🏫</div>
+          <h2 style="font-size:1.15rem;font-weight:700;margin:0 0 6px">No Organisations Yet</h2>
           <p style="color:var(--text-muted);max-width:440px;margin:0 auto 16px;font-size:0.88rem">
-            Add an Onshape API account in <a href="/api-keys" style="color:var(--brand)">API Keys</a> to start organizing your exports into groups.
+            Create your first organisation — a school, company, or team — to start managing exports.
           </p>
+          <button class="btn btn-primary" @click="openCreateForm('')">Create Organisation</button>
         </div>
       </div>
     </div>

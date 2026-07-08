@@ -82,8 +82,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency installed by requir
 # Notifications, and Backups live under the Settings gear.
 NAV_ITEMS: list[dict[str, str]] = [
     {"slug": "", "label": "Home", "icon": "home"},
-    {"slug": "api-keys", "label": "API Keys", "icon": "key"},
-    {"slug": "labels", "label": "Groups", "icon": "tag"},
+    {"slug": "organizations", "label": "Organisations", "icon": "key"},
     {"slug": "export", "label": "Export", "icon": "bolt"},
     {"slug": "history", "label": "History", "icon": "history"},
 ]
@@ -91,8 +90,9 @@ NAV_ITEMS: list[dict[str, str]] = [
 # ── Legacy route slugs (kept accessible via URL but hidden from nav) ──
 LEGACY_PAGES: set[str] = {
     "dashboard",
-    "organizations",
     "accounts",
+    "api-keys",
+    "labels",
     "export-profiles",
     "manual-export",
     "queue",
@@ -605,52 +605,67 @@ def create_web_app(base_dir: str | Path | None = None):
 
     @api.get("/api/tree")
     async def api_tree() -> dict[str, Any]:
-        """Return accounts with nested groups as a tree structure."""
+        """Return organisations with nested groups as a tree structure."""
         try:
             config = application.config_manager.load()
         except Exception:
-            return {"accounts": []}
+            return {"organisations": []}
 
-        # Build account → groups mapping
+        # Read organisations from organizations.json
+        from onshape_export_manager.core.organizations import OrganizationManager
+        org_manager = OrganizationManager(application.config_manager)
+        orgs = org_manager.list_organizations()
+
+        # Build org → credential names mapping for group assignment
+        org_accounts: dict[str, set[str]] = {}  # org_id → set of credential names
+        for org in orgs:
+            names = set()
+            for cred in org.get("credentials", []):
+                names.add(cred.get("name", ""))
+            org_accounts[org["id"]] = names
+
+        # Build groups for each organisation
         labels = config.labels.labels if hasattr(config, 'labels') else []
-        account_groups: dict[str, list[dict[str, Any]]] = {a.name: [] for a in config.accounts.accounts}
-        for lbl in labels:
-            for acc_name in lbl.assigned_accounts:
-                if acc_name in account_groups:
-                    account_groups[acc_name].append({
-                        "friendly_name": lbl.friendly_name,
-                        "onshape_label_id": lbl.onshape_label_id,
-                        "export_profile": lbl.export_profile,
-                        "export_location": lbl.export_location,
-                        "schedule": lbl.scheduler.interval if lbl.scheduler else None,
-                        "enabled": lbl.enabled,
-                    })
-                else:
-                    # Label references an account not in accounts.json — show it too
-                    if acc_name not in account_groups:
-                        account_groups[acc_name] = []
-                    account_groups[acc_name].append({
-                        "friendly_name": lbl.friendly_name,
-                        "onshape_label_id": lbl.onshape_label_id,
-                        "export_profile": lbl.export_profile,
-                        "export_location": lbl.export_location,
-                        "schedule": lbl.scheduler.interval if lbl.scheduler else None,
-                        "enabled": lbl.enabled,
-                    })
+        org_groups: dict[str, list[dict[str, Any]]] = {org["id"]: [] for org in orgs}
 
-        result_accounts: list[dict[str, Any]] = []
-        for acc in config.accounts.accounts:
-            result_accounts.append({
-                "name": acc.name,
-                "description": acc.description,
-                "enabled": acc.enabled,
-                "health": getattr(acc, "rate_limit_status", "available"),
-                "api_usage": getattr(acc, "api_usage", 0),
-                "groups": account_groups.get(acc.name, []),
-                "group_count": len(account_groups.get(acc.name, [])),
+        for lbl in labels:
+            group_data = {
+                "friendly_name": lbl.friendly_name,
+                "onshape_label_id": lbl.onshape_label_id,
+                "export_profile": lbl.export_profile,
+                "export_location": lbl.export_location,
+                "schedule": lbl.scheduler.interval if lbl.scheduler else None,
+                "enabled": lbl.enabled,
+            }
+            # Find which org(s) this group's accounts belong to
+            assigned = False
+            for org_id, cred_names in org_accounts.items():
+                if any(acc in cred_names for acc in lbl.assigned_accounts):
+                    org_groups[org_id].append(group_data)
+                    assigned = True
+            if not assigned:
+                # Group with no matching org — show under first org or orphan
+                if orgs:
+                    org_groups[orgs[0]["id"]].append(group_data)
+
+        result: list[dict[str, Any]] = []
+        for org in orgs:
+            result.append({
+                "id": org["id"],
+                "name": org["name"],
+                "type": org.get("type", "other"),
+                "description": org.get("description", ""),
+                "enabled": org.get("enabled", True),
+                "credential_count": len(org.get("credentials", [])),
+                "credentials_healthy": sum(
+                    1 for c in org.get("credentials", [])
+                    if c.get("health", "unknown") == "healthy"
+                ),
+                "groups": org_groups.get(org["id"], []),
+                "group_count": len(org_groups.get(org["id"], [])),
             })
 
-        return {"accounts": result_accounts}
+        return {"organisations": result}
 
     @api.get("/api/status")
     async def status() -> dict[str, Any]:
