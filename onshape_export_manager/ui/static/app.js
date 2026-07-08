@@ -1498,7 +1498,20 @@ let treeSelector = () => ({
   selectAllAccounts: {},
   icons: ICONS,
 
+  // Group creation form
+  showCreateForm: false,
+  createTargetAccount: "",
+  groupForm: { name: "", onshape_id: "", profile: "STL", schedule: "" },
+
+  // Delete confirmation
+  deleteConfirm: null,
+
   async init() {
+    await this.loadTree();
+  },
+
+  async loadTree() {
+    this.loading = true;
     try {
       const resp = await fetchJSON("/api/tree");
       this.accounts = resp.accounts || [];
@@ -1541,6 +1554,113 @@ let treeSelector = () => ({
     return Object.keys(this.selected).filter(k => this.selected[k]);
   },
 
+  // -- Group Management --------------------------------------------------
+
+  openCreateForm(accountName) {
+    this.createTargetAccount = accountName;
+    this.groupForm = { name: "", onshape_id: "", profile: "STL", schedule: "" };
+    this.showCreateForm = true;
+  },
+
+  cancelCreate() {
+    this.showCreateForm = false;
+    this.createTargetAccount = "";
+  },
+
+  async createGroup() {
+    const f = this.groupForm;
+    if (!(f.name || "").trim()) {
+      if (window.oem) window.oem.toast("Error", "Group name is required", "error");
+      return;
+    }
+    if (!(f.onshape_id || "").trim()) {
+      if (window.oem) window.oem.toast("Error", "Onshape Label ID is required", "error");
+      return;
+    }
+    const body = {
+      friendly_name: f.name.trim(),
+      onshape_label_id: f.onshape_id.trim(),
+      assigned_accounts: this.createTargetAccount ? [this.createTargetAccount] : [],
+      export_profile: f.profile || "STL",
+    };
+    if (f.schedule) body.scheduler = { interval: f.schedule, enabled: true };
+
+    try {
+      const r = await fetch("/api/groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Created", `Group '${d.friendly_name}' created`, "success");
+      this.showCreateForm = false;
+      this.createTargetAccount = "";
+      await this.loadTree();
+    } catch (e) {
+      if (window.oem) window.oem.toast("Error", e.message, "error");
+    }
+  },
+
+  confirmDelete(groupName) {
+    this.deleteConfirm = groupName;
+  },
+
+  cancelDelete() {
+    this.deleteConfirm = null;
+  },
+
+  async deleteGroup(groupName) {
+    try {
+      const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}`, {
+        method: "DELETE",
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Deleted", `Group '${groupName}' removed`, "success");
+      this.deleteConfirm = null;
+      // Clear selection
+      this.selected[groupName] = false;
+      await this.loadTree();
+    } catch (e) {
+      if (window.oem) window.oem.toast("Error", e.message, "error");
+    }
+  },
+
+  async moveGroup(groupName, targetAccount) {
+    if (!targetAccount) return;
+    try {
+      const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}/move`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: targetAccount }),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Moved", `Group moved to ${targetAccount}`, "success");
+      await this.loadTree();
+    } catch (e) {
+      if (window.oem) window.oem.toast("Error", e.message, "error");
+    }
+  },
+
+  async toggleGroupEnabled(groupName, enabled) {
+    try {
+      const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !enabled }),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      await this.loadTree();
+    } catch (e) {
+      if (window.oem) window.oem.toast("Error", e.message, "error");
+    }
+  },
+
+  // -- Export ------------------------------------------------------------
+
   queueExport() {
     const labels = this.selectedLabels;
     if (!labels.length) return;
@@ -1553,7 +1673,6 @@ let treeSelector = () => ({
       .then(r => {
         if (r.error) throw new Error(r.error);
         if (window.oem) window.oem.toast("Queued", `${r.count} export(s) enqueued`, "success");
-        // Clear selection
         for (const l of labels) this.selected[l] = false;
         for (const k of Object.keys(this.selectAllAccounts)) this.selectAllAccounts[k] = false;
       })

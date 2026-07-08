@@ -33,6 +33,46 @@
   <!-- Manual export view (also used by new /export page) -->
   <template x-if="page === 'manual-export' || page === 'export'">
     <div class="manual-workflow" x-init="$nextTick(() => initManualPlanner())">
+
+      <!-- Tree-based batch group selection -->
+      <section class="manual-command glass" x-data="treeSelector" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+          <h3 style="font-size:1rem;font-weight:700;margin:0">Select Groups</h3>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-ok" x-show="!loading && selectedCount > 0"
+                  x-text="selectedCount + ' selected'"></span>
+            <button class="btn btn-primary btn-sm" @click="queueExport()" :disabled="selectedCount === 0">
+              <span x-html="icons.bolt"></span><span>Export Selected</span>
+            </button>
+          </div>
+        </div>
+        <div x-show="!loading" style="max-height:300px;overflow-y:auto">
+          <template x-for="account in accounts" :key="account.name">
+            <div style="border-bottom:1px solid var(--border-light);padding:6px 0">
+              <div @click="toggle(account.name)"
+                   style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0">
+                <span style="font-size:10px;transition:transform .2s"
+                      :style="expanded[account.name] ? 'transform:rotate(90deg)' : ''">▶</span>
+                <input type="checkbox" :checked="selectAllAccounts[account.name]"
+                       @click.stop @change="toggleAccount(account.name)" style="margin:0" />
+                <span style="font-weight:700;font-size:0.85rem" x-text="account.name"></span>
+                <span style="font-size:0.68rem;color:var(--text-dim)" x-text="account.group_count + ' groups'"></span>
+              </div>
+              <div x-show="expanded[account.name]" style="padding-left:24px">
+                <template x-for="group in account.groups" :key="group.friendly_name">
+                  <div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:0.82rem">
+                    <input type="checkbox" :checked="selected[group.friendly_name]"
+                           @change="toggleGroup(group.friendly_name)" style="margin:0" />
+                    <span x-text="group.friendly_name"></span>
+                    <span x-show="!group.enabled" style="color:var(--red);font-size:0.65rem">disabled</span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+
       <section class="manual-command glass">
         <div class="manual-command-head">
           <div>
@@ -56,7 +96,7 @@
 
         <div class="manual-picker-grid">
           <label class="field">
-            <span>Label</span>
+            <span>Group</span>
             <select x-model="manual.label" @change="onManualSelectionChanged()">
               <template x-for="l in rows" :key="l.friendly_name">
                 <option :value="l.friendly_name" x-text="l.friendly_name"></option>
@@ -66,7 +106,7 @@
           <label class="field">
             <span>Export Profile</span>
             <select x-model="manual.profile" @change="onManualSelectionChanged()">
-              <option value="">Label default</option>
+              <option value="">Group default</option>
               <template x-for="p in profiles" :key="p.name">
                 <option :value="p.name" x-text="p.name"></option>
               </template>
@@ -74,7 +114,7 @@
           </label>
           <label class="field">
             <span>Destination</span>
-            <input x-model="manual.destination" @input.debounce.300ms="previewExport()" placeholder="Label export location" />
+            <input x-model="manual.destination" @input.debounce.300ms="previewExport()" placeholder="Group export location" />
           </label>
         </div>
       </section>
@@ -265,6 +305,49 @@
         </div>
       </div>
 
+      <!-- Create Group Form -->
+      <div class="card glass" x-show="showCreateForm" x-transition style="padding:16px 20px">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 12px">
+          Create Group <span x-show="createTargetAccount" x-text="'in ' + createTargetAccount"></span>
+        </h3>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <label class="field"><span>Group Name</span><input x-model="groupForm.name" placeholder="e.g. Robotics Team" /></label>
+          <label class="field"><span>Onshape Label ID</span><input x-model="groupForm.onshape_id" placeholder="24-character ID" /></label>
+          <label class="field"><span>Export Profile</span>
+            <select x-model="groupForm.profile">
+              <option value="STL">STL</option>
+              <option value="STEP">STEP</option>
+            </select>
+          </label>
+          <label class="field"><span>Schedule (optional)</span>
+            <select x-model="groupForm.schedule">
+              <option value="">None</option>
+              <option value="15min">Every 15 min</option>
+              <option value="30min">Every 30 min</option>
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary btn-sm" @click="createGroup()">Create</button>
+          <button class="btn btn-ghost btn-sm" @click="cancelCreate()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation -->
+      <div class="card glass" x-show="deleteConfirm" x-transition
+           style="padding:16px 20px;border:1px solid var(--red);background:rgba(239,68,68,0.08)">
+        <p style="margin:0 0 12px;font-weight:600">
+          Delete group "<span x-text="deleteConfirm"></span>"? This cannot be undone.
+        </p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" style="background:var(--red);color:#fff" @click="deleteGroup(deleteConfirm)">Delete</button>
+          <button class="btn btn-ghost btn-sm" @click="cancelDelete()">Cancel</button>
+        </div>
+      </div>
+
       <!-- Tree -->
       <div x-show="!loading">
         <template x-for="account in accounts" :key="account.name">
@@ -305,20 +388,44 @@
                          style="margin:0" />
                   <span x-text="group.friendly_name"
                         style="font-weight:600;font-size:0.88rem"></span>
-                  <span class="badge" x-show="group.enabled !== false"
-                        style="font-size:0.62rem;background:var(--bg-muted);color:var(--text-dim)">enabled</span>
-                  <span x-show="!group.enabled"
-                        style="font-size:0.72rem;color:var(--red)">disabled</span>
+                  <!-- Enable/disable toggle -->
+                  <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:0.62rem"
+                          @click.stop="toggleGroupEnabled(group.friendly_name, group.enabled)"
+                          x-text="group.enabled !== false ? 'Disable' : 'Enable'"
+                          :title="group.enabled !== false ? 'Disable this group' : 'Enable this group'"></button>
                   <span x-text="group.export_profile"
-                        style="font-size:0.72rem;color:var(--text-dim);margin-left:auto"></span>
+                        style="font-size:0.72rem;color:var(--text-dim)"></span>
                   <span x-show="group.schedule"
                         x-text="'⏱ ' + group.schedule"
                         style="font-size:0.68rem;color:var(--text-dim)"></span>
+                  <!-- Move to another account -->
+                  <select class="tree-move-select"
+                          @click.stop
+                          @change="moveGroup(group.friendly_name, $event.target.value)"
+                          style="font-size:0.62rem;margin-left:auto;padding:2px 4px;border-radius:4px;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border-light)">
+                    <option value="">Move to…</option>
+                    <template x-for="a in accounts" :key="a.name">
+                      <option :value="a.name" x-text="a.name"
+                              :selected="a.name === account.name"></option>
+                    </template>
+                  </select>
+                  <!-- Delete -->
+                  <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:0.62rem;color:var(--red)"
+                          @click.stop="confirmDelete(group.friendly_name)"
+                          title="Delete this group">✕</button>
                 </div>
               </template>
+              <!-- Empty & Create -->
               <div x-show="account.groups.length === 0"
-                   style="padding:20px 16px 20px 36px;color:var(--text-dim);font-size:0.82rem"
-                   x-text="'No groups in ' + account.name"></div>
+                   style="padding:20px 16px 20px 36px;color:var(--text-dim);font-size:0.82rem">
+                <span x-text="'No groups in ' + account.name"></span>
+              </div>
+              <div style="padding:8px 16px 8px 36px">
+                <button class="btn btn-ghost btn-sm" style="font-size:0.72rem"
+                        @click.stop="openCreateForm(account.name); expanded[account.name] = true">
+                  + Create Group
+                </button>
+              </div>
             </div>
           </div>
         </template>

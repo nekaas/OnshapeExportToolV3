@@ -52,6 +52,7 @@ from onshape_export_manager.core.validation import (
     CreateProfileRequest,
     ManualExportRequest,
     SetStorageRequest,
+    UpdateGroupRequest,
     UpdateNotificationRequest,
 )
 from onshape_export_manager.core.worker import BackgroundWorker
@@ -532,6 +533,46 @@ def create_web_app(base_dir: str | Path | None = None):
             return JSONResponse({"error": str(exc)}, status_code=400)
         return {"friendly_name": label["friendly_name"]}
 
+    @api.post("/api/groups")
+    async def api_create_group(body: CreateLabelRequest):
+        """Create a group (alias for label creation)."""
+        try:
+            label = _create_label(application, body.model_dump())
+        except (ConfigError, ValueError, ValidationError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+        return {"friendly_name": label["friendly_name"], "group": label}
+
+    @api.put("/api/groups/{group_name}")
+    async def api_update_group(group_name: str, body: UpdateGroupRequest):
+        """Update an existing group's settings."""
+        try:
+            updated = _update_label(application, group_name, body.model_dump(exclude_none=True))
+        except (ConfigError, ValueError, ValidationError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404 if "not found" in str(exc).lower() else 400)
+        return {"friendly_name": updated["friendly_name"], "group": updated}
+
+    @api.delete("/api/groups/{group_name}")
+    async def api_delete_group(group_name: str):
+        """Delete a group."""
+        try:
+            _delete_label(application, group_name)
+        except (ConfigError, ValueError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404 if "not found" in str(exc).lower() else 400)
+        return {"deleted": True, "friendly_name": group_name}
+
+    @api.put("/api/groups/{group_name}/move")
+    async def api_move_group(group_name: str, request: Request):
+        """Move a group to a different account."""
+        body = await request.json()
+        target_account = str(body.get("account", "")).strip()
+        if not target_account:
+            return JSONResponse({"error": "target 'account' is required"}, status_code=400)
+        try:
+            updated = _move_label(application, group_name, target_account)
+        except (ConfigError, ValueError, ValidationError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404 if "not found" in str(exc).lower() else 400)
+        return {"friendly_name": updated["friendly_name"], "group": updated}
+
     @api.post("/api/profiles")
     async def api_create_profile(request: Request):
         from onshape_export_manager.core.profile_manager import (
@@ -754,6 +795,13 @@ def create_web_app(base_dir: str | Path | None = None):
         config = _safe_config(application)
         labels = [label.model_dump(mode="json") for label in config.labels.labels] if config else []
         return {"labels": labels}
+
+    @api.get("/api/groups")
+    async def api_groups() -> dict[str, Any]:
+        """List all groups (alias for labels)."""
+        config = _safe_config(application)
+        labels = [label.model_dump(mode="json") for label in config.labels.labels] if config else []
+        return {"groups": labels}
 
     @api.get("/api/profiles")
     async def api_profiles() -> dict[str, Any]:
@@ -1469,6 +1517,109 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
             data={"label": new["friendly_name"]},
         )
     return new
+
+
+def _update_label(application: Application, group_name: str, updates: dict[str, Any]) -> dict[str, Any]:
+    """Update an existing label/group, validating references before writing."""
+    from onshape_export_manager.core.configuration import LabelsConfig, read_json, write_json
+
+    manager = application.config_manager
+    config = manager.load()
+    labels = read_json(manager.labels_file).get("labels", [])
+    idx = next((i for i, lbl in enumerate(labels) if lbl.get("friendly_name") == group_name), None)
+    if idx is None:
+        raise ValueError(f"group '{group_name}' not found")
+
+    current = dict(labels[idx])
+    if "friendly_name" in updates and updates["friendly_name"] != current["friendly_name"]:
+        new_name = updates["friendly_name"]
+        if any(lbl.get("friendly_name") == new_name for lbl in labels):
+            raise ValueError(f"group '{new_name}' already exists")
+        current["friendly_name"] = new_name
+
+    for field in ("onshape_label_id", "export_location", "export_profile", "scheduler", "enabled"):
+        if field in updates:
+            current[field] = updates[field]
+
+    if "assigned_accounts" in updates:
+        account_names = {account.name for account in config.accounts.accounts}
+        missing = set(updates["assigned_accounts"]) - account_names
+        if missing:
+            raise ValueError(f"unknown accounts: {', '.join(sorted(missing))}")
+        current["assigned_accounts"] = updates["assigned_accounts"]
+
+    if "export_profile" in updates:
+        profile_names = {profile.name for profile in config.export_profiles.profiles}
+        if updates["export_profile"] not in profile_names:
+            raise ValueError(f"export profile '{updates['export_profile']}' does not exist")
+
+    labels[idx] = current
+    updated = {"labels": labels}
+    LabelsConfig.model_validate(updated)
+    write_json(manager.labels_file, updated)
+    if application.event_bus is not None:
+        application.event_bus.emit(
+            EventType.LABELS_CHANGED,
+            "Group updated: " + current["friendly_name"],
+            data={"label": current["friendly_name"]},
+        )
+    return current
+
+
+def _delete_label(application: Application, group_name: str) -> None:
+    """Delete a label/group by friendly name."""
+    from onshape_export_manager.core.configuration import LabelsConfig, read_json, write_json
+
+    manager = application.config_manager
+    labels = read_json(manager.labels_file).get("labels", [])
+    idx = next((i for i, lbl in enumerate(labels) if lbl.get("friendly_name") == group_name), None)
+    if idx is None:
+        raise ValueError(f"group '{group_name}' not found")
+
+    removed = labels.pop(idx)
+    updated = {"labels": labels}
+    LabelsConfig.model_validate(updated)
+    write_json(manager.labels_file, updated)
+    if application.event_bus is not None:
+        application.event_bus.emit(
+            EventType.LABELS_CHANGED,
+            "Group deleted: " + removed["friendly_name"],
+            data={"label": removed["friendly_name"]},
+        )
+    logger.info("Deleted group '%s'", group_name)
+
+
+def _move_label(application: Application, group_name: str, target_account: str) -> dict[str, Any]:
+    """Move a label/group to a different account."""
+    from onshape_export_manager.core.configuration import LabelsConfig, read_json, write_json
+
+    manager = application.config_manager
+    config = manager.load()
+    account_names = {account.name for account in config.accounts.accounts}
+    if target_account not in account_names:
+        raise ValueError(f"unknown account '{target_account}'")
+
+    labels = read_json(manager.labels_file).get("labels", [])
+    idx = next((i for i, lbl in enumerate(labels) if lbl.get("friendly_name") == group_name), None)
+    if idx is None:
+        raise ValueError(f"group '{group_name}' not found")
+
+    current = dict(labels[idx])
+    accounts = list(current.get("assigned_accounts", []))
+    # Remove from all current accounts, assign to target
+    current["assigned_accounts"] = [target_account]
+    labels[idx] = current
+
+    updated = {"labels": labels}
+    LabelsConfig.model_validate(updated)
+    write_json(manager.labels_file, updated)
+    if application.event_bus is not None:
+        application.event_bus.emit(
+            EventType.LABELS_CHANGED,
+            f"Group '{group_name}' moved to {target_account}",
+            data={"label": group_name, "account": target_account},
+        )
+    return current
 
 
 def _resolve_label_profile(application: Application, label_name: str, profile_name: str):

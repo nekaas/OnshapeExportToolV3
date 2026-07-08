@@ -38,7 +38,7 @@ class ManualExportRequest(BaseModel):
 
 
 class CreateLabelRequest(BaseModel):
-    """Request body for ``POST /api/labels``."""
+    """Request body for ``POST /api/labels`` (also ``POST /api/groups``)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -56,6 +56,27 @@ class CreateLabelRequest(BaseModel):
         if not v.strip():
             raise ValueError("friendly_name must not be empty or whitespace")
         return v.strip()
+
+
+class UpdateGroupRequest(BaseModel):
+    """Request body for ``PUT /api/groups/{group_name}``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    friendly_name: str | None = Field(None, min_length=1, max_length=128)
+    onshape_label_id: str | None = Field(None, min_length=1, max_length=64)
+    assigned_accounts: list[str] | None = None
+    export_location: str | None = Field(None, min_length=1)
+    export_profile: str | None = Field(None, min_length=1)
+    scheduler: dict[str, Any] | None = None
+    enabled: bool | None = None
+
+    @field_validator("friendly_name")
+    @classmethod
+    def _name_not_empty(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("friendly_name must not be empty or whitespace")
+        return v.strip() if v is None else v.strip()
 
 
 # -- Organizations -----------------------------------------------------------
