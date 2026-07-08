@@ -32,15 +32,22 @@ A self-contained export automation tool for Onshape CAD documents. You configure
 
 ## Core Concepts
 
-### Onshape Account
+### Organisation
 
-An API credential pair (access key + secret key) for one Onshape instance. Each account has a health status (`healthy`, `degraded`, `rate_limited`, `failed`, `disabled`), usage tracking, and failure counting. Accounts can be organized into Organizations for credential management at scale.
+The aggregate root of the application. An Organisation represents a real customer — a school, company, department, or team. Everything belongs to an Organisation.
 
-**Config file:** `config/accounts.json` (flat list) or `config/organizations.json` (hierarchical orgs with credentials)
+**Config file:** `config/organizations.json`
+
+An Organisation contains:
+- **API Credentials** — Onshape access/secret key pairs with health tracking
+- **Groups** — Label-to-export mappings scoped to this Organisation
+- **Statistics** — export history and metrics for this Organisation
+
+The UI is organized as a tree: **Organisations → Groups**. API credentials live inside their Organisation, not as a standalone page.
 
 ### Group
 
-A Group connects an Onshape document label to export settings. It answers: "When documents tagged with label X are found, export them using profile Y with account Z."
+A Group connects an Onshape document label to export settings within an Organisation. It answers: "When documents tagged with label X are found in Organisation Y, export them using profile Z."
 
 A Group has:
 - **Friendly name** — human-readable (e.g., "Robotics Team")
@@ -95,9 +102,8 @@ Pluggable notification channels: Discord, Slack, Teams, Email, Webhook. Each cha
 | Page | Purpose |
 |------|---------|
 | **Dashboard** | Overview — cards, charts, system health, recent exports |
-| **API Keys** | Manage Onshape API accounts (organizations + credentials) |
-| **Groups** | Tree view: Accounts → Groups. Create, delete, move, enable/disable, batch export |
-| **Export** | Manual export — tree selector for batch + detailed form with preview |
+| **Organisations** | Primary hub: Organisation tree → Groups, credentials, export management |
+| **Export** | Manual export — Organisation → Group tree selector + detailed form with preview |
 | **History** | Export history table — filterable, sortable |
 | **Settings** | General (theme, worker), Notifications, Backups, Remote Access, Logs, About |
 

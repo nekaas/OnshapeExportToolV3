@@ -46,6 +46,19 @@ class RetryPolicy:
         """Return True when an HTTP status should be retried."""
         return status_code in self.retry_http_statuses
 
+    def adaptive_delay(self, attempt_index: int, *, status_code: int | None = None) -> float:
+        """Return capped delay with adaptive backoff based on error type.
+
+        Rate-limit errors (429) get a longer base delay to respect server
+        throttling. Server errors (5xx) use standard backoff.
+        """
+        base = self.backoff_base_seconds
+        if status_code == 429:
+            base = max(base, 5.0)  # minimum 5s for rate-limit retries
+        elif status_code and 500 <= status_code < 600:
+            base = base * 1.5  # 50% longer for server errors
+        return min(base * (2 ** max(attempt_index, 0)), self.backoff_max_seconds)
+
 
 @dataclass(frozen=True, slots=True)
 class RetryDecision:

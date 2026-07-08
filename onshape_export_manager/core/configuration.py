@@ -430,6 +430,12 @@ def validate_cross_references(config: LoadedConfig) -> None:
                 f"label '{label.friendly_name}' references missing export profile: "
                 f"{label.export_profile}"
             )
+        # Warn about labels with no assigned accounts (not a hard error)
+        if not label.assigned_accounts:
+            import logging
+            logging.getLogger(__name__).warning(
+                "label '%s' has no assigned accounts", label.friendly_name
+            )
     if errors:
         raise ConfigError("; ".join(errors))
 

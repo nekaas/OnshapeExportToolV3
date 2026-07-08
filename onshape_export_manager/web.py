@@ -603,6 +603,17 @@ def create_web_app(base_dir: str | Path | None = None):
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "onshape-export-manager", "version": __version__}
 
+    @api.get("/api/health/database")
+    async def api_database_health() -> dict[str, Any]:
+        """Database health check including WAL checkpoint trigger."""
+        try:
+            status = application.database.status()
+            application.database.checkpoint()
+            return {"status": "ok", **status, "wal_checkpointed": True}
+        except Exception as exc:
+            logger.error("Database health check failed: %s", exc)
+            return JSONResponse({"status": "error", "error": str(exc)}, status_code=500)
+
     @api.get("/api/tree")
     async def api_tree() -> dict[str, Any]:
         """Return organisations with nested groups as a tree structure."""
@@ -863,6 +874,34 @@ def create_web_app(base_dir: str | Path | None = None):
     @api.get("/api/worker")
     async def api_worker() -> dict[str, Any]:
         return worker.status().to_dict()
+
+    @api.get("/api/worker/health")
+    async def api_worker_health() -> dict[str, Any]:
+        """Detailed worker health check with stall detection."""
+        status = worker.status().to_dict()
+        last_tick = status.get("last_tick_at")
+        stalled = False
+        if last_tick:
+            try:
+                tick_dt = datetime.fromisoformat(last_tick.replace("Z", "+00:00"))
+                stalled = (datetime.now(timezone.utc) - tick_dt).total_seconds() > 30
+            except (ValueError, TypeError):
+                pass
+        failure_rate = 0.0
+        total = status.get("jobs_processed", 0) + status.get("jobs_failed", 0)
+        if total > 0:
+            failure_rate = round(status.get("jobs_failed", 0) / total * 100, 1)
+        return {
+            **status,
+            "stalled": stalled,
+            "healthy": status.get("running", False) and not stalled,
+            "failure_rate_pct": failure_rate,
+            "recommendation": (
+                "Worker appears stalled — restart may be needed" if stalled
+                else "Restart worker" if not status.get("running")
+                else "Healthy"
+            ),
+        }
 
     @api.post("/api/worker/start")
     async def api_worker_start() -> dict[str, Any]:
