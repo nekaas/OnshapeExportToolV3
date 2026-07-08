@@ -82,7 +82,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency installed by requir
 NAV_ITEMS: list[dict[str, str]] = [
     {"slug": "", "label": "Home", "icon": "home"},
     {"slug": "api-keys", "label": "API Keys", "icon": "key"},
-    {"slug": "labels", "label": "Labels", "icon": "tag"},
+    {"slug": "labels", "label": "Groups", "icon": "tag"},
     {"slug": "export", "label": "Export", "icon": "bolt"},
     {"slug": "history", "label": "History", "icon": "history"},
 ]
@@ -562,6 +562,55 @@ def create_web_app(base_dir: str | Path | None = None):
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "onshape-export-manager", "version": __version__}
 
+    @api.get("/api/tree")
+    async def api_tree() -> dict[str, Any]:
+        """Return accounts with nested groups as a tree structure."""
+        try:
+            config = application.config_manager.load()
+        except Exception:
+            return {"accounts": []}
+
+        # Build account → groups mapping
+        labels = config.labels.labels if hasattr(config, 'labels') else []
+        account_groups: dict[str, list[dict[str, Any]]] = {a.name: [] for a in config.accounts.accounts}
+        for lbl in labels:
+            for acc_name in lbl.assigned_accounts:
+                if acc_name in account_groups:
+                    account_groups[acc_name].append({
+                        "friendly_name": lbl.friendly_name,
+                        "onshape_label_id": lbl.onshape_label_id,
+                        "export_profile": lbl.export_profile,
+                        "export_location": lbl.export_location,
+                        "schedule": lbl.scheduler.interval if lbl.scheduler else None,
+                        "enabled": lbl.enabled,
+                    })
+                else:
+                    # Label references an account not in accounts.json — show it too
+                    if acc_name not in account_groups:
+                        account_groups[acc_name] = []
+                    account_groups[acc_name].append({
+                        "friendly_name": lbl.friendly_name,
+                        "onshape_label_id": lbl.onshape_label_id,
+                        "export_profile": lbl.export_profile,
+                        "export_location": lbl.export_location,
+                        "schedule": lbl.scheduler.interval if lbl.scheduler else None,
+                        "enabled": lbl.enabled,
+                    })
+
+        result_accounts: list[dict[str, Any]] = []
+        for acc in config.accounts.accounts:
+            result_accounts.append({
+                "name": acc.name,
+                "description": acc.description,
+                "enabled": acc.enabled,
+                "health": getattr(acc, "rate_limit_status", "available"),
+                "api_usage": getattr(acc, "api_usage", 0),
+                "groups": account_groups.get(acc.name, []),
+                "group_count": len(account_groups.get(acc.name, [])),
+            })
+
+        return {"accounts": result_accounts}
+
     @api.get("/api/status")
     async def status() -> dict[str, Any]:
         return build_dashboard_context(application)
@@ -764,23 +813,26 @@ def create_web_app(base_dir: str | Path | None = None):
 
     @api.post("/api/exports/run")
     async def api_run_export(body: ManualExportRequest) -> dict[str, Any]:
-        """Enqueue manual export(s); supports single label or label groups."""
+        """Enqueue manual export(s); supports tree selection via labels array."""
         if application.queue_manager is None:
             return JSONResponse(
                 {"error": "queue is unavailable; check configuration"}, status_code=503
             )
-        # Resolve single or group labels
+        # Support tree selection: labels array for group-based exports
         label_names: list[str] = []
         if body.labels:
-            label_names = body.labels
+            label_names = [l.strip() for l in body.labels if l.strip()]
         elif body.label:
-            label_names = [body.label]
+            label_names = [body.label.strip()]
+
+        if not label_names:
+            return JSONResponse({"error": "no labels selected"}, status_code=400)
 
         job_ids: list[str] = []
         for label_name in label_names:
             try:
                 label, profile = _resolve_label_profile(
-                    application, label_name.strip(), body.profile or ""
+                    application, label_name, body.profile or ""
                 )
                 body_dict = body.model_dump(exclude_none=True)
                 start_iso, end_iso, _ = _manual_export_window(body_dict)

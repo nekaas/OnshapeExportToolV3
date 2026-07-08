@@ -1488,8 +1488,85 @@ function sectionPage(page) {
 
 /* Register with Alpine's registry so initialization never races the
    defer-loaded factory definitions. */
+// -- Tree Selector (Account → Groups hierarchy) ------------------------------
+
+let treeSelector = () => ({
+  accounts: [],
+  loading: true,
+  expanded: {},       // account_name → bool
+  selected: {},       // group friendly_name → bool
+  selectAllAccounts: {},
+  icons: ICONS,
+
+  async init() {
+    try {
+      const resp = await fetchJSON("/api/tree");
+      this.accounts = resp.accounts || [];
+    } catch (e) {
+      console.warn("Tree load failed", e);
+    }
+    this.loading = false;
+  },
+
+  toggle(accountName) {
+    this.expanded[accountName] = !this.expanded[accountName];
+  },
+
+  toggleAccount(accountName) {
+    const acc = this.accounts.find(a => a.name === accountName);
+    if (!acc) return;
+    const select = !this.selectAllAccounts[accountName];
+    this.selectAllAccounts[accountName] = select;
+    for (const g of acc.groups) {
+      this.selected[g.friendly_name] = select;
+    }
+  },
+
+  toggleGroup(groupName) {
+    this.selected[groupName] = !this.selected[groupName];
+  },
+
+  get selectedCount() {
+    return Object.values(this.selected).filter(Boolean).length;
+  },
+
+  get selectedAccounts() {
+    return this.accounts.filter(a =>
+      this.selectAllAccounts[a.name] ||
+      a.groups.some(g => this.selected[g.friendly_name])
+    ).length;
+  },
+
+  get selectedLabels() {
+    return Object.keys(this.selected).filter(k => this.selected[k]);
+  },
+
+  queueExport() {
+    const labels = this.selectedLabels;
+    if (!labels.length) return;
+    fetch("/api/exports/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ labels }),
+    })
+      .then(r => r.json())
+      .then(r => {
+        if (r.error) throw new Error(r.error);
+        if (window.oem) window.oem.toast("Queued", `${r.count} export(s) enqueued`, "success");
+        // Clear selection
+        for (const l of labels) this.selected[l] = false;
+        for (const k of Object.keys(this.selectAllAccounts)) this.selectAllAccounts[k] = false;
+      })
+      .catch(e => {
+        if (window.oem) window.oem.toast("Error", "Export failed: " + e.message, "error");
+      });
+  },
+});
+
+
 document.addEventListener("alpine:init", () => {
   window.Alpine.data("appShell", appShell);
   window.Alpine.data("dashboardPage", dashboardPage);
   window.Alpine.data("sectionPage", sectionPage);
+  window.Alpine.data("treeSelector", treeSelector);
 });
