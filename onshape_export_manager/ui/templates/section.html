@@ -80,7 +80,9 @@
             <div class="manual-subline">
               <span class="badge" :class="worker.running ? 'badge-ok' : 'badge-muted'"
                     x-text="worker.running ? 'Worker running' : 'Worker idle'"></span>
-              <span x-show="preview && preview.window" x-text="preview.window.duration_label"></span>
+              <template x-if="preview && preview.window">
+                <span x-text="preview.window.duration_label"></span>
+              </template>
             </div>
           </div>
           <div class="manual-command-actions">
@@ -207,7 +209,7 @@
             </template>
           </div>
 
-          <div class="summary-list" x-show="preview && preview.valid">
+          <div class="summary-list" x-if="preview && preview.valid">
             <div><span>Label</span><strong x-text="preview.label.name"></strong></div>
             <div><span>Profile</span><strong x-text="preview.profile.name"></strong></div>
             <div><span>Window</span><strong x-text="preview.window.start_display + ' → ' + preview.window.end_display"></strong></div>
