@@ -380,6 +380,10 @@ const PAGE_CONFIG = {
     endpoint: "/api/labels", root: "labels", empty: "No groups configured yet.",
     columns: [],  // card-based view, not table
   },
+  organizations: {
+    endpoint: "/api/tree", root: "organisations", empty: "",
+    columns: [],  // tree-based view, not table
+  },
   "export-profiles": {
     endpoint: "/api/profiles", root: "profiles", empty: "No export profiles yet.",
     columns: [

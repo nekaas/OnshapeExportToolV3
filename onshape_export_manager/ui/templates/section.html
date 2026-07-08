@@ -677,9 +677,8 @@
     </div>
   </template>
 
-  <!-- Organizations view -->
-  <!-- ── API Keys (unified: organizations + credentials) ── -->
-  <template x-if="page === 'organizations' || page === 'api-keys'">
+  <!-- ── API Keys (legacy — organizations now uses tree view above) ── -->
+  <template x-if="page === 'api-keys'">
     <div class="page" style="gap:18px">
       <!-- Onboarding: shown when no orgs exist -->
       <div x-show="!orgs.length && !loading" class="card glass" style="text-align:center;padding:32px 24px">

@@ -611,22 +611,22 @@ def create_web_app(base_dir: str | Path | None = None):
         except Exception:
             return {"organisations": []}
 
-        # Read organisations from organizations.json
-        from onshape_export_manager.core.organizations import OrganizationManager
-        org_manager = OrganizationManager(application.config_manager)
-        orgs = org_manager.list_organizations()
+        # Read organisations from organizations.json directly
+        from onshape_export_manager.core.configuration import read_json
+        orgs_data = read_json(application.config_manager.organizations_file)
+        orgs = orgs_data.get("organizations", [])
 
         # Build org → credential names mapping for group assignment
-        org_accounts: dict[str, set[str]] = {}  # org_id → set of credential names
+        org_accounts: dict[str, set[str]] = {}
         for org in orgs:
             names = set()
             for cred in org.get("credentials", []):
                 names.add(cred.get("name", ""))
-            org_accounts[org["id"]] = names
+            org_accounts[org["name"]] = names
 
         # Build groups for each organisation
         labels = config.labels.labels if hasattr(config, 'labels') else []
-        org_groups: dict[str, list[dict[str, Any]]] = {org["id"]: [] for org in orgs}
+        org_groups: dict[str, list[dict[str, Any]]] = {org["name"]: [] for org in orgs}
 
         for lbl in labels:
             group_data = {
@@ -637,32 +637,34 @@ def create_web_app(base_dir: str | Path | None = None):
                 "schedule": lbl.scheduler.interval if lbl.scheduler else None,
                 "enabled": lbl.enabled,
             }
-            # Find which org(s) this group's accounts belong to
             assigned = False
-            for org_id, cred_names in org_accounts.items():
+            for org_name, cred_names in org_accounts.items():
                 if any(acc in cred_names for acc in lbl.assigned_accounts):
-                    org_groups[org_id].append(group_data)
+                    if org_name in org_groups:
+                        org_groups[org_name].append(group_data)
                     assigned = True
-            if not assigned:
-                # Group with no matching org — show under first org or orphan
-                if orgs:
-                    org_groups[orgs[0]["id"]].append(group_data)
+            if not assigned and orgs:
+                first = orgs[0]["name"]
+                if first in org_groups:
+                    org_groups[first].append(group_data)
 
         result: list[dict[str, Any]] = []
         for org in orgs:
+            gs = org_groups.get(org["name"], [])
+            healthy = sum(
+                1 for c in org.get("credentials", [])
+                if c.get("rate_limit_status", "healthy") == "healthy"
+            )
             result.append({
-                "id": org["id"],
+                "id": org.get("id", org["name"]),
                 "name": org["name"],
                 "type": org.get("type", "other"),
                 "description": org.get("description", ""),
                 "enabled": org.get("enabled", True),
                 "credential_count": len(org.get("credentials", [])),
-                "credentials_healthy": sum(
-                    1 for c in org.get("credentials", [])
-                    if c.get("health", "unknown") == "healthy"
-                ),
-                "groups": org_groups.get(org["id"], []),
-                "group_count": len(org_groups.get(org["id"], [])),
+                "credentials_healthy": healthy,
+                "groups": gs,
+                "group_count": len(gs),
             })
 
         return {"organisations": result}
@@ -1322,12 +1324,13 @@ def create_web_app(base_dir: str | Path | None = None):
         # Redirect legacy pages to their new equivalents
         _redirects: dict[str, str] = {
             "dashboard": "/",
-            "organizations": "/api-keys",
-            "accounts": "/api-keys",
-            "export-profiles": "/labels",
+            "api-keys": "/organizations",
+            "labels": "/organizations",
+            "accounts": "/organizations",
+            "export-profiles": "/organizations",
             "manual-export": "/export",
             "queue": "/export",
-            "scheduler": "/labels",
+            "scheduler": "/organizations",
         }
         if page_name in _redirects:
             return RedirectResponse(_redirects[page_name], status_code=301)
