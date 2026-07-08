@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any
 from onshape_export_manager.core.logger import APP_LOGGER, get_logger
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from onshape_export_manager.core.database import Database
     from onshape_export_manager.core.settings import AppPaths
 
 BACKUP_PREFIX = "oem-backup-"
@@ -50,8 +51,9 @@ class BackupError(RuntimeError):
 class BackupManager:
     """Creates, lists, restores, and prunes application backups."""
 
-    def __init__(self, paths: "AppPaths") -> None:
+    def __init__(self, paths: "AppPaths", *, database: "Database | None" = None) -> None:
         self.paths = paths
+        self._database = database
         self.backups_dir = getattr(paths, "backups_dir", paths.package_dir / "backups")
         self.logger = get_logger(APP_LOGGER)
 
@@ -126,11 +128,16 @@ class BackupManager:
         """Restore configuration and database from a backup. Returns entries restored.
 
         A safety snapshot of the current state is taken before overwriting so a
-        failed restore can be undone.
+        failed restore can be undone. The WAL journal is checkpointed before
+        the database file is overwritten to prevent corruption.
         """
         path = self._resolve(name)
         if not self.verify_backup(name):
             raise BackupError(f"Backup '{name}' is corrupt or unreadable")
+
+        # Flush the WAL journal so the database file on disk is consistent.
+        if self._database is not None:
+            self._database.checkpoint()
 
         # Safety net before we overwrite anything.
         self.create_backup(label="pre-restore")

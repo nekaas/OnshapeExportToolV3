@@ -58,7 +58,7 @@ class MetricsServiceTests(unittest.TestCase):
             metrics = MetricsService(app)
             snapshot = metrics.dashboard_snapshot()
 
-            self.assertEqual(snapshot["summary"]["export_profiles"], 9)
+            self.assertEqual(snapshot["summary"]["export_profiles"], 8)
             self.assertIn("activity", snapshot["exports"])
             self.assertIn("counts", snapshot["queue"])
             self.assertIn("schema_version", snapshot["database"])

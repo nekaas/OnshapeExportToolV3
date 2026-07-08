@@ -1,17 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 <div x-data="dashboardPage" x-init="load()" class="page">
+  <!-- Onboarding welcome (first-time users — no accounts or labels yet) -->
+  <section x-show="!loading && cards.length && cards[0].value === 0 && cards[1].value === 0" x-transition class="card glass" style="text-align:center;padding:36px 28px">
+    <div style="font-size:2.5rem;margin-bottom:12px">👋</div>
+    <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 6px">Welcome to Onshape Export Manager</h2>
+    <p style="color:var(--text-muted);max-width:480px;margin:0 auto 24px;font-size:0.9rem">
+      Automate your CAD exports in three simple steps. Set it up once — it runs forever.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a href="/api-keys" class="btn btn-primary">
+        <span>① Add your Onshape API Key</span>
+      </a>
+      <a href="/labels" class="btn btn-primary">
+        <span>② Create a Label</span>
+      </a>
+      <a href="/export" class="btn btn-primary">
+        <span>③ Run Your First Export</span>
+      </a>
+    </div>
+  </section>
+
   <!-- Stat cards -->
   <section class="stat-grid">
     <template x-for="card in cards" :key="card.key">
-      <div class="stat-card glass" :class="card.accent">
+      <a :href="card.href" class="stat-card glass" :class="card.accent" style="cursor:pointer">
         <div class="stat-card-top">
           <span class="stat-icon" x-html="card.icon"></span>
           <span class="stat-trend" x-show="card.badge" x-text="card.badge"></span>
         </div>
         <div class="stat-value" x-text="card.value"></div>
         <div class="stat-label" x-text="card.label"></div>
-      </div>
+      </a>
     </template>
   </section>
 

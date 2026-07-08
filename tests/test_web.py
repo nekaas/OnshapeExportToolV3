@@ -15,7 +15,7 @@ class WebTests(unittest.TestCase):
 
             self.assertEqual(context["counts"]["accounts"], 0)
             self.assertEqual(context["counts"]["labels"], 0)
-            self.assertEqual(context["counts"]["export_profiles"], 9)
+            self.assertEqual(context["counts"]["export_profiles"], 8)
             self.assertEqual(context["counts"]["queue_size"], 0)
             self.assertIn("database", context)
             self.assertIn("profiles", context)

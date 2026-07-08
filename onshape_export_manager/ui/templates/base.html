@@ -64,7 +64,6 @@
     <link href="/static/styles.css?v={{ asset_version }}" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
-    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- app.js must register Alpine components before Alpine starts, so it loads first. -->
     <script defer src="/static/app.js?v={{ asset_version }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
@@ -100,6 +99,10 @@
           <span class="nav-label">Sign out</span>
         </a>
         {% endif %}
+        <a href="/settings" class="nav-link {% if page == 'settings' %}active{% endif %}" title="Settings">
+          <span class="nav-icon">{% include 'icons/settings.svg' ignore missing %}</span>
+          <span class="nav-label">Settings</span>
+        </a>
         <button class="nav-link collapse-toggle" @click="toggleSidebar()" title="Toggle sidebar">
           <span class="nav-icon" x-html="collapsed ? icons.expand : icons.collapse"></span>
           <span class="nav-label">Collapse</span>
@@ -172,10 +175,11 @@
           <template x-if="!palette.query">
             <div class="palette-hint">
               <div class="palette-group-title">Quick actions</div>
-              <a href="/manual-export" class="palette-item"><div class="palette-item-title">Run manual export</div></a>
-              <a href="/queue" class="palette-item"><div class="palette-item-title">View queue</div></a>
+              <a href="/export" class="palette-item"><div class="palette-item-title">Run export</div></a>
+              <a href="/labels" class="palette-item"><div class="palette-item-title">Manage labels</div></a>
+              <a href="/api-keys" class="palette-item"><div class="palette-item-title">API keys</div></a>
               <a href="/history" class="palette-item"><div class="palette-item-title">Export history</div></a>
-              <a href="/logs" class="palette-item"><div class="palette-item-title">Open logs</div></a>
+              <a href="/settings" class="palette-item"><div class="palette-item-title">Settings</div></a>
             </div>
           </template>
         </div>

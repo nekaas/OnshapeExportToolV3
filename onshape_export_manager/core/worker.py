@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import threading
+import time as _time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -50,12 +51,27 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def auto_worker_count() -> int:
+    """Suggest a worker count based on available CPU cores.
+
+    Returns 1 on single-core systems (Raspberry Pi Zero), 2-4 on typical
+    multi-core hardware. Capped at 8 to avoid API rate-limit thrashing.
+    """
+    try:
+        import os
+        cores = len(os.sched_getaffinity(0))
+    except (ImportError, AttributeError):
+        cores = 4  # sensible fallback
+    return max(1, min(cores, 8))
+
+
 @dataclass(slots=True)
 class WorkerStatus:
     """Thread-safe snapshot of the worker's runtime state."""
 
     running: bool = False
     enabled: bool = False
+    worker_count: int = 1
     poll_interval_seconds: float = 5.0
     last_tick_at: str | None = None
     last_job_at: str | None = None
@@ -101,25 +117,39 @@ class BackgroundWorker:
         *,
         poll_interval_seconds: float = 5.0,
         max_jobs_per_tick: int = 25,
+        worker_count: int | None = None,
     ) -> None:
         self.application = application
         self.database = application.database
         self.poll_interval_seconds = max(0.5, float(poll_interval_seconds))
         self.max_jobs_per_tick = max(1, int(max_jobs_per_tick))
+        self._worker_count = max(1, int(worker_count or auto_worker_count()))
         self.logger = get_logger(WORKER_LOGGER)
 
-        self._thread: threading.Thread | None = None
+        self._threads: list[threading.Thread] = []
         self._stop = threading.Event()
         self._lock = threading.Lock()
-        self._status = WorkerStatus(poll_interval_seconds=self.poll_interval_seconds)
+        self._status = WorkerStatus(
+            poll_interval_seconds=self.poll_interval_seconds,
+            worker_count=self._worker_count,
+        )
+        self._scheduler_owned = False  # only worker 0 runs scheduler sync
+        # Config cache — avoids re-reading JSON files on every tick
+        self._config_cache: tuple[float, object] | None = None
+        self._config_cache_ttl: float = 5.0
 
     # -- Lifecycle ---------------------------------------------------------
 
     def start(self) -> None:
-        """Start the background worker thread (idempotent)."""
+        """Start background worker threads (idempotent).
+
+        Spawns ``worker_count`` daemon threads.  Worker 0 also initialises
+        and advances the scheduler; all workers independently claim and run
+        queued jobs via the atomic :meth:`QueueManager.claim_next`.
+        """
         with self._lock:
-            if self._thread is not None and self._thread.is_alive():
-                return
+            if self._threads:
+                return  # already started
             if self.application.queue_manager is None:
                 self.logger.warning("Worker not started: queue manager unavailable")
                 return
@@ -127,49 +157,61 @@ class BackgroundWorker:
             self._status.running = True
             self._status.enabled = True
             self._status.last_error = ""
-            thread = threading.Thread(
-                target=self._run_loop,
-                name="oem-export-worker",
-                daemon=True,
-            )
-            self._thread = thread
+            self._scheduler_owned = False
+            for i in range(self._worker_count):
+                thread = threading.Thread(
+                    target=self._run_loop,
+                    args=(i,),
+                    name=f"oem-export-worker-{i}",
+                    daemon=True,
+                )
+                self._threads.append(thread)
         self.database.set_state(STATE_RUNNING, "true")
-        if self.application.scheduler is not None:
+        if self.application.scheduler is not None and self._threads:
             self._sync_scheduler_jobs()
             self.application.scheduler.start()
-        thread.start()
+            self._wire_scheduler_reconnect()
+        for thread in self._threads:
+            thread.start()
         self.logger.info(
-            "Background worker started (poll=%ss, max_jobs_per_tick=%s)",
+            "Started %d background worker thread(s) (poll=%ss, max_jobs_per_tick=%s)",
+            len(self._threads),
             self.poll_interval_seconds,
             self.max_jobs_per_tick,
         )
         self._emit(
             EventType.WORKER_STARTED,
-            "Background export worker started",
-            data={"poll_interval_seconds": self.poll_interval_seconds},
+            f"Background worker started ({len(self._threads)} thread(s))",
+            data={
+                "poll_interval_seconds": self.poll_interval_seconds,
+                "worker_count": len(self._threads),
+            },
         )
 
-    def stop(self, *, timeout: float = 10.0) -> None:
-        """Signal the worker to stop and wait for the thread to exit."""
+    def stop(self, *, timeout: float = 30.0) -> None:
+        """Signal all workers to stop and wait for in-flight jobs."""
         with self._lock:
-            thread = self._thread
+            threads = list(self._threads)
             self._status.running = False
             self._status.enabled = False
         self._stop.set()
-        if thread is not None and thread.is_alive():
-            thread.join(timeout=timeout)
+        for thread in threads:
+            if thread.is_alive():
+                self.logger.info("Waiting up to %.0fs for worker %s", timeout, thread.name)
+                thread.join(timeout=timeout)
+                if thread.is_alive():
+                    self.logger.warning("Worker %s did not exit within %.0fs", thread.name, timeout)
         with self._lock:
-            self._thread = None
+            self._threads.clear()
         self.database.set_state(STATE_RUNNING, "false")
         if self.application.scheduler is not None:
             self.application.scheduler.stop()
-        self.logger.info("Background worker stopped")
+        self.logger.info("Background worker stopped (%d thread(s))", len(threads))
         self._emit(EventType.WORKER_STOPPED, "Background export worker stopped")
 
     @property
     def running(self) -> bool:
-        thread = self._thread
-        return thread is not None and thread.is_alive()
+        return any(t.is_alive() for t in self._threads)
 
     def status(self) -> WorkerStatus:
         """Return a copy of the current worker status."""
@@ -180,18 +222,21 @@ class BackgroundWorker:
 
     # -- Loop --------------------------------------------------------------
 
-    def _run_loop(self) -> None:
-        """Thread target: own asyncio loop, tick until stopped."""
+    def _run_loop(self, worker_index: int = 0) -> None:
+        """Thread target: own asyncio loop, tick until stopped.
+
+        Only *worker_index* 0 advances the scheduler to avoid duplicate
+        enqueuing.  All workers drain the queue independently.
+        """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
             while not self._stop.is_set():
                 try:
-                    loop.run_until_complete(self._tick_async())
+                    loop.run_until_complete(self._tick_async(worker_index))
                 except Exception as exc:  # noqa: BLE001 - keep the loop alive
                     self.logger.exception("Worker tick crashed: %s", exc)
                     self._record_error(str(exc))
-                # Interruptible sleep so stop() returns promptly.
                 self._stop.wait(self.poll_interval_seconds)
         finally:
             loop.close()
@@ -200,9 +245,11 @@ class BackgroundWorker:
         """Run a single tick synchronously. Used by the CLI and tests."""
         return asyncio.run(self._tick_async())
 
-    async def _tick_async(self) -> TickResult:
+    async def _tick_async(self, worker_index: int = 0) -> TickResult:
         result = TickResult()
-        result.scheduled_enqueued = self._advance_scheduler()
+        # Only worker 0 advances the scheduler (prevents duplicate enqueuing)
+        if worker_index == 0:
+            result.scheduled_enqueued = self._advance_scheduler()
         await self._drain_queue(result)
         with self._lock:
             self._status.last_tick_at = _utc_now().isoformat()
@@ -246,11 +293,30 @@ class BackgroundWorker:
         if scheduler is None:
             return
         try:
-            config = self.application.config_manager.load()
+            config = self._load_config()
             labels = config.runtime_labels(self.application.paths.package_dir)
             scheduler.sync_labels(labels)
+            # Register the labels loader so on_labels_changed() can re-sync
+            scheduler.set_labels_loader(
+                lambda: self._load_config().runtime_labels(
+                    self.application.paths.package_dir
+                )
+            )
         except Exception as exc:  # noqa: BLE001 - config may be incomplete
             self.logger.warning("Scheduler sync skipped: %s", exc)
+
+    def _wire_scheduler_reconnect(self) -> None:
+        """Subscribe the scheduler to label-change events so it re-syncs
+        automatically when labels are edited via the web UI or CLI."""
+        scheduler = self.application.scheduler
+        event_bus = self.application.event_bus
+        if scheduler is None or event_bus is None:
+            return
+        event_bus.subscribe(
+            lambda event: scheduler.on_labels_changed(),
+            event_type=EventType.LABELS_CHANGED,
+        )
+        self.logger.info("Scheduler subscribed to LABELS_CHANGED events")
 
     def _advance_scheduler(self) -> int:
         scheduler = self.application.scheduler
@@ -305,7 +371,11 @@ class BackgroundWorker:
         try:
             request = self._build_request(job)
             engine = self.application.create_export_engine(resolve_env=True)
-            export = await engine.run_manual_export(request)
+            timeout = self._export_timeout_seconds()
+            export = await asyncio.wait_for(
+                engine.run_manual_export(request),
+                timeout=timeout,
+            )
             duration = (_utc_now() - started).total_seconds()
             if export.success:
                 queue.mark_completed(job.id)
@@ -357,6 +427,29 @@ class BackgroundWorker:
                 self._status.active_label = None
                 self._status.last_job_at = _utc_now().isoformat()
 
+    def _load_config(self):
+        """Load and cache the application configuration.
+
+        Uses a short TTL (5s) so burst exports don't re-parse JSON on every
+        job while still picking up config changes quickly.
+        """
+        now = _time.monotonic()
+        if self._config_cache is not None:
+            cached_at, cached_config = self._config_cache
+            if now - cached_at < self._config_cache_ttl:
+                return cached_config
+        config = self.application.config_manager.load()
+        self._config_cache = (now, config)
+        return config
+
+    def _export_timeout_seconds(self) -> float:
+        """Read the per-export timeout from config, defaulting to 120s."""
+        try:
+            cfg = self._load_config()
+            return float(getattr(cfg.app, "export_timeout_seconds", 120) or 120)
+        except Exception:
+            return 120.0
+
     def _build_request(self, job: QueueEntry) -> ExportJobRequest:
         """Resolve a queue entry into an ExportJobRequest.
 
@@ -364,7 +457,7 @@ class BackgroundWorker:
         and profiles come from validated runtime configuration, the export
         window from the job payload, and an optional destination override.
         """
-        config = self.application.config_manager.load()
+        config = self._load_config()
         labels = {
             label.friendly_name: label
             for label in config.runtime_labels(self.application.paths.package_dir)

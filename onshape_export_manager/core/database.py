@@ -317,6 +317,14 @@ class Database:
             return None
         return queue_from_row(row)
 
+    def queue_stats(self) -> dict[str, int]:
+        """Return queue counts by status in a single query."""
+        with self.connect() as connection:
+            rows = connection.execute(
+                "SELECT status, COUNT(*) AS cnt FROM export_queue GROUP BY status"
+            ).fetchall()
+        return {str(row["status"]): int(row["cnt"]) for row in rows}
+
     def list_queue(
         self,
         *,
@@ -343,13 +351,67 @@ class Database:
             ).fetchall()
         return [queue_from_row(row) for row in rows]
 
+    def claim_next_queue(
+        self,
+        *,
+        now: datetime,
+        status_pending: str = "pending",
+        status_running: str = "running",
+    ) -> QueueEntry | None:
+        """Atomically claim the oldest pending queue job.
+
+        Uses a single ``UPDATE ... WHERE ... RETURNING *`` statement so that
+        no two callers ever obtain the same job — the SELECT subquery and the
+        status update execute inside one implicit transaction and the outer
+        ``WHERE status = ?`` guards against a concurrent claim having
+        already changed the row (the WAL reader sees the latest committed
+        state, so after another connection commits a claim this connection's
+        UPDATE finds ``status != 'pending'`` and affects zero rows).
+
+        Returns the claimed ``QueueEntry`` or ``None`` when no pending job
+        is due.
+        """
+        with self.connect() as connection:
+            row = connection.execute(
+                """
+                UPDATE export_queue
+                SET status = ?,
+                    updated_at = ?
+                WHERE status = ?
+                  AND id = (
+                      SELECT id FROM export_queue
+                      WHERE status = ?
+                        AND (next_run_at IS NULL OR next_run_at <= ?)
+                      ORDER BY created_at ASC
+                      LIMIT 1
+                  )
+                RETURNING *
+                """,
+                (
+                    status_running,
+                    serialize_dt(utc_now()),
+                    status_pending,
+                    status_pending,
+                    serialize_dt(now),
+                ),
+            ).fetchone()
+        if row is None:
+            return None
+        return queue_from_row(row)
+
     def list_due_queue(
         self,
         *,
         now: datetime,
         limit: int = 100,
     ) -> list[QueueEntry]:
-        """List pending queue jobs ready to run."""
+        """List pending queue jobs ready to run.
+
+        .. note::
+           Prefer :meth:`claim_next_queue` when you intend to immediately
+           claim a job — it avoids the TOCTOU race between the SELECT and
+           a subsequent ``update_queue_status`` call.
+        """
         with self.connect() as connection:
             rows = connection.execute(
                 """
@@ -644,6 +706,16 @@ class Database:
                 "DELETE FROM telemetry WHERE timestamp < ?", (cutoff,)
             )
             return cursor.rowcount or 0
+
+    def checkpoint(self) -> None:
+        """Flush the WAL journal to the main database file.
+
+        Should be called before any operation that reads or overwrites the
+        raw database file (e.g. backup restore). Uses ``TRUNCATE`` mode to
+        also reset the WAL file to zero bytes after the checkpoint.
+        """
+        with self.connect() as connection:
+            connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def status(self) -> dict[str, int]:
         """Return schema version and table counts."""

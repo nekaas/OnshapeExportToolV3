@@ -55,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--port", type=int, help="Port to listen on.")
     parser.add_argument("--no-browser", action="store_true", help="Do not open a browser in desktop mode.")
     parser.add_argument("--log-level", default=None, help="Uvicorn log level (info, warning, error).")
+    parser.add_argument("--tui", action="store_true", help="Launch the Rich terminal UI (appliance console mode).")
+    parser.add_argument("--console", action="store_true", help="Alias for --tui (appliance console mode).")
     return parser
 
 
@@ -114,6 +116,19 @@ def schedule_browser_open(options: RuntimeOptions) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+
+    # --tui / --console mode: launch the Rich terminal console
+    if args.tui or args.console or os.getenv("OEM_MODE") == "console":
+        from onshape_export_manager.app import create_app as _create_core_app
+        from onshape_export_manager.terminal.console import console
+        from onshape_export_manager.terminal.banner import print_banner as _tui_banner
+        from onshape_export_manager.terminal.commands import run_console
+
+        app = _create_core_app()
+        port = args.port or _int_env("OEM_PORT") or 8080
+        run_console(app, port=port)
+        return 0
+
     options = resolve_options(args)
 
     try:

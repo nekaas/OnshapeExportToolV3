@@ -27,7 +27,7 @@ class ConfigurationTests(unittest.TestCase):
             self.assertTrue(app.config_manager.labels_file.exists())
             self.assertTrue(app.config_manager.export_profiles_file.exists())
             self.assertEqual(config.app.worker_count, 4)
-            self.assertEqual(len(config.export_profiles.profiles), 9)
+            self.assertEqual(len(config.export_profiles.profiles), 8)
 
     def test_duplicate_account_names_are_rejected(self) -> None:
         with self.assertRaises(ValidationError):

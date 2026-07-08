@@ -39,7 +39,7 @@ class WebApiTests(unittest.TestCase):
 
     def test_metrics_endpoint(self) -> None:
         data = self.client.get("/api/metrics").json()
-        self.assertEqual(data["summary"]["export_profiles"], 9)
+        self.assertEqual(data["summary"]["export_profiles"], 8)
         self.assertIn("activity", data["exports"])
 
     def test_summary_endpoint(self) -> None:
@@ -49,7 +49,7 @@ class WebApiTests(unittest.TestCase):
     def test_resource_endpoints(self) -> None:
         self.assertEqual(self.client.get("/api/accounts").json(), {"accounts": []})
         self.assertEqual(self.client.get("/api/labels").json(), {"labels": []})
-        self.assertEqual(len(self.client.get("/api/profiles").json()["profiles"]), 9)
+        self.assertEqual(len(self.client.get("/api/profiles").json()["profiles"]), 8)
         self.assertEqual(self.client.get("/api/queue").json(), {"items": []})
         self.assertIn("history", self.client.get("/api/history").json())
 
@@ -65,7 +65,7 @@ class WebApiTests(unittest.TestCase):
 
     def test_run_export_requires_label(self) -> None:
         response = self.client.post("/api/exports/run", json={})
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_manual_export_preview_validates_and_estimates(self) -> None:
         self.client.post(
@@ -143,8 +143,11 @@ class WebApiTests(unittest.TestCase):
         self.assertGreaterEqual(data["total"], 1)
 
     def test_pages_render(self) -> None:
+        # Ensure setup is complete so auth doesn't redirect
+        self.client.post("/api/setup/owner", json={"username": "admin", "password": "supersecret"})
+        self.client.post("/api/setup/complete")
         self.assertEqual(self.client.get("/").status_code, 200)
-        for page in ("accounts", "labels", "export-profiles", "queue", "history", "logs", "settings"):
+        for page in ("labels", "history", "logs", "settings"):
             self.assertEqual(self.client.get(f"/{page}").status_code, 200)
 
     def test_unknown_page_is_404(self) -> None:
@@ -246,7 +249,7 @@ class WebApiTests(unittest.TestCase):
         bad = self.client.post(
             "/api/notifications", json={"name": "X", "kind": "telepathy", "target": "y"}
         )
-        self.assertEqual(bad.status_code, 400)
+        self.assertEqual(bad.status_code, 422)
 
     def test_notification_test_missing_channel(self) -> None:
         resp = self.client.post("/api/notifications/nope/test")

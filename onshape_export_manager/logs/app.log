@@ -220,3 +220,154 @@
 2026-06-29 12:22:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-06-29 12:25:44 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
 2026-06-29 12:25:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:47:49 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:47:49 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:49:48 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:49:48 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:51:30 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:51:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:51:30 ERROR    [onshape_export_manager.events] Event subscriber raised for system.startup
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/events.py", line 344, in _dispatch
+    result = callback(event)
+  File "/Users/hrebis/Desktop/AI/Projects/OnshapeExportTool-ClaudeV3/tests/test_events.py", line 64, in boom
+    raise RuntimeError("subscriber failure")
+RuntimeError: subscriber failure
+2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Scheduler stopped
+2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Synced scheduler job id=schedule-customer-a label=Customer A interval=hourly profile=STL
+2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Synced scheduler job id=schedule-customer-a label=Customer A interval=hourly profile=STL
+2026-07-08 19:51:30 INFO     [onshape_export_manager.queue] Queued export job id=33acd33b-7dd0-4e1b-9089-3e0051c95d7b label=Customer A profile=STL reason=scheduled
+2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Queued scheduled export scheduler_job_id=schedule-customer-a queue_job_id=33acd33b-7dd0-4e1b-9089-3e0051c95d7b label=Customer A
+2026-07-08 19:52:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:52:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:54:19 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:54:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:54:28 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:54:28 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:57:42 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:57:42 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:57:50 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:57:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 19:59:40 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 19:59:40 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:00:22 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:00:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:01:29 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:01:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:06:29 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:06:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:06:38 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:06:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:08:21 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:08:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:10:19 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:10:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:11:08 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:11:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:25:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:25:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:26:01 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:26:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:26:12 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:26:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:26:32 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:26:32 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:26:54 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:26:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:30:38 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:30:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:33:02 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:33:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:36:52 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:36:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:37:39 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:37:39 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:37:53 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:37:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:38:19 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:38:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:39:15 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:39:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:41:03 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:41:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:41:19 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:41:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:43:02 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:43:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:46:53 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:46:53 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:48:27 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:48:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:51:27 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:51:27 INFO     [onshape_export_manager] Created backup oem-backup-20260708-175127.zip (7 entries, 9.6 KB)
+2026-07-08 20:51:36 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:51:36 INFO     [onshape_export_manager] Created backup oem-backup-20260708-175136.zip (7 entries, 9.6 KB)
+2026-07-08 20:51:45 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:51:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 20:52:20 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 20:52:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:21:06 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:13 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:14 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:14 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:25 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:25 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:25 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:25 INFO     [onshape_export_manager] Created backup oem-backup-20260708-182125.zip (7 entries, 9.6 KB)
+2026-07-08 21:21:56 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:21:56 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:21:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:22:29 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:30 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:42 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:42 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:22:52 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:22:54 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:57 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:22:57 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:23:11 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:23:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:23:32 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:23:32 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:23:40 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:23:40 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:23:41 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:23:41 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:23:47 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:23:47 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:25:09 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:25:09 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:26:07 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:26:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:26:28 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:27:05 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:27:05 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:27:10 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:27:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:27:44 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:27:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:28:29 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:28:31 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:28:31 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:28:39 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:28:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:28:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:28:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:28:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:28:55 INFO     [httpx] HTTP Request: GET http://testserver/settings "HTTP/1.1 302 Found"
+2026-07-08 21:28:55 INFO     [httpx] HTTP Request: GET http://testserver/api-keys "HTTP/1.1 401 Unauthorized"
+2026-07-08 21:28:55 INFO     [httpx] HTTP Request: GET http://testserver/export "HTTP/1.1 302 Found"
+2026-07-08 21:28:55 INFO     [httpx] HTTP Request: GET http://testserver/ "HTTP/1.1 302 Found"
+2026-07-08 21:31:15 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:31:15 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0

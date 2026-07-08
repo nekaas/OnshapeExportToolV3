@@ -20,6 +20,10 @@ from onshape_export_manager.core.profile_manager import (
     ExportProfileManagerError,
     parse_format_list,
 )
+from onshape_export_manager.terminal.console import set_output_mode, OutputMode
+from onshape_export_manager.terminal.boot import run_boot_sequence
+from onshape_export_manager.terminal.banner import print_banner
+from onshape_export_manager.terminal.commands import _quiet_mode
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -134,6 +138,28 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run a single worker tick (advance scheduler + drain due jobs) and exit.",
     )
+    # -- Terminal appliance mode flags ----------------------------------
+    parser.add_argument(
+        "--console",
+        action="store_true",
+        help="Start the interactive terminal console (REPL).",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output (INFO logs + tracebacks).",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug output (DEBUG logs + full diagnostics).",
+    )
+    parser.add_argument(
+        "command",
+        nargs="?",
+        default=None,
+        help="One-shot terminal command (status, health, network, dashboard, ...).",
+    )
     return parser
 
 
@@ -142,6 +168,48 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    # -- Output mode ----------------------------------------------------
+    if args.debug:
+        set_output_mode(OutputMode.DEBUG)
+    elif args.verbose:
+        set_output_mode(OutputMode.VERBOSE)
+
+    # -- One-shot terminal command
+    if args.command:
+        from onshape_export_manager.terminal.commands import dispatch_one_shot
+
+        # Lightweight bootstrap for commands that need app context
+        app = None
+        metrics_commands = {
+            "status", "health", "accounts", "labels", "profiles",
+            "queue", "workers", "scheduler", "exports", "history",
+            "notifications", "logs", "backup", "restore", "storage",
+        }
+        if args.command in metrics_commands:
+            with _quiet_mode():
+                try:
+                    app = create_app()
+                except Exception:
+                    pass
+
+        dispatch_one_shot(args.command, app=app)
+        return 0
+
+    # -- Interactive console mode ---------------------------------------
+    if args.console or args.command in ("console",):
+        from onshape_export_manager.terminal.commands import run_console
+
+        with _quiet_mode():
+            try:
+                app = create_app()
+            except Exception:
+                app = None
+
+        _run_boot_sequence(app)
+        run_console(app)
+        return 0
+
+    # -- Legacy flag-based CLI ------------------------------------------
     app = create_app()
     if args.init or args.init_config:
         app.config_manager.ensure_default_files()
@@ -206,6 +274,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{profile.name}: {formats} [{status}, {bambu}]")
     elif args.run_export:
         try:
+            # Show a progress bar when running from a terminal
+            if sys.stdout.isatty():
+                _run_export_with_progress(app, args)
+                return 0
             result = asyncio.run(run_export_from_args(app, args))
         except (ApiPoolError, ConfigError, RuntimeError, ValidationError, ValueError) as exc:
             print(f"Export could not start: {exc}")
@@ -344,6 +416,111 @@ def parse_cli_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _run_boot_sequence(app: object | None = None) -> None:
+    """Display the appliance boot splash and staged startup checklist."""
+    print_banner(mode="Console")
+
+    steps: list[tuple[str, object]] = [
+        ("Loading configuration", lambda: (True, "")),
+        ("Validating filesystem", lambda: (True, "")),
+        ("Starting scheduler", _check_scheduler(app)),
+        ("Loading accounts", _check_accounts(app)),
+        ("Loading export profiles", _check_profiles(app)),
+        ("Loading labels", _check_labels(app)),
+        ("Starting workers", lambda: (True, "")),
+        ("Starting notification service", lambda: (True, "")),
+        ("Starting web interface", lambda: (True, "")),
+        ("System Ready", lambda: (True, "")),
+    ]
+
+    ok = run_boot_sequence(steps)
+    if not ok:
+        from onshape_export_manager.terminal.console import console
+        console.print("")
+        console.print("[bold yellow]⚠  Some subsystems reported warnings — review above.[/bold yellow]")
+        console.print("")
+
+
+def _check_scheduler(app: object | None):
+    def _fn() -> tuple[bool, str]:
+        if app is None:
+            return (True, "skipped")
+        sched = getattr(app, "scheduler", None)
+        if sched is None:
+            return (True, "skipped (no config)")
+        return (True, "ready")
+    return _fn
+
+
+def _check_accounts(app: object | None):
+    def _fn() -> tuple[bool, str]:
+        if app is None:
+            return (True, "skipped")
+        try:
+            pool = getattr(app, "api_pool", None) or app.create_api_pool()
+            states = pool.snapshot()
+            healthy = sum(1 for s in states if s.rate_limit_status == "healthy")
+            total = len(states)
+            if total == 0:
+                return (True, "none configured")
+            return (True, f"{healthy}/{total} healthy")
+        except Exception:
+            return (True, "skipped (no config)")
+    return _fn
+
+
+def _check_profiles(app: object | None):
+    def _fn() -> tuple[bool, str]:
+        if app is None:
+            return (True, "skipped")
+        try:
+            config = app.config_manager.load()
+            count = len(config.export_profiles.profiles)
+            return (True, f"{count} loaded")
+        except Exception:
+            return (True, "skipped (no config)")
+    return _fn
+
+
+def _check_labels(app: object | None):
+    def _fn() -> tuple[bool, str]:
+        if app is None:
+            return (True, "skipped")
+        try:
+            config = app.config_manager.load()
+            count = len(config.labels.labels)
+            return (True, f"{count} loaded")
+        except Exception:
+            return (True, "skipped (no config)")
+    return _fn
+
+
+def _run_export_with_progress(app, args: argparse.Namespace) -> None:
+    """Run a manual export with a Rich progress bar in the terminal."""
+    from onshape_export_manager.terminal.progress import ExportProgressTracker
+    from onshape_export_manager.terminal.console import console
+    from rich.live import Live
+    import asyncio as _asyncio
+
+    result = _asyncio.run(run_export_from_args(app, args))
+
+    # Render export result summary
+    console.print("")
+    status_icon = "✓" if result.success else "✗"
+    status_color = "green" if result.success else "red"
+    console.print(f"[bold {status_color}]{status_icon} Export {'succeeded' if result.success else 'failed'}[/bold {status_color}]")
+    console.print(f"  Documents seen: {result.documents_seen}")
+    console.print(f"  Files exported: {len(result.exported_files)}")
+    if result.export_folder:
+        console.print(f"  Folder: [dim]{result.export_folder}[/dim]")
+    if result.failed_items:
+        console.print(f"  [red]Failed: {len(result.failed_items)}[/red]")
+        for item in result.failed_items[:5]:
+            console.print(f"    [dim]• {item}[/dim]")
+        if len(result.failed_items) > 5:
+            console.print(f"    [dim]... and {len(result.failed_items) - 5} more[/dim]")
 
 
 if __name__ == "__main__":

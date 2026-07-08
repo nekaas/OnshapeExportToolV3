@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -101,7 +102,13 @@ class AccountLease:
 
 
 class ApiPool:
-    """Select enabled accounts for export work and track runtime API health."""
+    """Select enabled accounts for export work and track runtime API health.
+
+    All state-mutating methods are guarded by an internal ``threading.Lock``
+    so the pool is safe to use concurrently from the web dashboard thread
+    (``snapshot()``, ``available_account_names()``) and the background
+    worker thread (``record_success()``, ``record_failure()``, etc.).
+    """
 
     def __init__(
         self,
@@ -115,6 +122,7 @@ class ApiPool:
         self._database = database
         self._default_rate_limit_cooldown = default_rate_limit_cooldown
         self._now_fn = now_fn or utc_now
+        self._lock = threading.Lock()
         self._states = {
             account.name: self._load_state(account)
             for account in accounts
@@ -124,54 +132,61 @@ class ApiPool:
     def lease(self, assigned_account_names: Sequence[str] | None = None) -> AccountLease:
         """Lease the best available account for a label or export job."""
         now = self._now()
-        candidates = self._eligible_accounts(assigned_account_names)
-        if not candidates:
-            raise NoEnabledAccountsError("No enabled Onshape accounts are configured.")
+        with self._lock:
+            candidates = self._eligible_accounts(assigned_account_names)
+            if not candidates:
+                raise NoEnabledAccountsError("No enabled Onshape accounts are configured.")
 
-        for account in candidates:
-            self._states[account.name].mark_available_if_cooldown_expired(now)
+            for account in candidates:
+                self._states[account.name].mark_available_if_cooldown_expired(now)
 
-        available = [
-            account
-            for account in candidates
-            if not self._states[account.name].is_rate_limited(now)
-        ]
-        if not available:
-            next_available_at = self._next_available_at(candidates)
-            raise AllAccountsRateLimitedError(
-                "Every eligible Onshape account is currently rate limited.",
-                next_available_at=next_available_at,
-            )
+            available = [
+                account
+                for account in candidates
+                if not self._states[account.name].is_rate_limited(now)
+            ]
+            if not available:
+                next_available_at = self._next_available_at(candidates)
+                raise AllAccountsRateLimitedError(
+                    "Every eligible Onshape account is currently rate limited.",
+                    next_available_at=next_available_at,
+                )
 
-        account = min(available, key=self._selection_key)
-        state = self._states[account.name]
-        state.last_used = now
-        state.mark_available_if_cooldown_expired(now)
-        if state.rate_limit_status not in {"failed", "rate_limited"}:
-            state.rate_limit_status = "available"
-        self._apply_state_to_account(account.name)
-        self._persist_state(account.name)
-        return AccountLease(account=account, leased_at=now, state=state)
+            account = min(available, key=self._selection_key)
+            state = self._states[account.name]
+            state.last_used = now
+            state.mark_available_if_cooldown_expired(now)
+            if state.rate_limit_status not in {"failed", "rate_limited"}:
+                state.rate_limit_status = "available"
+            self._apply_state_to_account(account.name)
+            # Capture the lease details before releasing the lock
+            leased_account = account
+            leased_state = state
+        # Persist outside the lock to avoid holding it during I/O
+        self._persist_state(leased_account.name)
+        return AccountLease(account=leased_account, leased_at=now, state=leased_state)
 
     def record_success(self, account_name: str, *, api_calls: int = 1) -> None:
         """Record successful API work for an account."""
-        state = self._state_for(account_name)
-        state.api_usage += max(api_calls, 0)
-        state.rate_limit_status = "available"
-        state.rate_limited_until = None
-        state.last_error = ""
-        state.last_used = self._now()
-        self._apply_state_to_account(account_name)
+        with self._lock:
+            state = self._state_for(account_name)
+            state.api_usage += max(api_calls, 0)
+            state.rate_limit_status = "available"
+            state.rate_limited_until = None
+            state.last_error = ""
+            state.last_used = self._now()
+            self._apply_state_to_account(account_name)
         self._persist_state(account_name)
 
     def record_failure(self, account_name: str, error: str) -> None:
         """Record a non-rate-limit API failure."""
-        state = self._state_for(account_name)
-        state.failure_count += 1
-        state.rate_limit_status = "failed"
-        state.last_error = error
-        state.last_used = self._now()
-        self._apply_state_to_account(account_name)
+        with self._lock:
+            state = self._state_for(account_name)
+            state.failure_count += 1
+            state.rate_limit_status = "failed"
+            state.last_error = error
+            state.last_used = self._now()
+            self._apply_state_to_account(account_name)
         self._persist_state(account_name)
 
     def record_rate_limited(
@@ -184,13 +199,14 @@ class ApiPool:
     ) -> None:
         """Mark an account as rate limited until reset_at or a cooldown expires."""
         now = self._now()
-        state = self._state_for(account_name)
-        state.failure_count += 1
-        state.rate_limit_status = "rate_limited"
-        state.rate_limited_until = reset_at or now + (cooldown or self._default_rate_limit_cooldown)
-        state.last_error = error
-        state.last_used = now
-        self._apply_state_to_account(account_name)
+        with self._lock:
+            state = self._state_for(account_name)
+            state.failure_count += 1
+            state.rate_limit_status = "rate_limited"
+            state.rate_limited_until = reset_at or now + (cooldown or self._default_rate_limit_cooldown)
+            state.last_error = error
+            state.last_used = now
+            self._apply_state_to_account(account_name)
         self._persist_state(account_name)
 
     def record_http_result(
@@ -211,22 +227,25 @@ class ApiPool:
 
     def mark_available(self, account_name: str) -> None:
         """Clear failure and rate-limit status for an account."""
-        state = self._state_for(account_name)
-        state.rate_limit_status = "available"
-        state.rate_limited_until = None
-        state.last_error = ""
-        self._apply_state_to_account(account_name)
+        with self._lock:
+            state = self._state_for(account_name)
+            state.rate_limit_status = "available"
+            state.rate_limited_until = None
+            state.last_error = ""
+            self._apply_state_to_account(account_name)
         self._persist_state(account_name)
 
     def snapshot(self) -> list[AccountRuntimeState]:
         """Return current account runtime state sorted by account name."""
         now = self._now()
-        for state in self._states.values():
-            state.mark_available_if_cooldown_expired(now)
-        for name in self._states:
-            self._apply_state_to_account(name)
-            self._persist_state(name)
-        return [self._states[name] for name in sorted(self._states)]
+        with self._lock:
+            for state in self._states.values():
+                state.mark_available_if_cooldown_expired(now)
+            for name in self._states:
+                self._apply_state_to_account(name)
+            for name in self._states:
+                self._persist_state(name)
+            return [self._states[name] for name in sorted(self._states)]
 
     def available_account_names(
         self,
@@ -234,13 +253,14 @@ class ApiPool:
     ) -> list[str]:
         """Return eligible account names that are currently selectable."""
         now = self._now()
-        names: list[str] = []
-        for account in self._eligible_accounts(assigned_account_names):
-            state = self._states[account.name]
-            state.mark_available_if_cooldown_expired(now)
-            if not state.is_rate_limited(now):
-                names.append(account.name)
-        return names
+        with self._lock:
+            names: list[str] = []
+            for account in self._eligible_accounts(assigned_account_names):
+                state = self._states[account.name]
+                state.mark_available_if_cooldown_expired(now)
+                if not state.is_rate_limited(now):
+                    names.append(account.name)
+            return names
 
     def _eligible_accounts(
         self,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import StrEnum
@@ -45,6 +46,7 @@ class SchedulerService:
         self.queue_manager = queue_manager
         self._now_fn = now_fn or utc_now
         self._running = False
+        self._labels_loader: Callable[[], list[LabelDefinition]] | None = None
         self.logger = get_logger(SCHEDULER_LOGGER)
 
     def start(self) -> None:
@@ -99,6 +101,32 @@ class SchedulerService:
                 label.export_profile,
             )
         return job_ids
+
+    def set_labels_loader(self, loader: Callable[[], list[LabelDefinition]]) -> None:
+        """Register a callable that returns the current label definitions.
+
+        Called by :meth:`on_labels_changed` to re-sync scheduler jobs after
+        labels are added, removed, or modified at runtime.
+        """
+        self._labels_loader = loader
+
+    def on_labels_changed(self) -> list[str]:
+        """Re-sync scheduler jobs from the current labels configuration.
+
+        Safe to call from any thread — the underlying database and queue
+        operations are self-contained. Returns the IDs of synced jobs.
+        """
+        if self._labels_loader is None:
+            self.logger.warning(
+                "Cannot re-sync scheduler: no labels loader registered"
+            )
+            return []
+        try:
+            labels = self._labels_loader()
+            return self.sync_labels(labels)
+        except Exception as exc:
+            self.logger.warning("Scheduler re-sync skipped: %s", exc)
+            return []
 
     def due_jobs(self) -> list[SchedulerJobEntry]:
         """Return enabled scheduler jobs whose next run time has arrived."""

@@ -16,6 +16,7 @@ migrates it into the richer model for the Web UI.
 
 from __future__ import annotations
 
+import threading
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
@@ -284,7 +285,13 @@ def _cooldown_key(state: CredentialState | None, now: datetime) -> datetime:
 
 
 class CredentialPool:
-    """Selects credentials with priority + failover and tracks health in SQLite."""
+    """Selects credentials with priority + failover and tracks health in SQLite.
+
+    All state-mutating methods are guarded by an internal ``threading.Lock``
+    so the pool is safe to use concurrently from the web dashboard thread
+    (``snapshot()``) and the background worker thread (``record_success()``,
+    ``record_failure()``, etc.).
+    """
 
     def __init__(
         self,
@@ -298,62 +305,68 @@ class CredentialPool:
         self._database = database
         self._cooldown = cooldown
         self._now_fn = now_fn or _utc_now
+        self._lock = threading.Lock()
         self._states = {credential.id: self._load_state(credential.id) for credential in credentials}
 
     def lease(self, candidate_ids: Sequence[str] | None = None) -> Credential:
         """Lease the best available credential, optionally restricted to ids."""
         now = self._now()
         today = now.date().isoformat()
-        candidates = self._candidates(candidate_ids)
-        if not candidates:
-            raise OrganizationError("No enabled credentials are available for selection.")
-        for state in self._states.values():
-            state.roll_day(today)
-        ordered = order_credentials(candidates, self._states, now)
-        if not ordered:
-            raise OrganizationError("No selectable credentials (all disabled).")
-        chosen = ordered[0]
-        state = self._states[chosen.id]
-        if state.is_rate_limited(now):
-            raise OrganizationError("All eligible credentials are currently rate limited.")
-        state.last_used = now
+        with self._lock:
+            candidates = self._candidates(candidate_ids)
+            if not candidates:
+                raise OrganizationError("No enabled credentials are available for selection.")
+            for state in self._states.values():
+                state.roll_day(today)
+            ordered = order_credentials(candidates, self._states, now)
+            if not ordered:
+                raise OrganizationError("No selectable credentials (all disabled).")
+            chosen = ordered[0]
+            state = self._states[chosen.id]
+            if state.is_rate_limited(now):
+                raise OrganizationError("All eligible credentials are currently rate limited.")
+            state.last_used = now
         self._persist(chosen.id)
         return chosen
 
     def record_success(self, credential_id: str, *, latency_ms: float | None = None) -> None:
-        state = self._state(credential_id)
-        state.roll_day(self._now().date().isoformat())
-        state.requests_today += 1
-        state.rate_limit_status = "available"
-        state.rate_limited_until = None
-        state.last_error = ""
-        state.last_used = self._now()
-        if latency_ms is not None:
-            state.latency_ms = latency_ms if state.latency_ms == 0 else (state.latency_ms * 0.7 + latency_ms * 0.3)
+        with self._lock:
+            state = self._state(credential_id)
+            state.roll_day(self._now().date().isoformat())
+            state.requests_today += 1
+            state.rate_limit_status = "available"
+            state.rate_limited_until = None
+            state.last_error = ""
+            state.last_used = self._now()
+            if latency_ms is not None:
+                state.latency_ms = latency_ms if state.latency_ms == 0 else (state.latency_ms * 0.7 + latency_ms * 0.3)
         self._persist(credential_id)
 
     def record_failure(self, credential_id: str, error: str) -> None:
-        state = self._state(credential_id)
-        state.failure_count += 1
-        state.rate_limit_status = "failed"
-        state.last_error = error
-        state.last_used = self._now()
+        with self._lock:
+            state = self._state(credential_id)
+            state.failure_count += 1
+            state.rate_limit_status = "failed"
+            state.last_error = error
+            state.last_used = self._now()
         self._persist(credential_id)
 
     def record_rate_limited(self, credential_id: str, *, reset_at: datetime | None = None) -> None:
         now = self._now()
-        state = self._state(credential_id)
-        state.failure_count += 1
-        state.rate_limit_status = "rate_limited"
-        state.rate_limited_until = reset_at or now + self._cooldown
-        state.last_used = now
+        with self._lock:
+            state = self._state(credential_id)
+            state.failure_count += 1
+            state.rate_limit_status = "rate_limited"
+            state.rate_limited_until = reset_at or now + self._cooldown
+            state.last_used = now
         self._persist(credential_id)
 
     def snapshot(self) -> list[CredentialState]:
         now = self._now()
-        for state in self._states.values():
-            state.clear_expired_cooldown(now)
-        return [self._states[cid] for cid in self._states]
+        with self._lock:
+            for state in self._states.values():
+                state.clear_expired_cooldown(now)
+            return [self._states[cid] for cid in self._states]
 
     def state_for(self, credential_id: str) -> CredentialState | None:
         return self._states.get(credential_id)

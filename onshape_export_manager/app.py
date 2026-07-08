@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from onshape_export_manager.core.api_pool import ApiPool
 from onshape_export_manager.core.audit import AuditService, TelemetryStore
-from onshape_export_manager.core.configuration import ConfigError, ConfigManager
+from onshape_export_manager.core.configuration import ConfigError, ConfigManager, ConfigWatcher
 from onshape_export_manager.core.database import Database
 from onshape_export_manager.core.events import EventBus
 from onshape_export_manager.core.export_engine import ExportEngine
@@ -37,6 +37,7 @@ class Application:
     audit: AuditService | None = None
     telemetry: TelemetryStore | None = None
     notifications: NotificationService | None = None
+    config_watcher: ConfigWatcher | None = None
 
     def bootstrap(self) -> "Application":
         """Create required directories and initialize process-wide services."""
@@ -66,6 +67,10 @@ class Application:
             self.api_pool = self.create_api_pool()
         except (ConfigError, ValidationError):
             self.api_pool = None
+        # Start config file watcher for hot-reload on headless deployments
+        self.config_watcher = ConfigWatcher(self.config_manager)
+        self.config_watcher.set_event_bus(self.event_bus)
+        self.config_watcher.start()
         return self
 
     def _configure_logging(self) -> None:

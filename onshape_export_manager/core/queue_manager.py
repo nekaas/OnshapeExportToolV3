@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from onshape_export_manager.core.database import Database, QueueEntry, utc_now
-from onshape_export_manager.core.jobs import JobStatus
+from onshape_export_manager.core.jobs import VALID_TRANSITIONS, JobStatus, can_transition
 from onshape_export_manager.core.logger import QUEUE_LOGGER, get_logger
 from onshape_export_manager.core.retry import RetryPolicy
 
@@ -78,18 +78,22 @@ class QueueManager:
         return self.database.list_due_queue(now=self._now(), limit=limit)
 
     def claim_next(self) -> QueueEntry | None:
-        """Mark the oldest due pending job as running and return it."""
-        due = self.due_jobs(limit=1)
-        if not due:
+        """Atomically mark the oldest due pending job as running and return it.
+
+        Uses :meth:`Database.claim_next_queue` which performs the SELECT and
+        UPDATE in a single atomic SQL statement, eliminating the TOCTOU race
+        that existed when ``due_jobs()`` and ``update_queue_status()`` were
+        called in separate transactions.
+        """
+        claimed = self.database.claim_next_queue(now=self._now())
+        if claimed is None:
             return None
-        job = due[0]
-        self.database.update_queue_status(job.id, JobStatus.RUNNING)
-        self.logger.info("Claimed queue job id=%s", job.id)
-        claimed = self.database.get_queue_entry(job.id)
-        return claimed or job
+        self.logger.info("Claimed queue job id=%s", claimed.id)
+        return claimed
 
     def mark_completed(self, job_id: str) -> None:
         """Mark a job complete."""
+        self._assert_transition(job_id, JobStatus.COMPLETED)
         self.database.update_queue_status(job_id, JobStatus.COMPLETED)
         self.logger.info("Completed queue job id=%s", job_id)
 
@@ -100,6 +104,7 @@ class QueueManager:
             raise KeyError(f"Unknown queue job: {job_id}")
         retry_count = job.retry_count + 1
         if retry_count >= self.retry_policy.max_attempts:
+            self._assert_transition(job_id, JobStatus.FAILED)
             self.database.update_queue_status(
                 job_id,
                 JobStatus.FAILED,
@@ -128,11 +133,13 @@ class QueueManager:
 
     def cancel(self, job_id: str, reason: str = "cancelled") -> None:
         """Cancel a queued job."""
+        self._assert_transition(job_id, JobStatus.CANCELLED)
         self.database.update_queue_status(job_id, JobStatus.CANCELLED, last_error=reason)
         self.logger.info("Cancelled queue job id=%s reason=%s", job_id, reason)
 
     def requeue(self, job_id: str, *, next_run_at: datetime | None = None) -> None:
         """Move a failed/cancelled/running job back to pending."""
+        self._assert_transition(job_id, JobStatus.PENDING)
         self.database.update_queue_status(
             job_id,
             JobStatus.PENDING,
@@ -141,21 +148,29 @@ class QueueManager:
         )
 
     def stats(self) -> QueueStats:
-        """Return queue counts by status."""
-        counts = {
-            status: len(self.database.list_queue(status=status, limit=10_000))
-            for status in JobStatus
-        }
+        """Return queue counts by status (single GROUP BY query)."""
+        counts = self.database.queue_stats()
         return QueueStats(
-            pending=counts[JobStatus.PENDING],
-            running=counts[JobStatus.RUNNING],
-            completed=counts[JobStatus.COMPLETED],
-            failed=counts[JobStatus.FAILED],
-            cancelled=counts[JobStatus.CANCELLED],
+            pending=counts.get(JobStatus.PENDING.value, 0),
+            running=counts.get(JobStatus.RUNNING.value, 0),
+            completed=counts.get(JobStatus.COMPLETED.value, 0),
+            failed=counts.get(JobStatus.FAILED.value, 0),
+            cancelled=counts.get(JobStatus.CANCELLED.value, 0),
         )
 
     def _now(self) -> datetime:
         return normalize_datetime(self._now_fn())
+
+    def _assert_transition(self, job_id: str, target: JobStatus) -> None:
+        """Raise ValueError if the transition is invalid per the state machine."""
+        job = self.database.get_queue_entry(job_id)
+        if job is None:
+            raise KeyError(f"Unknown queue job: {job_id}")
+        if not can_transition(job.status, target):
+            raise ValueError(
+                f"Invalid transition for job {job_id}: "
+                f"{job.status.value} -> {target.value}"
+            )
 
 
 def normalize_datetime(value: datetime) -> datetime:

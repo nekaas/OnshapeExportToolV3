@@ -19,6 +19,7 @@ from onshape_export_manager.core.folder_manager import FolderManager, sanitize_f
 from onshape_export_manager.core.logger import EXPORT_LOGGER, ExportLogContext, get_logger, log_export_summary
 from onshape_export_manager.core.models import ExportFormat, ExportJobRequest, OnshapeAccount
 from onshape_export_manager.core.onshape_client import OnshapeClient, RequestRetryPolicy
+from onshape_export_manager.core.provider import CredentialProvider
 
 
 class ExportEngineError(RuntimeError):
@@ -52,7 +53,7 @@ class ExportEngine:
     def __init__(
         self,
         *,
-        api_pool: ApiPool,
+        api_pool: ApiPool | CredentialProvider,
         database: Database,
         base_url: str = "https://cad.onshape.com/api/v6",
         folder_manager: FolderManager | None = None,
@@ -160,36 +161,36 @@ class ExportEngine:
                     result.failed_items.append(f"{doc_name}: no Part Studios found")
                     continue
 
-                # Preserve proof-of-concept behavior: export the first Part Studio.
-                element = part_studios[0]
-                element_id = str(element.get("id") or "")
-                element_name = sanitize_filename(str(element.get("name") or element_id))
-                if not element_id:
-                    result.failed_items.append(f"{doc_name}: Part Studio is missing id")
-                    continue
+                # Export ALL Part Studios in the document.
+                for element in part_studios:
+                    element_id = str(element.get("id") or "")
+                    element_name = sanitize_filename(str(element.get("name") or element_id))
+                    if not element_id:
+                        result.failed_items.append(f"{doc_name}: Part Studio is missing id")
+                        continue
 
-                for export_format in request.profile.formats:
-                    try:
-                        path = self._export_part_studio_format(
-                            client,
-                            request,
-                            export_format,
-                            doc_id,
-                            workspace_id,
-                            element_id,
-                            doc_name,
-                            element_name,
-                            result.export_folder,
-                        )
-                    except ExportFormatNotImplementedError as exc:
-                        result.skipped_items.append(str(exc))
-                    except Exception as exc:
-                        result.failed_items.append(
-                            f"{doc_name}/{element_name}/{export_format.value}: {exc}"
-                        )
-                    else:
-                        if path is not None:
-                            result.exported_files.append(path)
+                    for export_format in request.profile.formats:
+                        try:
+                            path = self._export_part_studio_format(
+                                client,
+                                request,
+                                export_format,
+                                doc_id,
+                                workspace_id,
+                                element_id,
+                                doc_name,
+                                element_name,
+                                result.export_folder,
+                            )
+                        except ExportFormatNotImplementedError as exc:
+                            result.skipped_items.append(str(exc))
+                        except Exception as exc:
+                            result.failed_items.append(
+                                f"{doc_name}/{element_name}/{export_format.value}: {exc}"
+                            )
+                        else:
+                            if path is not None:
+                                result.exported_files.append(path)
             except Exception as exc:
                 result.failed_items.append(f"{doc_name}: {exc}")
 
@@ -215,7 +216,10 @@ class ExportEngine:
                 f"{definition.display_name} export is not a Part Studio export."
             )
         format_folder = self.folder_manager.create_format_folder(export_folder, export_format)
-        filename = f"{doc_name}__{element_name}{definition.default_extension}"
+        # Include a short document-id suffix to prevent name collisions when
+        # two documents share the same name within a label.
+        doc_suffix = doc_id[-8:] if len(doc_id) >= 8 else doc_id
+        filename = f"{doc_name}__{element_name}__{doc_suffix}{definition.default_extension}"
         save_path = unique_path(format_folder / filename)
         options = default_options_for(export_format)
         options.update(format_options_for(request.profile.options, export_format))

@@ -251,12 +251,11 @@ function dashboardPage() {
     build(d) {
       const s = d.summary || {};
       this.cards = [
-        { key: "accounts", label: "Accounts", value: s.accounts ?? 0, icon: ICONS.accounts, badge: `${s.healthy_accounts ?? 0} healthy`, accent: "" },
-        { key: "labels", label: "Labels", value: s.labels ?? 0, icon: ICONS.labels, accent: "" },
-        { key: "profiles", label: "Profiles", value: s.export_profiles ?? 0, icon: ICONS.layers, accent: "" },
-        { key: "exports", label: "Total Exports", value: s.total_exports ?? 0, icon: ICONS.files, accent: "accent-success" },
-        { key: "queue", label: "In Queue", value: s.queue_size ?? 0, icon: ICONS.queue, accent: "" },
-        { key: "failed", label: "Failed", value: s.failed_exports ?? 0, icon: ICONS.alert, accent: (s.failed_exports ?? 0) > 0 ? "accent-danger" : "" },
+        { key: "apikeys", label: "API Keys", value: s.accounts ?? 0, icon: ICONS.accounts, badge: `${s.healthy_accounts ?? 0} healthy`, accent: "", href: "/api-keys" },
+        { key: "labels", label: "Labels", value: s.labels ?? 0, icon: ICONS.labels, accent: "", href: "/labels" },
+        { key: "exports", label: "Total Exports", value: s.total_exports ?? 0, icon: ICONS.files, accent: "accent-success", href: "/history" },
+        { key: "queue", label: "In Queue", value: s.queue_size ?? 0, icon: ICONS.queue, accent: "", href: "/export" },
+        { key: "failed", label: "Failed", value: s.failed_exports ?? 0, icon: ICONS.alert, accent: (s.failed_exports ?? 0) > 0 ? "accent-danger" : "", href: "/history" },
       ];
       this.recent = d.recent_history || [];
 
@@ -348,6 +347,23 @@ function dashboardPage() {
 
 /* ---------------- Section pages ---------------- */
 const PAGE_CONFIG = {
+  // ── New Phase 0 pages ────────────────────────────────────────────
+  "api-keys": {
+    // Unified view: organizations + credentials merged.
+    // Renders the organizations template (cards with nested creds).
+    endpoint: "/api/organizations",
+    root: "organizations",
+    empty: "No API keys configured yet. Add your Onshape API key to get started.",
+    columns: [],  // card-based, not table
+  },
+  export: {
+    // Merged manual-export + queue.  Uses custom template blocks.
+    endpoint: null,
+    root: null,
+    empty: "",
+    columns: [],
+  },
+  // ── Legacy pages (still accessible via URL) ──────────────────────
   accounts: {
     endpoint: "/api/accounts", root: "accounts", empty: "No accounts configured yet.",
     columns: [
@@ -362,13 +378,7 @@ const PAGE_CONFIG = {
   },
   labels: {
     endpoint: "/api/labels", root: "labels", empty: "No labels configured yet.",
-    columns: [
-      { key: "friendly_name", label: "Label", type: "strong" },
-      { key: "export_profile", label: "Profile", type: "text" },
-      { key: "onshape_label_id", label: "Onshape ID", type: "code" },
-      { key: "assigned_accounts", label: "Accounts", type: "join" },
-      { key: "enabled", label: "Enabled", type: "bool" },
-    ],
+    columns: [],  // card-based view, not table
   },
   "export-profiles": {
     endpoint: "/api/profiles", root: "profiles", empty: "No export profiles yet.",
@@ -430,8 +440,10 @@ function sectionPage(page) {
     activeTab: "All",
     columns: cfg ? cfg.columns : [],
     emptyText: cfg ? cfg.empty : "Nothing here.",
-    hasTable: !!cfg,
+    hasTable: cfg && cfg.columns && cfg.columns.length > 0,
     profiles: [],
+    // export page: queue items for combined view
+    queueItems: [],
     // logs
     logAreas: ["app", "errors", "api", "export", "scheduler", "queue", "web", "worker", "events", "audit", "notifications"],
     activeLog: "app",
@@ -494,9 +506,27 @@ function sectionPage(page) {
       { name: "Validators", desc: "Verify checksums and detect duplicates." },
       { name: "Reports", desc: "Generate HTML, JSON, CSV, and PDF summaries." },
     ],
+    // settings
+    settingsTabs: [
+      { slug: "general", label: "General" },
+      { slug: "notifications", label: "Notifications" },
+      { slug: "backups", label: "Backups" },
+      { slug: "remote-access", label: "Remote Access" },
+      { slug: "logs", label: "Logs" },
+      { slug: "about", label: "About" },
+    ],
+    settingsActiveTab: "general",
     settingsGroups: [],
+    // label creation form
+    showLabelForm: false,
+    labelForm: { name: "", onshape_id: "", profile: "STL", schedule: "" },
 
     load() {
+      // ── New Phase 0 pages ──────────────────────────────────────
+      if (this.page === "api-keys") return this.loadOrganizations();
+      if (this.page === "export")   return this.loadExportPage();
+      if (this.page === "labels")   return this.loadLabelsPage();
+      // ── Legacy pages ───────────────────────────────────────────
       if (this.page === "logs") return this.selectLog(this.activeLog);
       if (this.page === "settings") return this.loadSettings();
       if (this.page === "system") return this.loadSystem();
@@ -513,22 +543,103 @@ function sectionPage(page) {
         .finally(() => (this.loading = false));
     },
 
+    // ── New: Export page (manual export + queue combined) ────────
+    loadExportPage() {
+      this.loading = true;
+      this.loadManualTemplates();
+      this.ensureManualWindow();
+      Promise.all([
+        fetchJSON("/api/labels"),
+        fetchJSON("/api/profiles"),
+        fetchJSON("/api/worker").catch(() => ({ running: false })),
+        fetchJSON("/api/queue").catch(() => ({ items: [] })),
+      ])
+        .then(([labels, profiles, worker, queue]) => {
+          this.rows = labels.labels || [];
+          this.profiles = profiles.profiles || [];
+          this.worker = worker || { running: false };
+          this.queueItems = (queue && queue.items) || [];
+          if (this.rows.length && !this.manual.label) {
+            this.manual.label = this.rows[0].friendly_name;
+          }
+          this.schedulePreview(100);
+        })
+        .catch((e) => window.oem && window.oem.toast("Failed to load export planner", "error", e.message))
+        .finally(() => (this.loading = false));
+    },
+
+    // ── Labels page (card view) ──────────────────────────────────
+    loadLabelsPage() {
+      this.loading = true;
+      Promise.all([
+        fetchJSON("/api/labels"),
+        fetchJSON("/api/profiles").catch(() => ({ profiles: [] })),
+      ])
+        .then(([labelsData, profilesData]) => {
+          this.rows = labelsData.labels || [];
+          this.profiles = profilesData.profiles || [];
+        })
+        .catch((e) => window.oem && window.oem.toast("Failed to load labels", "error", e.message))
+        .finally(() => (this.loading = false));
+    },
+
+    createLabel() {
+      const f = this.labelForm;
+      if (!(f.name || "").trim()) return window.oem && window.oem.toast("Label name is required", "error");
+      const body = {
+        friendly_name: f.name.trim(),
+        onshape_label_id: (f.onshape_id || "").trim(),
+        export_profile: f.profile || "STL",
+      };
+      if (f.schedule) body.scheduler = { interval: f.schedule, enabled: true };
+      fetch("/api/labels", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.error) throw new Error(d.error);
+          window.oem && window.oem.toast("Label created", "success", f.name);
+          this.showLabelForm = false;
+          this.labelForm = { name: "", onshape_id: "", profile: "STL", schedule: "" };
+          this.loadLabelsPage();
+        })
+        .catch((e) => window.oem && window.oem.toast("Create failed", "error", e.message));
+    },
+
+    triggerLabelExport(labelName) {
+      if (!labelName) return;
+      fetch("/api/exports/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: labelName, profile: "", start: new Date().toISOString().slice(0, 10), end: "" }),
+      })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.error) throw new Error(d.error);
+          window.oem && window.oem.toast("Export queued", "success", labelName);
+        })
+        .catch((e) => window.oem && window.oem.toast("Export failed", "error", e.message));
+    },
+
     loadAux() {
-      // manual-export needs label list
-      if (this.page === "manual-export") {
+      // manual-export / export need label list
+      if (this.page === "manual-export" || this.page === "export") {
         this.loading = true;
         this.loadManualTemplates();
         this.ensureManualWindow();
-        Promise.all([
+        const fetches = [
           fetchJSON("/api/labels"),
           fetchJSON("/api/profiles"),
           fetchJSON("/api/worker").catch(() => ({ running: false })),
-        ])
-          .then(([labels, profiles, worker]) => {
+        ];
+        if (this.page === "export") {
+          fetches.push(fetchJSON("/api/queue").catch(() => ({ items: [] })));
+        }
+        Promise.all(fetches)
+          .then(([labels, profiles, worker, queue]) => {
             this.rows = labels.labels || [];
             this.profiles = profiles.profiles || [];
             if (this.rows.length && !this.manual.label) this.manual.label = this.rows[0].friendly_name;
             this.worker = worker || { running: false };
+            if (queue) this.queueItems = (queue && queue.items) || [];
             this.schedulePreview(100);
           })
           .catch((e) => window.oem && window.oem.toast("Failed to load export planner", "error", e.message))
@@ -537,7 +648,7 @@ function sectionPage(page) {
     },
 
     initManualPlanner() {
-      if (this.page !== "manual-export") return;
+      if (this.page !== "manual-export" && this.page !== "export") return;
       this.loadManualTemplates();
       this.ensureManualWindow();
       this.initManualFlatpickrs();
@@ -860,30 +971,56 @@ function sectionPage(page) {
     },
 
     loadSettings() {
-      fetchJSON("/api/metrics").then((d) => {
-        const db = d.database || {};
-        this.settingsGroups = [
-          { title: "Application", rows: [
-            { k: "Version", v: d.version },
-            { k: "Generated", v: relativeTime(d.generated_at) },
-          ]},
-          { title: "Database", rows: [
-            { k: "Schema version", v: "v" + (db.schema_version ?? 0) },
-            { k: "Export history rows", v: db.export_history ?? 0 },
-            { k: "Queue rows", v: db.export_queue ?? 0 },
-            { k: "Scheduler rows", v: db.scheduler_jobs ?? 0 },
-          ]},
-          { title: "Storage", rows: [
-            { k: "Exports size", v: d.disk?.human ?? "0 B" },
-            { k: "Exported files", v: d.disk?.file_count ?? 0 },
-          ]},
-          { title: "Exports", rows: [
-            { k: "Success rate", v: (d.exports?.success_rate ?? 0) + "%" },
-            { k: "Average duration", v: (d.exports?.average_duration_seconds ?? 0) + "s" },
-            { k: "Total files", v: d.exports?.total_files ?? 0 },
-          ]},
-        ];
-      });
+      // Load all data needed across settings tabs
+      this.loading = true;
+      this.loadNotifications();
+      Promise.all([
+        fetchJSON("/api/metrics"),
+        fetchJSON("/api/system").catch(() => ({})),
+        fetchJSON("/api/remote-access").catch(() => ({})),
+        fetchJSON("/api/backups").catch(() => ({ backups: [] })),
+      ])
+        .then(([metrics, sys, remote, backupsData]) => {
+          const db = metrics.database || {};
+          this.settingsGroups = [
+            { title: "Application", rows: [
+              { k: "Version", v: metrics.version },
+              { k: "Generated", v: relativeTime(metrics.generated_at) },
+            ]},
+            { title: "Database", rows: [
+              { k: "Schema version", v: "v" + (db.schema_version ?? 0) },
+              { k: "Export history rows", v: db.export_history ?? 0 },
+              { k: "Queue rows", v: db.export_queue ?? 0 },
+              { k: "Scheduler rows", v: db.scheduler_jobs ?? 0 },
+            ]},
+            { title: "Storage", rows: [
+              { k: "Exports size", v: metrics.disk?.human ?? "0 B" },
+              { k: "Exported files", v: metrics.disk?.file_count ?? 0 },
+            ]},
+            { title: "Exports", rows: [
+              { k: "Success rate", v: (metrics.exports?.success_rate ?? 0) + "%" },
+              { k: "Average duration", v: (metrics.exports?.average_duration_seconds ?? 0) + "s" },
+              { k: "Total files", v: metrics.exports?.total_files ?? 0 },
+            ]},
+          ];
+          this.system = sys;
+          this.remote = remote || {};
+          this.backups = (backupsData && backupsData.backups) || [];
+          this.buildSystem(sys, remote || {});
+        })
+        .catch((e) => window.oem && window.oem.toast("Failed to load settings", "error", e.message))
+        .finally(() => (this.loading = false));
+    },
+
+    switchSettingsTab(slug) {
+      if (slug === "logs" && this.logLines.length === 0) this.selectLog(this.activeLog || "app");
+    },
+
+    setTheme(mode) {
+      const dark = mode === "dark";
+      document.documentElement.classList.toggle("dark", dark);
+      try { localStorage.setItem("oem-theme", dark ? "dark" : "light"); } catch (e) {}
+      if (window.oem) { window.oem.isDark = dark; }
     },
 
     loadOrganizations() {
@@ -1085,6 +1222,17 @@ function sectionPage(page) {
         .then((r) => r.json())
         .then(() => { window.oem && window.oem.toast("Credential deleted", "success"); this.loadOrganizations(); })
         .catch((e) => window.oem && window.oem.toast("Delete failed", "error", e.message));
+    },
+
+    testCredential(orgId, credId) {
+      window.oem && window.oem.toast("Testing connection…", "info");
+      fetch(`/api/organizations/${orgId}/credentials/${credId}/test`, { method: "POST" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.ok) window.oem && window.oem.toast("Connected", "success", (d.latency_ms || 0) + "ms");
+          else window.oem && window.oem.toast("Connection failed", "error", d.error || "Unknown error");
+        })
+        .catch((e) => window.oem && window.oem.toast("Test failed", "error", e.message));
     },
 
     importAccounts() {

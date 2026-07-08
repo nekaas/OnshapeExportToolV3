@@ -30,8 +30,8 @@
     </div>
   </template>
 
-  <!-- Manual export view -->
-  <template x-if="page === 'manual-export'">
+  <!-- Manual export view (also used by new /export page) -->
+  <template x-if="page === 'manual-export' || page === 'export'">
     <div class="manual-workflow" x-init="$nextTick(() => initManualPlanner())">
       <section class="manual-command glass">
         <div class="manual-command-head">
@@ -200,6 +200,145 @@
         </template>
       </section>
     </div>
+
+    <!-- Queue status (shown on new /export page below the export form) -->
+    <template x-if="page === 'export'">
+      <div class="card glass" style="margin-top:18px">
+        <div class="card-head">
+          <h2 class="card-title">Active &amp; Queued</h2>
+          <span class="badge" :class="worker.running ? 'badge-ok' : 'badge-muted'"
+                x-text="worker.running ? 'Worker running' : 'Worker idle'"></span>
+        </div>
+        <div class="table-wrap" @click="onQueueAction($event)">
+          <table class="data-table">
+            <thead><tr>
+              <th>Label</th><th>Profile</th><th>Status</th><th>Retries</th><th>Next Run</th><th>Last Error</th><th></th>
+            </tr></thead>
+            <tbody>
+              <template x-for="item in (queueItems || [])" :key="item.id">
+                <tr>
+                  <td><strong x-text="item.label_name"></strong></td>
+                  <td x-text="item.profile_name"></td>
+                  <td><span class="badge" :class="{
+                    'badge-ok': item.status === 'completed',
+                    'badge-warn': item.status === 'running',
+                    'badge-muted': item.status === 'pending' || item.status === 'cancelled',
+                    'badge-fail': item.status === 'failed',
+                  }" x-text="item.status"></span></td>
+                  <td x-text="item.retry_count"></td>
+                  <td><span :title="item.next_run_at" x-text="formatTime(item.next_run_at)"></span></td>
+                  <td x-text="item.last_error || '—'"></td>
+                  <td>
+                    <template x-if="item.status === 'pending' || item.status === 'running'">
+                      <button class="btn btn-ghost btn-sm" :data-qaction="'cancel'" :data-qid="item.id">Cancel</button>
+                    </template>
+                    <template x-if="item.status === 'failed' || item.status === 'cancelled'">
+                      <button class="btn btn-ghost btn-sm" :data-qaction="'retry'" :data-qid="item.id">Retry</button>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty" x-show="(!queueItems || !queueItems.length) && !loading">
+          The export queue is empty. Run an export above to see it here.
+        </div>
+      </div>
+    </template>
+  </template>
+
+  <!-- ── Labels (card view with inline profiles, schedules, Export Now) ── -->
+  <template x-if="page === 'labels'">
+    <div class="page" style="gap:16px">
+      <!-- New Label button -->
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" @click="showLabelForm = !showLabelForm">
+          <span x-html="icons.labels"></span><span>New Label</span>
+        </button>
+      </div>
+
+      <!-- Label creation form (collapsed by default) -->
+      <div class="card glass" x-show="showLabelForm" x-transition>
+        <div class="card-head"><h2 class="card-title">Create Label</h2></div>
+        <div class="form-grid">
+          <label class="field"><span>Friendly Name</span><input x-model="labelForm.name" placeholder="Robotics Team" /></label>
+          <label class="field"><span>Onshape Label ID</span><input x-model="labelForm.onshape_id" placeholder="24-character ID from Onshape" /></label>
+          <label class="field"><span>Export Profile</span>
+            <select x-model="labelForm.profile">
+              <option value="STL">STL</option>
+              <template x-for="p in profiles" :key="p.name">
+                <option :value="p.name" x-text="p.name"></option>
+              </template>
+            </select>
+          </label>
+          <label class="field"><span>Schedule (optional)</span>
+            <select x-model="labelForm.schedule">
+              <option value="">None</option>
+              <option value="15min">Every 15 min</option>
+              <option value="30min">Every 30 min</option>
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="createLabel()">Create Label</button>
+      </div>
+
+      <!-- Onboarding: no labels -->
+      <div x-show="!rows.length && !loading" class="card glass" style="text-align:center;padding:36px 28px">
+        <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 6px">No Labels Yet</h2>
+        <p style="color:var(--text-muted);max-width:440px;margin:0 auto 20px;font-size:0.88rem">
+          Labels connect your Onshape documents to export settings. Tag documents in Onshape, then create a matching label here.
+        </p>
+        <button class="btn btn-primary" @click="showLabelForm = true">➕ Create Your First Label</button>
+      </div>
+
+      <!-- Label cards -->
+      <template x-for="label in rows" :key="label.friendly_name">
+        <div class="card glass">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title" style="display:flex;align-items:center;gap:10px">
+                <span x-text="label.friendly_name"></span>
+                <span class="badge" :class="label.enabled !== false ? 'badge-ok' : 'badge-muted'"
+                      x-text="label.enabled !== false ? 'Active' : 'Disabled'"></span>
+              </h2>
+              <p class="card-sub">
+                <code style="font-size:0.72rem" x-text="label.onshape_label_id || 'No Onshape ID'"></code>
+              </p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn btn-primary btn-sm" @click="triggerLabelExport(label.friendly_name)">
+                <span x-html="icons.bolt"></span><span>Export Now</span>
+              </button>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:4px">
+            <div style="min-width:120px">
+              <span style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700">Profile</span>
+              <div style="font-weight:600;font-size:0.88rem" x-text="label.export_profile || '—'"></div>
+            </div>
+            <div style="min-width:120px">
+              <span style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700">Accounts</span>
+              <div style="font-weight:600;font-size:0.88rem">
+                <span x-text="(label.assigned_accounts && label.assigned_accounts.length) ? label.assigned_accounts.join(', ') : '—'"></span>
+              </div>
+            </div>
+            <div style="min-width:120px" x-show="label.scheduler && label.scheduler.enabled">
+              <span style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700">Schedule</span>
+              <div style="font-weight:600;font-size:0.88rem" x-text="(label.scheduler && label.scheduler.interval) || '—'"></div>
+            </div>
+            <div style="min-width:120px">
+              <span style="font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700">Location</span>
+              <div style="font-weight:600;font-size:0.88rem" x-text="label.export_location || 'exports'"></div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </template>
 
   <!-- Generic data table -->
@@ -235,43 +374,223 @@
     </div>
   </template>
 
-  <!-- Settings view -->
+  <!-- ── Settings (tabbed: General | Notifications | Backups | Remote | Logs | About) ── -->
   <template x-if="page === 'settings'">
-    <div class="settings-grid">
-      <template x-for="group in settingsGroups" :key="group.title">
+    <div class="page" style="gap:18px">
+      <!-- Settings tabs -->
+      <div class="settings-tabs" style="display:flex;gap:6px;flex-wrap:wrap">
+        <template x-for="tab in settingsTabs" :key="tab.slug">
+          <button class="chip" :class="{ active: settingsActiveTab === tab.slug }"
+                  @click="settingsActiveTab = tab.slug; switchSettingsTab(tab.slug)"
+                  x-text="tab.label"></button>
+        </template>
+      </div>
+
+      <!-- General -->
+      <template x-if="settingsActiveTab === 'general'">
+        <div class="settings-grid">
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">Appearance</h2></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="chip" :class="{ active: !isDark }" @click="setTheme('light')">☀️ Light</button>
+              <button class="chip" :class="{ active: isDark }" @click="setTheme('dark')">🌙 Dark</button>
+            </div>
+          </div>
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">Worker</h2></div>
+            <dl class="kv">
+              <div class="kv-row"><dt>Status</dt><dd><span class="badge" :class="(system.worker && system.worker.running) ? 'badge-ok' : 'badge-muted'" x-text="(system.worker && system.worker.running) ? 'Running' : 'Stopped'"></span></dd></div>
+              <div class="kv-row"><dt>Jobs processed</dt><dd x-text="(system.worker && system.worker.jobs_processed) || 0"></dd></div>
+              <div class="kv-row"><dt>Last tick</dt><dd x-text="system.worker && system.worker.last_tick_at ? formatTime(system.worker.last_tick_at) : '—'"></dd></div>
+            </dl>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" @click="workerControl('start')" x-show="!(system.worker && system.worker.running)">Start Worker</button>
+              <button class="btn btn-ghost btn-sm" @click="workerControl('stop')" x-show="system.worker && system.worker.running">Stop Worker</button>
+            </div>
+          </div>
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">System Health</h2></div>
+            <dl class="kv">
+              <div class="kv-row"><dt>CPU</dt><dd x-text="(systemCards && systemCards.length && systemCards[0] && systemCards[0].value) || '—'"></dd></div>
+              <div class="kv-row"><dt>RAM</dt><dd x-text="(systemCards && systemCards.length && systemCards[1] && systemCards[1].value) || '—'"></dd></div>
+              <div class="kv-row"><dt>Disk</dt><dd x-text="(systemCards && systemCards.length && systemCards[3] && systemCards[3].value) || '—'"></dd></div>
+              <div class="kv-row"><dt>Uptime</dt><dd x-text="(systemCards && systemCards.length && systemCards[4] && systemCards[4].value) || '—'"></dd></div>
+            </dl>
+          </div>
+        </div>
+      </template>
+
+      <!-- Notifications -->
+      <template x-if="settingsActiveTab === 'notifications'">
+        <div class="page" style="gap:18px">
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title" x-text="notifForm.id ? 'Edit Channel' : 'New Channel'"></h2>
+              <button class="btn btn-ghost btn-sm" @click="resetNotifForm()" x-show="notifForm.id">Cancel</button>
+            </div>
+            <div class="form-grid">
+              <label class="field"><span>Name</span><input x-model="notifForm.name" placeholder="My Discord Channel" /></label>
+              <label class="field"><span>Kind</span>
+                <select x-model="notifForm.kind">
+                  <template x-for="k in notifKinds" :key="k"><option :value="k" x-text="k"></option></template>
+                </select>
+              </label>
+              <label class="field" style="grid-column:1/-1"><span>Target / Webhook URL</span><input x-model="notifForm.target" placeholder="https://..." /></label>
+              <label class="field"><span>Min Severity</span>
+                <select x-model="notifForm.min_severity">
+                  <template x-for="s in notifSeverities" :key="s"><option :value="s" x-text="s"></option></template>
+                </select>
+              </label>
+              <label class="field" style="align-items:flex-start;gap:10px">
+                <span>Enabled</span>
+                <input type="checkbox" x-model="notifForm.enabled" style="width:18px;height:18px;margin-top:2px" />
+              </label>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="saveNotification()">Save Channel</button>
+          </div>
+          <div class="card glass" x-show="notifChannels.length">
+            <div class="card-head"><h2 class="card-title">Configured Channels</h2></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Name</th><th>Kind</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                  <template x-for="ch in notifChannels" :key="ch.id">
+                    <tr>
+                      <td><strong x-text="ch.name"></strong></td>
+                      <td x-text="ch.kind"></td>
+                      <td x-text="ch.min_severity"></td>
+                      <td><span class="badge" :class="ch.enabled ? 'badge-ok' : 'badge-muted'" x-text="ch.enabled ? 'On' : 'Off'"></span></td>
+                      <td>
+                        <button class="btn btn-ghost btn-sm" @click="editNotification(ch)">Edit</button>
+                        <button class="btn btn-ghost btn-sm" @click="testNotification(ch.id)">Test</button>
+                        <button class="btn btn-ghost btn-sm" @click="deleteNotification(ch.id)">✕</button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="empty" x-show="!notifChannels.length">No notification channels configured.</div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Backups -->
+      <template x-if="settingsActiveTab === 'backups'">
         <div class="card glass">
-          <div class="card-head"><h2 class="card-title" x-text="group.title"></h2></div>
-          <dl class="kv">
-            <template x-for="row in group.rows" :key="row.k">
-              <div class="kv-row"><dt x-text="row.k"></dt><dd x-text="row.v"></dd></div>
+          <div class="card-head"><h2 class="card-title">Backups</h2>
+            <button class="btn btn-primary btn-sm" @click="createBackup()" :class="{ spinning: backupBusy }">
+              <span x-html="icons.refresh"></span><span>Create Backup</span></button></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Size</th><th>Files</th><th>Created</th></tr></thead>
+              <tbody>
+                <template x-for="b in backups" :key="b.name">
+                  <tr><td><code x-text="b.name"></code></td><td x-text="b.size_human"></td>
+                    <td x-text="b.entry_count"></td><td x-text="formatTime(b.created_at)"></td></tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="empty" x-show="!backups.length">No backups yet. Create one to snapshot config and database.</div>
+        </div>
+      </template>
+
+      <!-- Remote Access -->
+      <template x-if="settingsActiveTab === 'remote-access'">
+        <div class="grid-2">
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">Remote Access</h2>
+              <span class="badge" :class="remote.recommended_url ? 'badge-ok' : 'badge-muted'"
+                    x-text="remote.recommended_url ? 'Reachable' : 'Local only'"></span></div>
+            <dl class="kv">
+              <template x-for="row in remoteRows" :key="row.k">
+                <div class="kv-row"><dt x-text="row.k"></dt>
+                  <dd><span class="badge" :class="row.cls" x-show="row.badge" x-text="row.badge"></span>
+                    <span x-text="row.v"></span></dd></div>
+              </template>
+            </dl>
+          </div>
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">Access URLs</h2></div>
+            <div class="url-list">
+              <template x-for="url in remote.local_urls || []" :key="url">
+                <a class="url-pill" :href="url" target="_blank" x-text="url"></a>
+              </template>
+              <template x-for="url in (remote.tailscale && remote.tailscale.urls) || []" :key="url">
+                <a class="url-pill ts" :href="url" target="_blank" x-text="'Tailscale · ' + url"></a>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Logs -->
+      <template x-if="settingsActiveTab === 'logs'">
+        <div class="card glass logs-card">
+          <div class="log-tabs">
+            <template x-for="area in logAreas" :key="area">
+              <button class="chip" :class="{ active: activeLog === area }" @click="selectLog(area)" x-text="area"></button>
             </template>
-          </dl>
+          </div>
+          <pre class="log-view" x-ref="logView"><template x-for="(line, i) in logLines" :key="i"><div class="log-line" :class="logClass(line)" x-text="line"></div></template></pre>
+          <div class="empty" x-show="!logLines.length && !loading">No log entries.</div>
+        </div>
+      </template>
+
+      <!-- About -->
+      <template x-if="settingsActiveTab === 'about'">
+        <div class="settings-grid">
+          <template x-for="group in settingsGroups" :key="group.title">
+            <div class="card glass">
+              <div class="card-head"><h2 class="card-title" x-text="group.title"></h2></div>
+              <dl class="kv">
+                <template x-for="row in group.rows" :key="row.k">
+                  <div class="kv-row"><dt x-text="row.k"></dt><dd x-text="row.v"></dd></div>
+                </template>
+              </dl>
+            </div>
+          </template>
         </div>
       </template>
     </div>
   </template>
 
   <!-- Organizations view -->
-  <template x-if="page === 'organizations'">
+  <!-- ── API Keys (unified: organizations + credentials) ── -->
+  <template x-if="page === 'organizations' || page === 'api-keys'">
     <div class="page" style="gap:18px">
-      <div class="card glass">
+      <!-- Onboarding: shown when no orgs exist -->
+      <div x-show="!orgs.length && !loading" class="card glass" style="text-align:center;padding:32px 24px">
+        <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 6px">No API Keys Yet</h2>
+        <p style="color:var(--text-muted);max-width:440px;margin:0 auto 20px;font-size:0.88rem">
+          Add your Onshape API keys to start exporting. Create an organization to group related keys, or add them directly.
+        </p>
+        <button class="btn btn-primary" @click="newOrg.name = ''; document.querySelector('.org-create-card')?.scrollIntoView({behavior:'smooth'})">
+          ➕ Add Your First API Key
+        </button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:8px" @click="importAccounts()">Import from Legacy Accounts</button>
+      </div>
+
+      <!-- New organization form -->
+      <div class="card glass org-create-card">
         <div class="card-head">
           <h2 class="card-title">New Organization</h2>
           <button class="btn btn-ghost btn-sm" @click="importAccounts()">Import from Accounts</button>
         </div>
         <div class="form-grid">
-          <label class="field"><span>Name</span><input x-model="newOrg.name" placeholder="Engineering School" /></label>
+          <label class="field"><span>Name</span><input x-model="newOrg.name" placeholder="Engineering Team" /></label>
           <label class="field"><span>Type</span>
             <select x-model="newOrg.type">
               <template x-for="t in orgTypes" :key="t"><option x-text="t"></option></template>
             </select>
           </label>
-          <label class="field" style="grid-column:1/-1"><span>Description</span>
-            <input x-model="newOrg.description" placeholder="High School · Engineering Team" /></label>
+          <label class="field" style="grid-column:1/-1"><span>Description (optional)</span>
+            <input x-model="newOrg.description" placeholder="Main engineering Onshape account" /></label>
         </div>
         <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="createOrg()">Create Organization</button>
       </div>
 
+      <!-- Organization cards -->
       <template x-for="org in orgs" :key="org.id">
         <div class="card glass">
           <div class="card-head">
@@ -279,7 +598,7 @@
               <h2 class="card-title" x-text="org.name"></h2>
               <p class="card-sub">
                 <span class="badge badge-muted" x-text="org.type"></span>
-                <span x-text="org.credential_count + ' credential' + (org.credential_count === 1 ? '' : 's')"></span>
+                <span x-text="org.credential_count + ' key' + (org.credential_count === 1 ? '' : 's')"></span>
                 <span x-show="org.description" x-text="' · ' + org.description"></span>
               </p>
             </div>
@@ -290,37 +609,38 @@
           </div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Credential</th><th>Environment</th><th>Health</th><th>Priority</th><th>Today</th><th>Access Key</th><th></th></tr></thead>
+              <thead><tr><th>Key Name</th><th>Health</th><th>Priority</th><th>Usage Today</th><th>Access Key</th><th></th></tr></thead>
               <tbody>
                 <template x-for="c in org.credentials" :key="c.id">
                   <tr>
-                    <td><strong x-text="c.name"></strong></td>
-                    <td x-text="c.environment"></td>
+                    <td><strong x-text="c.name"></strong><br><span style="font-size:0.72rem;color:var(--text-dim)" x-text="c.environment"></span></td>
                     <td><span class="badge" :class="healthClass(c.health)" x-text="c.health"></span></td>
                     <td x-text="c.priority"></td>
                     <td x-text="c.requests_today"></td>
                     <td><code x-text="c.access_key"></code></td>
-                    <td><button class="btn btn-ghost btn-sm" @click="deleteCredential(org.id, c.id)">✕</button></td>
+                    <td style="white-space:nowrap">
+                      <button class="btn btn-ghost btn-sm" @click="testCredential(org.id, c.id)">Test</button>
+                      <button class="btn btn-ghost btn-sm" @click="deleteCredential(org.id, c.id)">✕</button>
+                    </td>
                   </tr>
                 </template>
               </tbody>
             </table>
           </div>
-          <div class="empty" x-show="!org.credentials.length" style="padding:18px">No credentials yet — add one below.</div>
+          <div class="empty" x-show="!org.credentials.length" style="padding:18px">No keys yet — add one below.</div>
           <details class="cred-add">
-            <summary>+ Add credential</summary>
+            <summary>+ Add API Key</summary>
             <div class="form-grid" style="margin-top:12px">
-              <label class="field"><span>Name</span><input x-model="credForm.name" placeholder="Primary" /></label>
+              <label class="field"><span>Key Name</span><input x-model="credForm.name" placeholder="Primary" /></label>
               <label class="field"><span>Environment</span><input x-model="credForm.environment" placeholder="production" /></label>
               <label class="field"><span>Access Key</span><input x-model="credForm.access_key" placeholder="env:ONSHAPE_ACCESS_KEY" /></label>
               <label class="field"><span>Secret Key</span><input type="password" x-model="credForm.secret_key" placeholder="env:ONSHAPE_SECRET_KEY" /></label>
               <label class="field"><span>Priority (1 = primary)</span><input type="number" min="1" x-model.number="credForm.priority" /></label>
             </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:12px" @click="addCredential(org.id)">Add Credential</button>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px" @click="addCredential(org.id)">Add Key</button>
           </details>
         </div>
       </template>
-      <div class="empty" x-show="!orgs.length && !loading">No organizations yet. Create one above, or import from your existing accounts.</div>
     </div>
   </template>
 

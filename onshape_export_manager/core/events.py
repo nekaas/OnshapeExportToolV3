@@ -109,6 +109,7 @@ class EventType(StrEnum):
 
     # Configuration
     CONFIG_UPDATED = "config.updated"
+    LABELS_CHANGED = "config.labels_changed"
 
     # Auth / security
     AUTH_LOGIN_SUCCEEDED = "auth.login_succeeded"
@@ -160,6 +161,7 @@ _TYPE_CATEGORY: dict[EventType, EventCategory] = {
     EventType.SCHEDULE_UPDATED: EventCategory.SCHEDULER,
     EventType.SCHEDULE_DELETED: EventCategory.SCHEDULER,
     EventType.CONFIG_UPDATED: EventCategory.CONFIG,
+    EventType.LABELS_CHANGED: EventCategory.CONFIG,
     EventType.AUTH_LOGIN_SUCCEEDED: EventCategory.AUTH,
     EventType.AUTH_LOGIN_FAILED: EventCategory.AUTH,
     EventType.AUTH_LOGOUT: EventCategory.AUTH,

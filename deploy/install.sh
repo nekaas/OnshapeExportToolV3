@@ -3,16 +3,20 @@
 # Onshape Export Manager — Linux / Raspberry Pi installer.
 #
 # Creates a Python virtual environment, installs dependencies, and installs a
-# systemd service that runs the app headless (Server Mode) and starts on boot.
+# systemd service that boots into the terminal appliance experience (the web
+# server runs in the background).
 #
 # Usage:
 #   sudo ./deploy/install.sh
-#   sudo OEM_PORT=8080 OEM_USER=pi ./deploy/install.sh
+#   sudo OEM_PORT=8080 OEM_USER=pi OEM_MODE=console ./deploy/install.sh
+#
+# OEM_MODE:  console (default)  |  server (web-only, no terminal UI)
 #
 set -euo pipefail
 
 SERVICE_NAME="onshape-export-manager"
 PORT="${OEM_PORT:-8080}"
+MODE="${OEM_MODE:-console}"
 
 # Resolve the repository root (parent of this script's directory).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -24,6 +28,7 @@ echo "==> Onshape Export Manager installer"
 echo "    App directory : ${APP_DIR}"
 echo "    Run as user   : ${RUN_USER}"
 echo "    Port          : ${PORT}"
+echo "    Mode          : ${MODE}"
 
 if [[ "$(id -u)" -ne 0 ]]; then
   echo "This installer must be run as root (use sudo)." >&2
@@ -47,7 +52,7 @@ UNIT_PATH="/etc/systemd/system/${SERVICE_NAME}.service"
 echo "==> Writing ${UNIT_PATH}"
 cat > "${UNIT_PATH}" <<UNIT
 [Unit]
-Description=Onshape Export Manager (headless server)
+Description=Onshape Export Manager Appliance
 After=network-online.target
 Wants=network-online.target
 
@@ -55,9 +60,16 @@ Wants=network-online.target
 Type=simple
 User=${RUN_USER}
 WorkingDirectory=${APP_DIR}
-Environment=OEM_MODE=server
+Environment=OEM_MODE=${MODE}
 Environment=OEM_PORT=${PORT}
-ExecStart=${VENV_DIR}/bin/python ${APP_DIR}/app.py --mode server
+# The terminal appliance experience — web server runs in background.
+# Set OEM_MODE=server to run as a headless web-only service.
+ExecStart=${VENV_DIR}/bin/python ${APP_DIR}/app.py
+StandardInput=tty
+StandardOutput=journal
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
 Restart=on-failure
 RestartSec=5
 # Low-power friendly limits

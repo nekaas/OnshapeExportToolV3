@@ -493,14 +493,6 @@ def default_app_config() -> dict[str, Any]:
             "behind_proxy": False,
             "auto_open_browser": True,
         },
-        "bambu": {
-            "enabled": False,
-            "bambu_studio_exe": "",
-            "profile_root": "",
-            "machine_profile": "",
-            "process_profile": "",
-            "output_folder": "",
-        },
     }
 
 
@@ -551,12 +543,6 @@ def default_export_profiles_config() -> dict[str, Any]:
                     ExportFormat.STL: {"resolution": "medium"},
                     ExportFormat.STEP: {"stepVersionString": "AP242"},
                 },
-            ),
-            default_single_format_profile(
-                "Bambu STL",
-                ExportFormat.STL,
-                options={"resolution": "medium"},
-                bambu=default_bambu_settings(enabled=True, open_bambu_studio=True),
             ),
         ]
     }
@@ -621,3 +607,100 @@ def default_multi_format_profile(
         "bambu": default_bambu_settings(),
         "enabled": True,
     }
+
+
+# -- Config file watcher (hot-reload) ---------------------------------------
+
+
+class ConfigWatcher:
+    """Polls config-file mtimes and hot-reloads when files change externally.
+
+    Useful for headless Raspberry Pi deployments where users edit JSON config
+    files directly (via SSH + nano/vim) and expect changes to take effect
+    without a service restart.
+
+    Runs on a daemon thread.  When a change is detected the affected config
+    is re-validated and an event is emitted on the application's EventBus so
+    subscribers (scheduler, UI) can react.
+    """
+
+    def __init__(
+        self,
+        config_manager: ConfigManager,
+        *,
+        poll_seconds: float = 5.0,
+    ) -> None:
+        self._manager = config_manager
+        self._poll_seconds = max(1.0, float(poll_seconds))
+        self._mtimes: dict[str, float] = {}
+        self._thread: threading.Thread | None = None
+        self._stop = threading.Event()
+        self._event_bus = None  # set by the caller after wiring
+
+    def set_event_bus(self, event_bus) -> None:
+        self._event_bus = event_bus
+
+    def start(self) -> None:
+        if self._thread is not None and self._thread.is_alive():
+            return
+        self._snapshot_mtimes()
+        self._stop.clear()
+        self._thread = threading.Thread(
+            target=self._poll_loop, name="oem-config-watcher", daemon=True
+        )
+        self._thread.start()
+
+    def stop(self, *, timeout: float = 5.0) -> None:
+        self._stop.set()
+        if self._thread is not None and self._thread.is_alive():
+            self._thread.join(timeout=timeout)
+
+    # -- internal ----------------------------------------------------------
+
+    def _config_files(self) -> list[Path]:
+        return [
+            self._manager.config_file,
+            self._manager.accounts_file,
+            self._manager.labels_file,
+            self._manager.export_profiles_file,
+            getattr(self._manager, "organizations_file", None),
+        ]
+
+    def _snapshot_mtimes(self) -> None:
+        for path in self._config_files():
+            if path is not None and path.exists():
+                self._mtimes[str(path)] = path.stat().st_mtime
+
+    def _poll_loop(self) -> None:
+        while not self._stop.is_set():
+            changed = False
+            for path in self._config_files():
+                if path is None or not path.exists():
+                    continue
+                key = str(path)
+                try:
+                    current = path.stat().st_mtime
+                except OSError:
+                    continue
+                if key not in self._mtimes or self._mtimes[key] != current:
+                    self._mtimes[key] = current
+                    changed = True
+
+            if changed:
+                try:
+                    self._manager.load()  # re-validates
+                    if self._event_bus is not None:
+                        self._event_bus.emit(
+                            EventType.CONFIG_UPDATED,
+                            "Configuration files changed on disk — reloaded",
+                            severity=EventSeverity.INFO,
+                            data={"source": "file_watcher"},
+                        )
+                except Exception:
+                    pass  # invalid config — keep running with current config
+
+            self._stop.wait(self._poll_seconds)
+
+# Import at bottom to avoid circular imports
+import threading
+from onshape_export_manager.core.events import EventSeverity, EventType

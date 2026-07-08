@@ -1,0 +1,21 @@
+services:
+  onshape-export-manager:
+    build: .
+    container_name: onshape-export-manager
+    restart: unless-stopped
+    ports:
+      - "${OEM_PORT:-8000}:8000"
+    environment:
+      - OEM_MODE=server
+      - OEM_HOST=0.0.0.0
+      - OEM_PORT=8000
+      - OEM_LOG_LEVEL=${OEM_LOG_LEVEL:-INFO}
+    volumes:
+      - ./config:/app/config              # JSON configuration files
+      - ./exports:/app/exports            # Exported CAD files
+      - ./database:/app/database          # SQLite database
+      - ./logs:/app/logs                  # Rotating log files
+      - ./backups:/app/backups            # ZIP backup archives
+    # Raspberry Pi tuning
+    mem_limit: 512M
+    cpus: 2

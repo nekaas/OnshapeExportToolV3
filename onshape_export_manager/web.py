@@ -45,6 +45,15 @@ from onshape_export_manager.core.organizations import (
 )
 from onshape_export_manager.core.remote_access import remote_access_snapshot
 from onshape_export_manager.core.system_monitor import system_snapshot
+from onshape_export_manager.core.validation import (
+    CreateLabelRequest,
+    CreateNotificationRequest,
+    CreateOwnerRequest,
+    CreateProfileRequest,
+    ManualExportRequest,
+    SetStorageRequest,
+    UpdateNotificationRequest,
+)
 from onshape_export_manager.core.worker import BackgroundWorker
 
 try:
@@ -52,6 +61,7 @@ try:
     from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
     from fastapi.staticfiles import StaticFiles
     from fastapi.templating import Jinja2Templates
+    from starlette.exceptions import HTTPException as StarletteHTTPException
 except ModuleNotFoundError:  # pragma: no cover - dependency installed by requirements.txt
     FastAPI = None  # type: ignore[assignment]
     Query = None  # type: ignore[assignment]
@@ -66,25 +76,45 @@ except ModuleNotFoundError:  # pragma: no cover - dependency installed by requir
     Jinja2Templates = None  # type: ignore[assignment]
 
 
+# ── Primary navigation (7 items + Settings gear) ──────────────────────
+# Phase 0 redesign: collapsed from 14 items.  Settings, Logs, System,
+# Notifications, and Backups live under the Settings gear.
 NAV_ITEMS: list[dict[str, str]] = [
-    {"slug": "", "label": "Dashboard", "icon": "home"},
-    {"slug": "organizations", "label": "Organizations", "icon": "building"},
-    {"slug": "accounts", "label": "Accounts", "icon": "key"},
+    {"slug": "", "label": "Home", "icon": "home"},
+    {"slug": "api-keys", "label": "API Keys", "icon": "key"},
     {"slug": "labels", "label": "Labels", "icon": "tag"},
-    {"slug": "export-profiles", "label": "Export Profiles", "icon": "layers"},
-    {"slug": "manual-export", "label": "Manual Export", "icon": "bolt"},
-    {"slug": "queue", "label": "Queue", "icon": "queue"},
-    {"slug": "scheduler", "label": "Scheduler", "icon": "clock"},
+    {"slug": "export", "label": "Export", "icon": "bolt"},
     {"slug": "history", "label": "History", "icon": "history"},
-    {"slug": "system", "label": "System", "icon": "activity"},
-    {"slug": "activity", "label": "Activity", "icon": "history"},
-    {"slug": "logs", "label": "Logs", "icon": "terminal"},
-    {"slug": "notifications", "label": "Notifications", "icon": "bolt"},
-    {"slug": "settings", "label": "Settings", "icon": "settings"},
-    {"slug": "plugins", "label": "Plugins", "icon": "puzzle"},
 ]
 
-ALLOWED_PAGES = {item["slug"] for item in NAV_ITEMS if item["slug"]}
+# ── Legacy route slugs (kept accessible via URL but hidden from nav) ──
+LEGACY_PAGES: set[str] = {
+    "dashboard",
+    "organizations",
+    "accounts",
+    "export-profiles",
+    "manual-export",
+    "queue",
+    "scheduler",
+    "system",
+    "activity",
+    "logs",
+    "notifications",
+    "plugins",
+    "settings",
+}
+
+# ── Settings sub-pages (rendered within /settings via tabs) ────────────
+SETTINGS_TABS: list[str] = [
+    "general",
+    "notifications",
+    "backups",
+    "remote-access",
+    "logs",
+    "about",
+]
+
+ALLOWED_PAGES = {item["slug"] for item in NAV_ITEMS if item["slug"]} | LEGACY_PAGES
 
 LOG_FILES: dict[str, str] = {"app": "app.log", "errors": "errors.log"}
 LOG_FILES.update({name.rsplit(".", 1)[-1]: filename for name, filename in AREA_LOG_FILES.items()})
@@ -153,6 +183,49 @@ def create_web_app(base_dir: str | Path | None = None):
         except Exception:  # noqa: BLE001 - event emission must never break a request
             logger.exception("Failed to emit web event %s", event_type)
 
+    # -- Rate limiter (in-memory, per-IP) -----------------------------------
+
+    import time as _time
+    from collections import defaultdict
+
+    class _RateLimiter:
+        """Simple token-bucket-inspired per-IP rate limiter.
+
+        Tracks request timestamps per key (typically ``client_ip``) in an
+        in-memory dict. Thread-safe enough for a single-process ASGI server
+        (Guarded by the GIL for CPython).
+        """
+
+        def __init__(self, max_requests: int, window_seconds: float) -> None:
+            self._max = max_requests
+            self._window = window_seconds
+            self._buckets: dict[str, list[float]] = defaultdict(list)
+
+        def allow(self, key: str) -> bool:
+            now = _time.monotonic()
+            timestamps = self._buckets[key]
+            # Expire old entries
+            cutoff = now - self._window
+            while timestamps and timestamps[0] < cutoff:
+                timestamps.pop(0)
+            if len(timestamps) >= self._max:
+                return False
+            timestamps.append(now)
+            # Prevent unbounded memory growth from exhausted IPs
+            if len(self._buckets) > 10_000:
+                stale = [k for k, ts in self._buckets.items() if not ts or ts[-1] < cutoff]
+                for k in stale:
+                    del self._buckets[k]
+            return True
+
+        def reset(self, key: str) -> None:
+            self._buckets.pop(key, None)
+
+    # Login: 5 attempts per 60 seconds before rate-limiting
+    _login_limiter = _RateLimiter(max_requests=5, window_seconds=60.0)
+    # API: 120 requests per 60 seconds (generous; 2 req/s sustained)
+    _api_limiter = _RateLimiter(max_requests=120, window_seconds=60.0)
+
     from contextlib import asynccontextmanager
 
     @asynccontextmanager
@@ -182,6 +255,64 @@ def create_web_app(base_dir: str | Path | None = None):
         description="Premium export automation for Onshape across multiple accounts.",
         lifespan=lifespan,
     )
+
+    # -- Centralized exception-to-HTTP mapping (Item 13) --------------------
+
+    _EXCEPTION_STATUS: dict[type[Exception], int] = {
+        ConfigError: 400,
+        AuthError: 401,
+        OrganizationError: 400,
+        BackupError: 500,
+        ValueError: 400,
+        KeyError: 404,
+        FileNotFoundError: 404,
+        PermissionError: 403,
+        NotImplementedError: 501,
+    }
+
+    @api.exception_handler(StarletteHTTPException)
+    async def _http_exception_handler(request: Request, exc):
+        return JSONResponse(
+            {"error": exc.detail, "status_code": exc.status_code},
+            status_code=exc.status_code,
+        )
+
+    @api.exception_handler(Exception)
+    async def _global_exception_handler(request: Request, exc):
+        status_code = 500
+        for exc_type, code in _EXCEPTION_STATUS.items():
+            if isinstance(exc, exc_type):
+                status_code = code
+                break
+        logger.warning(
+            "Unhandled %s in %s %s: %s",
+            type(exc).__name__,
+            request.method,
+            request.url.path,
+            exc,
+        )
+        return JSONResponse(
+            {
+                "error": str(exc) if status_code < 500 else "Internal server error",
+                "status_code": status_code,
+                "type": type(exc).__name__,
+            },
+            status_code=status_code,
+        )
+
+    # -- API versioning header (Item 15) ------------------------------------
+
+    @api.middleware("http")
+    async def _api_version_header(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/api/") and "/api/v" not in request.url.path:
+            response.headers["Deprecation"] = "true"
+            response.headers["Sunset"] = "Sat, 01 Jan 2027 00:00:00 GMT"
+            response.headers["Link"] = (
+                f'</api/v1{request.url.path[4:]}>; rel="successor-version"'
+            )
+        return response
+
     api.mount(
         "/static",
         _RevalidatingStaticFiles(directory=str(static_dir)),
@@ -231,6 +362,16 @@ def create_web_app(base_dir: str | Path | None = None):
     async def auth_guard(request: Request, call_next):
         path = request.url.path
         request.state.authenticated = False
+
+        # API rate limiting (skip public and static paths)
+        if path.startswith("/api"):
+            client_ip = request.client.host if request.client else "unknown"
+            if not _api_limiter.allow(client_ip):
+                return JSONResponse(
+                    {"error": "rate limited", "retry_after_seconds": 60},
+                    status_code=429,
+                )
+
         if path in PUBLIC_PATHS or path.startswith("/static"):
             return await call_next(request)
 
@@ -269,6 +410,20 @@ def create_web_app(base_dir: str | Path | None = None):
 
     @api.post("/login")
     async def login_submit(request: Request):
+        client_ip = request.client.host if request.client else "unknown"
+        if not _login_limiter.allow(client_ip):
+            emit_event(
+                EventType.AUTH_LOGIN_FAILED,
+                f"Rate-limited login attempt from {client_ip}",
+                severity=EventSeverity.WARNING,
+                data={"ip": client_ip, "reason": "rate_limited"},
+                actor=client_ip,
+            )
+            return RedirectResponse(
+                f"/login?error={_q('Too many login attempts. Please wait before trying again.')}",
+                status_code=302,
+            )
+
         form = await request.form()
         username = str(form.get("username", "")).strip()
         password = str(form.get("password", ""))
@@ -304,6 +459,8 @@ def create_web_app(base_dir: str | Path | None = None):
         token = auth.create_session(remember=remember, user_agent=request.headers.get("user-agent", ""))
         response = RedirectResponse("/", status_code=302)
         _set_session_cookie(response, token, remember)
+        # Reset rate limiter on successful login
+        _login_limiter.reset(client_ip)
         logger.info("Owner signed in")
         emit_event(
             EventType.AUTH_LOGIN_SUCCEEDED,
@@ -339,10 +496,9 @@ def create_web_app(base_dir: str | Path | None = None):
         }
 
     @api.post("/api/setup/owner")
-    async def setup_owner(request: Request):
-        body = await request.json()
+    async def setup_owner(body: CreateOwnerRequest, request: Request):
         try:
-            auth.create_owner(str(body.get("username", "")).strip(), str(body.get("password", "")))
+            auth.create_owner(body.username, body.password)
             auth_state["configured"] = True
         except AuthError as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
@@ -353,11 +509,8 @@ def create_web_app(base_dir: str | Path | None = None):
         return response
 
     @api.post("/api/setup/storage")
-    async def setup_storage(request: Request):
-        body = await request.json()
-        path = str(body.get("path", "")).strip()
-        if not path:
-            return JSONResponse({"error": "storage path is required"}, status_code=400)
+    async def setup_storage(body: SetStorageRequest):
+        path = body.exports_dir
         try:
             _update_app_config(application, lambda data: data.setdefault("folders", {}).update({"exports_dir": path}))
             Path(path).mkdir(parents=True, exist_ok=True)
@@ -372,10 +525,9 @@ def create_web_app(base_dir: str | Path | None = None):
         return {"ok": True}
 
     @api.post("/api/labels")
-    async def api_create_label(request: Request):
-        body = await request.json()
+    async def api_create_label(body: CreateLabelRequest):
         try:
-            label = _create_label(application, body)
+            label = _create_label(application, body.model_dump())
         except (ConfigError, ValueError, ValidationError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
         return {"friendly_name": label["friendly_name"]}
@@ -611,21 +763,19 @@ def create_web_app(base_dir: str | Path | None = None):
         return worker.status().to_dict()
 
     @api.post("/api/exports/run")
-    async def api_run_export(request: Request) -> dict[str, Any]:
+    async def api_run_export(body: ManualExportRequest) -> dict[str, Any]:
         """Enqueue a manual export for a label; the worker runs it shortly."""
         if application.queue_manager is None:
             return JSONResponse(
                 {"error": "queue is unavailable; check configuration"}, status_code=503
             )
-        body = await request.json()
-        label_name = str(body.get("label", "")).strip()
-        if not label_name:
-            return JSONResponse({"error": "label is required"}, status_code=400)
+        label_name = body.label
         try:
             label, profile = _resolve_label_profile(
-                application, label_name, str(body.get("profile", "")).strip()
+                application, label_name, body.profile or ""
             )
-            start_iso, end_iso, _ = _manual_export_window(body)
+            body_dict = body.model_dump(exclude_none=True)
+            start_iso, end_iso, _ = _manual_export_window(body_dict)
         except ValueError as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
 
@@ -635,8 +785,8 @@ def create_web_app(base_dir: str | Path | None = None):
             "start_iso": start_iso,
             "end_iso": end_iso,
         }
-        if body.get("destination"):
-            payload["destination"] = str(body["destination"]).strip()
+        if body.destination:
+            payload["destination"] = body.destination
 
         job_id = application.queue_manager.enqueue(
             label_name=label.friendly_name,
@@ -655,11 +805,10 @@ def create_web_app(base_dir: str | Path | None = None):
         return {"queued": True, "job_id": job_id, "label": label.friendly_name, "profile": profile.name}
 
     @api.post("/api/exports/preview")
-    async def api_preview_export(request: Request) -> dict[str, Any]:
+    async def api_preview_export(body: ManualExportRequest) -> dict[str, Any]:
         """Validate and estimate a manual export before it is queued."""
-        body = await request.json()
         try:
-            return _manual_export_preview(application, body)
+            return _manual_export_preview(application, body.model_dump(exclude_none=True))
         except ValueError as exc:
             return JSONResponse({"error": str(exc), "valid": False}, status_code=400)
 
@@ -763,10 +912,9 @@ def create_web_app(base_dir: str | Path | None = None):
         }
 
     @api.post("/api/notifications")
-    async def api_create_notification(request: Request) -> dict[str, Any]:
-        body = await request.json()
+    async def api_create_notification(body: CreateNotificationRequest) -> dict[str, Any]:
         try:
-            channel = _upsert_notification_channel(application, body, create=True)
+            channel = _upsert_notification_channel(application, body.model_dump(), create=True)
         except (ConfigError, ValidationError, ValueError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
         emit_event(
@@ -777,11 +925,11 @@ def create_web_app(base_dir: str | Path | None = None):
         return channel
 
     @api.put("/api/notifications/{channel_id}")
-    async def api_update_notification(channel_id: str, request: Request) -> dict[str, Any]:
-        body = await request.json()
-        body["id"] = channel_id
+    async def api_update_notification(channel_id: str, body: UpdateNotificationRequest) -> dict[str, Any]:
+        data = body.model_dump(exclude_unset=True)
+        data["id"] = channel_id
         try:
-            channel = _upsert_notification_channel(application, body, create=False)
+            channel = _upsert_notification_channel(application, data, create=False)
         except (ConfigError, ValidationError, ValueError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
         emit_event(EventType.CONFIG_UPDATED, f"Notification channel updated: {channel['name']}")
@@ -885,12 +1033,12 @@ def create_web_app(base_dir: str | Path | None = None):
 
     @api.get("/api/backups")
     async def api_backups() -> dict[str, Any]:
-        manager = BackupManager(application.paths)
+        manager = BackupManager(application.paths, database=application.database)
         return {"backups": [info.to_dict() for info in manager.list_backups()]}
 
     @api.post("/api/backups")
     async def api_create_backup(include_logs: bool = Query(False)) -> dict[str, Any]:
-        manager = BackupManager(application.paths)
+        manager = BackupManager(application.paths, database=application.database)
         try:
             info = manager.create_backup(include_logs=include_logs)
         except BackupError as exc:
@@ -910,6 +1058,53 @@ def create_web_app(base_dir: str | Path | None = None):
         )
         return info.to_dict()
 
+    # -- Export archive download --------------------------------------------
+
+    @api.get("/api/exports/download/{label_name}")
+    async def api_download_export(label_name: str, timestamp: str = Query("")):
+        """Stream a completed export folder as a ZIP archive."""
+        import io
+        import zipfile
+        from pathlib import Path as _Path
+
+        exports_root = application.paths.exports_dir
+        if timestamp:
+            target = exports_root / label_name / timestamp
+        else:
+            # Find the most recent export for this label
+            label_dir = exports_root / label_name
+            if not label_dir.is_dir():
+                return JSONResponse({"error": "no exports found for this label"}, status_code=404)
+            subdirs = sorted(
+                [d for d in label_dir.iterdir() if d.is_dir()],
+                key=lambda d: d.stat().st_mtime,
+                reverse=True,
+            )
+            if not subdirs:
+                return JSONResponse({"error": "no exports found for this label"}, status_code=404)
+            target = subdirs[0]
+
+        if not target.is_dir():
+            return JSONResponse({"error": "export folder not found"}, status_code=404)
+
+        # Stream a ZIP in memory (exports are typically <100MB)
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for file_path in sorted(target.rglob("*")):
+                if file_path.is_file():
+                    arcname = str(file_path.relative_to(target))
+                    archive.write(file_path, arcname)
+        buffer.seek(0)
+
+        safe_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in label_name)
+        return StreamingResponse(
+            buffer,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f'attachment; filename="export_{safe_name}.zip"',
+            },
+        )
+
     @api.get("/api/logs/{area}")
     async def api_logs(area: str, limit: int = Query(200, ge=1, le=2000)) -> dict[str, Any]:
         filename = LOG_FILES.get(area)
@@ -922,13 +1117,37 @@ def create_web_app(base_dir: str | Path | None = None):
     async def api_search(q: str = Query("", alias="q")) -> dict[str, Any]:
         return metrics.global_search(q)
 
+    # -- Legacy page title lookup ------------------------------------------
+    _LEGACY_TITLES: dict[str, str] = {
+        "dashboard": "Dashboard",
+        "organizations": "Organizations",
+        "accounts": "Accounts",
+        "export-profiles": "Export Profiles",
+        "manual-export": "Manual Export",
+        "queue": "Queue",
+        "scheduler": "Scheduler",
+        "system": "System",
+        "activity": "Activity",
+        "logs": "Logs",
+        "notifications": "Notifications",
+        "plugins": "Plugins",
+        "settings": "Settings",
+    }
+
+    def _page_title(slug: str) -> str:
+        """Resolve a display title for a page slug (new or legacy)."""
+        for item in NAV_ITEMS:
+            if item["slug"] == slug:
+                return item["label"]
+        return _LEGACY_TITLES.get(slug, slug.replace("-", " ").title())
+
     # -- Pages --------------------------------------------------------------
 
     @api.get("/", response_class=HTMLResponse)
     async def dashboard(request: Request):
         if not auth.is_configured():
             return RedirectResponse("/setup", status_code=302)
-        return render(request, "dashboard.html", {"page": "", "page_title": "Dashboard"})
+        return render(request, "dashboard.html", {"page": "", "page_title": "Home"})
 
     @api.get("/{page_name}", response_class=HTMLResponse)
     async def section(request: Request, page_name: str):
@@ -939,7 +1158,19 @@ def create_web_app(base_dir: str | Path | None = None):
                 {"page": "", "page_title": "Not Found", "page_name": page_name},
                 status_code=404,
             )
-        title = next(item["label"] for item in NAV_ITEMS if item["slug"] == page_name)
+        # Redirect legacy pages to their new equivalents
+        _redirects: dict[str, str] = {
+            "dashboard": "/",
+            "organizations": "/api-keys",
+            "accounts": "/api-keys",
+            "export-profiles": "/labels",
+            "manual-export": "/export",
+            "queue": "/export",
+            "scheduler": "/labels",
+        }
+        if page_name in _redirects:
+            return RedirectResponse(_redirects[page_name], status_code=301)
+        title = _page_title(page_name)
         return render(
             request,
             "section.html",
@@ -1132,6 +1363,13 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
     updated = {"labels": [*labels, new]}
     LabelsConfig.model_validate(updated)
     write_json(manager.labels_file, updated)
+    # Notify the scheduler to re-sync its jobs
+    if application.event_bus is not None:
+        application.event_bus.emit(
+            EventType.LABELS_CHANGED,
+            "Label created: " + new["friendly_name"],
+            data={"label": new["friendly_name"]},
+        )
     return new
 
 
