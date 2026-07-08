@@ -1519,7 +1519,8 @@ let treeSelector = () => ({
     this.loading = true;
     try {
       const resp = await fetchJSON("/api/tree");
-      this.accounts = resp.accounts || [];
+      this.organisations = resp.organisations || [];
+      this.accounts = this.organisations;  // backward compat
     } catch (e) {
       console.warn("Tree load failed", e);
     }
