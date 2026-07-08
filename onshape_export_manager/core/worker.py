@@ -314,7 +314,7 @@ class BackgroundWorker:
             return
         event_bus.subscribe(
             lambda event: scheduler.on_labels_changed(),
-            event_type=EventType.LABELS_CHANGED,
+            types=[EventType.LABELS_CHANGED],
         )
         self.logger.info("Scheduler subscribed to LABELS_CHANGED events")
 
@@ -381,6 +381,25 @@ class BackgroundWorker:
                 queue.mark_completed(job.id)
                 result.jobs_succeeded += 1
                 self._record_success()
+                # Job chaining: enqueue the next job if configured, with depth limit
+                chain = (job.payload or {}).get("chain_to")
+                chain_depth = int((job.payload or {}).get("chain_depth", 0))
+                if chain and isinstance(chain, dict) and chain_depth < 3:
+                    chain_label = str(chain.get("label", "")).strip()
+                    chain_profile = str(chain.get("profile", "")).strip()
+                    if chain_label:
+                        queue.enqueue(
+                            label_name=chain_label,
+                            profile_name=chain_profile or job.profile_name,
+                            payload={
+                                **(chain.get("payload", {}) or {}),
+                                "chain_depth": chain_depth + 1,
+                            },
+                            reason=f"chained from {job.label_name}",
+                        )
+                        self.logger.info(
+                            "Chained job enqueued: %s (depth %d)", chain_label, chain_depth + 1
+                        )
                 self._emit(
                     EventType.JOB_COMPLETED,
                     f"Export completed for {job.label_name}",

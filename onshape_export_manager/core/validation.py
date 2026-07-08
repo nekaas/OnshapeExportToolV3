@@ -20,11 +20,18 @@ class ManualExportRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    label: str = Field(..., min_length=1, description="Friendly name of the label to export")
+    label: str | None = Field(None, min_length=1, description="Friendly name of a single label to export")
+    labels: list[str] | None = Field(None, min_length=1, description="Multiple label names to export as a group")
     profile: str | None = Field(None, description="Export profile name (uses label default if omitted)")
     start: str | None = Field(None, description="ISO 8601 start date filter (inclusive)")
     end: str | None = Field(None, description="ISO 8601 end date filter (inclusive)")
     destination: str | None = Field(None, min_length=1, description="Custom export destination path")
+
+    @model_validator(mode="after")
+    def _at_least_one_label(self) -> "ManualExportRequest":
+        if not self.label and not self.labels:
+            raise ValueError("Either 'label' or 'labels' must be provided")
+        return self
 
 
 # -- Labels ------------------------------------------------------------------
@@ -144,3 +151,91 @@ class SetStorageRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     exports_dir: str = Field(..., min_length=1)
+
+
+# -- Per-format export option schemas (Item 28) ------------------------------
+
+
+class StlOptions(BaseModel):
+    """Options for STL export."""
+
+    model_config = ConfigDict(extra="allow")  # allow future Onshape options
+
+    mode: str = Field(default="binary", pattern=r"^(binary|text)$")
+    units: str = Field(default="millimeter", pattern=r"^(inch|millimeter|centimeter|meter|foot|yard)$")
+    resolution: str = Field(default="medium", pattern=r"^(coarse|medium|fine)$")
+
+
+class StepOptions(BaseModel):
+    """Options for STEP export."""
+
+    model_config = ConfigDict(extra="allow")
+
+    formatName: str = Field(default="STEP")
+    storeInDocument: bool = False
+    stepVersionString: str | None = None
+
+
+class ParasolidOptions(BaseModel):
+    """Options for Parasolid export."""
+
+    model_config = ConfigDict(extra="allow")
+
+    formatName: str = Field(default="PARASOLID")
+    storeInDocument: bool = False
+
+
+class ObjOptions(BaseModel):
+    """Options for OBJ export."""
+
+    model_config = ConfigDict(extra="allow")
+
+    formatName: str = Field(default="OBJ")
+    storeInDocument: bool = False
+
+
+class IgesOptions(BaseModel):
+    """Options for IGES export."""
+
+    model_config = ConfigDict(extra="allow")
+
+    formatName: str = Field(default="IGES")
+    storeInDocument: bool = False
+
+
+# Per-format option validator lookup
+_FORMAT_OPTION_VALIDATORS: dict[str, type[BaseModel]] = {
+    "stl": StlOptions,
+    "step": StepOptions,
+    "parasolid": ParasolidOptions,
+    "obj": ObjOptions,
+    "iges": IgesOptions,
+}
+
+
+def validate_export_options(formats: list[str], options: dict[str, Any]) -> None:
+    """Validate per-format export options against their schemas.
+
+    Raises ``ValidationError`` if any format's options are invalid.
+    Formats with no registered schema (dxf, pdf, custom) pass through.
+    Unknown formats are silently ignored.
+    """
+    from pydantic import ValidationError as PydanticValidationError
+
+    errors: list[str] = []
+    for fmt in formats:
+        key = fmt.lower()
+        validator = _FORMAT_OPTION_VALIDATORS.get(key)
+        if validator is None:
+            continue  # no strict schema for this format
+        fmt_options = options.get(fmt, options.get(key, {}))
+        if not isinstance(fmt_options, dict):
+            continue
+        try:
+            validator.model_validate(fmt_options)
+        except PydanticValidationError as exc:
+            for err in exc.errors():
+                loc = " → ".join(str(p) for p in err["loc"])
+                errors.append(f"{fmt}.{loc}: {err['msg']}")
+    if errors:
+        raise ValueError("Invalid export options: " + "; ".join(errors))

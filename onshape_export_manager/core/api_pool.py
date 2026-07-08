@@ -341,12 +341,12 @@ class ApiPool:
 
 
 def utc_now() -> datetime:
-    """Return current UTC time."""
+    """Return current UTC-aware time."""
     return datetime.now(timezone.utc)
 
 
 def serialize_dt(value: datetime | None) -> str | None:
-    """Serialize a datetime for JSON state."""
+    """Serialize a datetime to ISO 8601 UTC string."""
     if value is None:
         return None
     if value.tzinfo is None:
@@ -355,7 +355,7 @@ def serialize_dt(value: datetime | None) -> str | None:
 
 
 def parse_dt(value: Any) -> datetime | None:
-    """Parse an optional datetime from JSON state."""
+    """Parse an optional datetime, always returning UTC-aware."""
     if not value:
         return None
     if not isinstance(value, str):

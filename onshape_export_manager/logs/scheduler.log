@@ -6,3 +6,9 @@
 2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Synced scheduler job id=schedule-customer-a label=Customer A interval=hourly profile=STL
 2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Synced scheduler job id=schedule-customer-a label=Customer A interval=hourly profile=STL
 2026-07-08 19:51:30 INFO     [onshape_export_manager.scheduler] Queued scheduled export scheduler_job_id=schedule-customer-a queue_job_id=33acd33b-7dd0-4e1b-9089-3e0051c95d7b label=Customer A
+2026-07-08 21:49:55 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:03 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:03 INFO     [onshape_export_manager.scheduler] Scheduler stopped
+2026-07-08 21:51:22 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:22 INFO     [onshape_export_manager.scheduler] Scheduler stopped
+2026-07-08 21:51:44 INFO     [onshape_export_manager.scheduler] Scheduler started

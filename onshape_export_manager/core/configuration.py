@@ -296,6 +296,16 @@ class ExportProfileConfig(StrictConfigModel):
             raise ValueError("at least one export format is required")
         return value
 
+    @model_validator(mode="after")
+    def validate_format_options(self) -> "ExportProfileConfig":
+        from onshape_export_manager.core.validation import validate_export_options
+
+        validate_export_options(
+            [f.value for f in self.formats],
+            self.options,
+        )
+        return self
+
     def to_runtime_model(self) -> ExportProfile:
         return ExportProfile(
             name=self.name,

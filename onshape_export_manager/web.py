@@ -764,45 +764,55 @@ def create_web_app(base_dir: str | Path | None = None):
 
     @api.post("/api/exports/run")
     async def api_run_export(body: ManualExportRequest) -> dict[str, Any]:
-        """Enqueue a manual export for a label; the worker runs it shortly."""
+        """Enqueue manual export(s); supports single label or label groups."""
         if application.queue_manager is None:
             return JSONResponse(
                 {"error": "queue is unavailable; check configuration"}, status_code=503
             )
-        label_name = body.label
-        try:
-            label, profile = _resolve_label_profile(
-                application, label_name, body.profile or ""
+        # Resolve single or group labels
+        label_names: list[str] = []
+        if body.labels:
+            label_names = body.labels
+        elif body.label:
+            label_names = [body.label]
+
+        job_ids: list[str] = []
+        for label_name in label_names:
+            try:
+                label, profile = _resolve_label_profile(
+                    application, label_name.strip(), body.profile or ""
+                )
+                body_dict = body.model_dump(exclude_none=True)
+                start_iso, end_iso, _ = _manual_export_window(body_dict)
+            except ValueError as exc:
+                return JSONResponse({"error": f"{label_name}: {exc}"}, status_code=400)
+
+            payload: dict[str, Any] = {
+                "label_name": label.friendly_name,
+                "profile_name": profile.name,
+                "start_iso": start_iso,
+                "end_iso": end_iso,
+            }
+            if body.destination:
+                payload["destination"] = body.destination
+
+            job_id = application.queue_manager.enqueue(
+                label_name=label.friendly_name,
+                profile_name=profile.name,
+                payload=payload,
+                reason="manual",
             )
-            body_dict = body.model_dump(exclude_none=True)
-            start_iso, end_iso, _ = _manual_export_window(body_dict)
-        except ValueError as exc:
-            return JSONResponse({"error": str(exc)}, status_code=400)
+            job_ids.append(job_id)
+            logger.info("Manual export enqueued id=%s label=%s", job_id, label.friendly_name)
+            emit_event(
+                EventType.JOB_ENQUEUED,
+                f"Manual export queued for {label.friendly_name}",
+                data={"job_id": job_id, "label": label.friendly_name, "profile": profile.name},
+            )
 
-        payload: dict[str, Any] = {
-            "label_name": label.friendly_name,
-            "profile_name": profile.name,
-            "start_iso": start_iso,
-            "end_iso": end_iso,
-        }
-        if body.destination:
-            payload["destination"] = body.destination
-
-        job_id = application.queue_manager.enqueue(
-            label_name=label.friendly_name,
-            profile_name=profile.name,
-            payload=payload,
-            reason="manual",
-        )
-        logger.info("Manual export enqueued via API id=%s label=%s", job_id, label.friendly_name)
-        emit_event(
-            EventType.JOB_ENQUEUED,
-            f"Manual export queued for {label.friendly_name}",
-            data={"job_id": job_id, "label": label.friendly_name, "profile": profile.name},
-        )
         if not worker.running and autostart_worker:
             worker.start()
-        return {"queued": True, "job_id": job_id, "label": label.friendly_name, "profile": profile.name}
+        return {"queued": True, "job_ids": job_ids, "count": len(job_ids)}
 
     @api.post("/api/exports/preview")
     async def api_preview_export(body: ManualExportRequest) -> dict[str, Any]:
@@ -837,6 +847,42 @@ def create_web_app(base_dir: str | Path | None = None):
         if not worker.running and autostart_worker:
             worker.start()
         return {"requeued": job_id}
+
+    @api.post("/api/queue/batch")
+    async def api_queue_batch(request: Request) -> dict[str, Any]:
+        """Batch cancel or retry multiple queue jobs."""
+        if application.queue_manager is None:
+            return JSONResponse({"error": "queue is unavailable"}, status_code=503)
+        body = await request.json()
+        action = str(body.get("action", "")).strip()
+        job_ids = list(body.get("job_ids", []) or [])
+        if not job_ids:
+            return JSONResponse({"error": "job_ids is required"}, status_code=400)
+        if action not in ("cancel", "retry"):
+            return JSONResponse({"error": "action must be 'cancel' or 'retry'"}, status_code=400)
+
+        results: dict[str, list[str]] = {"succeeded": [], "failed": []}
+        for job_id in job_ids:
+            try:
+                entry = application.database.get_queue_entry(job_id)
+                if entry is None:
+                    results["failed"].append(job_id)
+                    continue
+                if action == "cancel":
+                    application.queue_manager.cancel(job_id, reason="batch cancel")
+                else:
+                    application.queue_manager.requeue(job_id)
+                results["succeeded"].append(job_id)
+            except Exception:
+                results["failed"].append(job_id)
+
+        emit_event(
+            EventType.JOB_CANCELLED if action == "cancel" else EventType.CUSTOM,
+            f"Batch {action}: {len(results['succeeded'])} succeeded, {len(results['failed'])} failed",
+            severity=EventSeverity.INFO,
+            data={"action": action, "succeeded": len(results["succeeded"]), "failed": len(results["failed"])},
+        )
+        return {"action": action, **results}
 
     # -- Events / audit / telemetry (AI-ready foundation) -------------------
 

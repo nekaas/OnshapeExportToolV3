@@ -5,3 +5,39 @@ Traceback (most recent call last):
   File "/Users/hrebis/Desktop/AI/Projects/OnshapeExportTool-ClaudeV3/tests/test_events.py", line 64, in boom
     raise RuntimeError("subscriber failure")
 RuntimeError: subscriber failure
+2026-07-08 21:49:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 retry_count=1 next_run_at=2026-06-25T12:00:02+00:00 error=timeout
+2026-07-08 21:49:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 retry_count=2 next_run_at=2026-06-25T12:00:04+00:00 error=timeout again
+2026-07-08 21:49:18 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 error=final
+2026-07-08 21:49:55 WARNING  [onshape_export_manager.web] Worker failed to start: EventBus.subscribe() got an unexpected keyword argument 'event_type'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=f7fd731a-6a94-445f-aa39-36e11e8d9a31: ValueError: unknown or disabled label 'A'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=666095cb-8a86-433e-b92d-3ad60b1a3818: ValueError: unknown or disabled label 'B'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba: ValueError: unknown or disabled label 'A'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=f7fd731a-6a94-445f-aa39-36e11e8d9a31 retry_count=1 next_run_at=2026-07-08T18:51:04.013769+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba retry_count=1 next_run_at=2026-07-08T18:51:04.018087+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=05c46483-eb6c-4cdf-89f1-9b16455af859: ValueError: unknown or disabled label 'B'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=666095cb-8a86-433e-b92d-3ad60b1a3818 retry_count=1 next_run_at=2026-07-08T18:51:04.015937+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=05c46483-eb6c-4cdf-89f1-9b16455af859 retry_count=1 next_run_at=2026-07-08T18:51:04.021392+00:00 error=ValueError: unknown or disabled label 'B'

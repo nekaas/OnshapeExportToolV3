@@ -371,3 +371,141 @@ RuntimeError: subscriber failure
 2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-07-08 21:31:15 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
 2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:36:35 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:36:35 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:38:02 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:38:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:38:56 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:38:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:41:45 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:41:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:42:54 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:42:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:43:09 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:43:09 INFO     [onshape_export_manager.queue] Queued export job id=f7fd731a-6a94-445f-aa39-36e11e8d9a31 label=A profile=STL reason=
+2026-07-08 21:43:09 INFO     [onshape_export_manager.queue] Queued export job id=666095cb-8a86-433e-b92d-3ad60b1a3818 label=B profile=STL reason=
+2026-07-08 21:43:09 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:44:28 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:44:28 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:44:28 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:44:28 INFO     [onshape_export_manager.queue] Queued export job id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba label=A profile=STL reason=
+2026-07-08 21:44:28 INFO     [onshape_export_manager.queue] Queued export job id=05c46483-eb6c-4cdf-89f1-9b16455af859 label=B profile=STL reason=
+2026-07-08 21:44:28 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:47:38 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:47:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:47:50 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:47:50 INFO     [onshape_export_manager.queue] Queued export job id=00243848-9688-48f1-8b18-5b3f5335b2cd label=A profile=STL reason=
+2026-07-08 21:47:50 INFO     [onshape_export_manager.queue] Queued export job id=85da08ab-8f96-4204-89e0-0a7d3850f238 label=B profile=STL reason=
+2026-07-08 21:47:50 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:48:27 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:48:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:48:39 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:48:39 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:48:41 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:48:41 INFO     [onshape_export_manager.queue] Queued export job id=1ef18042-b65e-4b68-95f8-b34bd802e162 label=A profile=STL reason=
+2026-07-08 21:48:41 INFO     [onshape_export_manager.queue] Queued export job id=9faac89a-3569-4024-940a-2b6962503f33 label=B profile=STL reason=
+2026-07-08 21:48:41 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:48:59 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:48:59 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:11 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:49:11 INFO     [onshape_export_manager.queue] Queued export job id=bd475a3f-1b46-4a8c-bc14-95b159f98b9d label=A profile=STL reason=
+2026-07-08 21:49:11 INFO     [onshape_export_manager.queue] Queued export job id=bcb378fd-cd93-4d4d-92e7-9a4b6c1fef20 label=B profile=STL reason=
+2026-07-08 21:49:11 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:49:18 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:49:18 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Queued export job id=df651efe-01cc-4c93-97bd-e159cd56764a label=A profile=STL reason=
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Queued export job id=016d5456-e1e8-4f55-9b1c-07d30bc06e6d label=B profile=STL reason=
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Claimed queue job id=df651efe-01cc-4c93-97bd-e159cd56764a
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Completed queue job id=df651efe-01cc-4c93-97bd-e159cd56764a
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Cancelled queue job id=016d5456-e1e8-4f55-9b1c-07d30bc06e6d reason=cancelled
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Queued export job id=5d04c445-a2d7-45aa-bdea-1cbdb4f6b4d6 label=Customer A profile=STL reason=rate limited
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Claimed queue job id=5d04c445-a2d7-45aa-bdea-1cbdb4f6b4d6
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Queued export job id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 label=Customer A profile=STL reason=
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Claimed queue job id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18
+2026-07-08 21:49:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 retry_count=1 next_run_at=2026-06-25T12:00:02+00:00 error=timeout
+2026-07-08 21:49:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 retry_count=2 next_run_at=2026-06-25T12:00:04+00:00 error=timeout again
+2026-07-08 21:49:18 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=7af0cb93-1ee7-4f7f-8c0c-1dd4396e8d18 error=final
+2026-07-08 21:49:18 INFO     [onshape_export_manager.queue] Queued export job id=9ef30eb4-69ad-4612-aa11-15a2d1d11ddf label=Customer A profile=STL reason=
+2026-07-08 21:49:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:49:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:55 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:49:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:55 INFO     [onshape_export_manager.notifications] Notification service started
+2026-07-08 21:49:55 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:49:55 WARNING  [onshape_export_manager.web] Worker failed to start: EventBus.subscribe() got an unexpected keyword argument 'event_type'
+2026-07-08 21:50:43 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:50:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:50:54 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:50:54 INFO     [onshape_export_manager.queue] Queued export job id=bb00a6c2-6ab6-4b6d-a65e-2784552b8e49 label=A profile=STL reason=
+2026-07-08 21:50:54 INFO     [onshape_export_manager.queue] Queued export job id=86770aa7-6240-48f7-b904-9e0a8fc3d316 label=B profile=STL reason=
+2026-07-08 21:50:54 INFO     [httpx] HTTP Request: POST http://testserver/api/queue/batch "HTTP/1.1 200 OK"
+2026-07-08 21:51:02 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:02 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:03 INFO     [onshape_export_manager.notifications] Notification service started
+2026-07-08 21:51:03 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Scheduler subscribed to LABELS_CHANGED events
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Started 4 background worker thread(s) (poll=5.0s, max_jobs_per_tick=25)
+2026-07-08 21:51:03 INFO     [onshape_export_manager.queue] Claimed queue job id=f7fd731a-6a94-445f-aa39-36e11e8d9a31
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Running queued export id=f7fd731a-6a94-445f-aa39-36e11e8d9a31 label=A profile=STL
+2026-07-08 21:51:03 INFO     [onshape_export_manager.queue] Claimed queue job id=666095cb-8a86-433e-b92d-3ad60b1a3818
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=f7fd731a-6a94-445f-aa39-36e11e8d9a31: ValueError: unknown or disabled label 'A'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Running queued export id=666095cb-8a86-433e-b92d-3ad60b1a3818 label=B profile=STL
+2026-07-08 21:51:03 INFO     [onshape_export_manager.queue] Claimed queue job id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Running queued export id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba label=A profile=STL
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=666095cb-8a86-433e-b92d-3ad60b1a3818: ValueError: unknown or disabled label 'B'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba: ValueError: unknown or disabled label 'A'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Waiting up to 30s for worker oem-export-worker-0
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=f7fd731a-6a94-445f-aa39-36e11e8d9a31 retry_count=1 next_run_at=2026-07-08T18:51:04.013769+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 INFO     [onshape_export_manager.queue] Claimed queue job id=05c46483-eb6c-4cdf-89f1-9b16455af859
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Running queued export id=05c46483-eb6c-4cdf-89f1-9b16455af859 label=B profile=STL
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba retry_count=1 next_run_at=2026-07-08T18:51:04.018087+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 21:51:03 ERROR    [onshape_export_manager.worker] Queued export failed id=05c46483-eb6c-4cdf-89f1-9b16455af859: ValueError: unknown or disabled label 'B'
+Traceback (most recent call last):
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 372, in _run_job
+    request = self._build_request(job)
+  File "/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/worker.py", line 487, in _build_request
+    raise ValueError(f"unknown or disabled label '{job.label_name}'")
+ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=666095cb-8a86-433e-b92d-3ad60b1a3818 retry_count=1 next_run_at=2026-07-08T18:51:04.015937+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=05c46483-eb6c-4cdf-89f1-9b16455af859 retry_count=1 next_run_at=2026-07-08T18:51:04.021392+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 21:51:03 INFO     [onshape_export_manager.scheduler] Scheduler stopped
+2026-07-08 21:51:03 INFO     [onshape_export_manager.worker] Background worker stopped (4 thread(s))
+2026-07-08 21:51:22 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:22 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:22 INFO     [onshape_export_manager.notifications] Notification service started
+2026-07-08 21:51:22 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:22 INFO     [onshape_export_manager.worker] Scheduler subscribed to LABELS_CHANGED events
+2026-07-08 21:51:22 INFO     [onshape_export_manager.worker] Started 4 background worker thread(s) (poll=5.0s, max_jobs_per_tick=25)
+2026-07-08 21:51:22 INFO     [onshape_export_manager.worker] Waiting up to 30s for worker oem-export-worker-0
+2026-07-08 21:51:22 INFO     [onshape_export_manager.scheduler] Scheduler stopped
+2026-07-08 21:51:22 INFO     [onshape_export_manager.worker] Background worker stopped (4 thread(s))
+2026-07-08 21:51:43 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:43 INFO     [onshape_export_manager.audit] Audit service subscribed to event bus
+2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:44 INFO     [onshape_export_manager.notifications] Notification service started
+2026-07-08 21:51:44 INFO     [onshape_export_manager.scheduler] Scheduler started
+2026-07-08 21:51:44 INFO     [onshape_export_manager.worker] Scheduler subscribed to LABELS_CHANGED events
+2026-07-08 21:51:44 INFO     [onshape_export_manager.worker] Started 4 background worker thread(s) (poll=5.0s, max_jobs_per_tick=25)

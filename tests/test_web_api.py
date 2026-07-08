@@ -272,6 +272,36 @@ class WebApiTests(unittest.TestCase):
                     break
             self.assertIn("config.org_created", seen_types)
 
+    # -- Batch queue operations -------------------------------------------
+
+    def test_queue_batch_cancel_succeeds(self) -> None:
+        self.client.post("/api/setup/owner", json={"username": "admin", "password": "supersecret"})
+        self.client.post("/api/setup/complete")
+        # Enqueue two jobs
+        from onshape_export_manager.web import create_web_app
+        from onshape_export_manager.app import create_app
+        app = create_app()
+        if app.queue_manager:
+            j1 = app.queue_manager.enqueue(label_name="A", profile_name="STL", payload={})
+            j2 = app.queue_manager.enqueue(label_name="B", profile_name="STL", payload={})
+            resp = self.client.post("/api/queue/batch", json={
+                "action": "cancel", "job_ids": [j1, j2],
+            })
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertIn("succeeded", data)
+            self.assertIn("failed", data)
+
+    def test_queue_batch_rejects_bad_action(self) -> None:
+        resp = self.client.post("/api/queue/batch", json={
+            "action": "delete", "job_ids": ["none"],
+        })
+        self.assertEqual(resp.status_code, 400)
+
+    def test_queue_batch_requires_job_ids(self) -> None:
+        resp = self.client.post("/api/queue/batch", json={"action": "cancel"})
+        self.assertEqual(resp.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()

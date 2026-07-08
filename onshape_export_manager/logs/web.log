@@ -117,3 +117,24 @@
 2026-07-08 21:28:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-07-08 21:31:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:36:35 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:38:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:38:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:41:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:42:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:44:28 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:47:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:48:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:48:39 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:48:59 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:18 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:49:55 WARNING  [onshape_export_manager.web] Worker failed to start: EventBus.subscribe() got an unexpected keyword argument 'event_type'
+2026-07-08 21:50:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0

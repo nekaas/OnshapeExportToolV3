@@ -19,12 +19,12 @@ SCHEMA_VERSION = 3
 
 
 def utc_now() -> datetime:
-    """Return the current UTC time."""
+    """Return the current UTC-aware datetime."""
     return datetime.now(timezone.utc)
 
 
 def serialize_dt(value: datetime | None) -> str | None:
-    """Serialize an optional datetime for SQLite."""
+    """Serialize a datetime to an ISO 8601 string with UTC timezone."""
     if value is None:
         return None
     if value.tzinfo is None:
@@ -33,10 +33,13 @@ def serialize_dt(value: datetime | None) -> str | None:
 
 
 def parse_dt(value: str | None) -> datetime | None:
-    """Parse an optional SQLite datetime string."""
+    """Parse an ISO 8601 datetime string, always returning UTC-aware."""
     if value is None:
         return None
-    return datetime.fromisoformat(value)
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def to_json(value: Any) -> str:

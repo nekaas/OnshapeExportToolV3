@@ -152,6 +152,10 @@ _COMMANDS: dict[str, dict[str, Any]] = {
         "description": "Launch the first-run setup wizard",
         "one_shot": True,
     },
+    "shortcuts": {
+        "description": "Show keyboard shortcuts and quick-reference",
+        "one_shot": True,
+    },
     "exit": {
         "description": "Exit the interactive console",
         "one_shot": False,  # REPL-only
@@ -257,6 +261,8 @@ def _dispatch(cmd: str, *, app: object | None, port: int) -> None:
         from .wizard import run_wizard
 
         run_wizard(app)
+    elif cmd in ("shortcuts",):
+        _print_shortcuts()
     else:
         console.print(f"[bold red]Unknown command:[/bold red] {cmd}")
         console.print("Type [bold #5dade2]help[/bold #5dade2] to see available commands.")
@@ -847,6 +853,34 @@ def _print_placeholder(cmd: str, msg: str) -> None:
     from .widgets import info_panel
 
     console.print(info_panel(f"`{cmd}` — {msg}.", title="Coming Soon"))
+
+
+def _print_shortcuts() -> None:
+    """Print the keyboard shortcuts and quick-reference card."""
+    from .tables import data_table, fill_table
+
+    shortcuts = [
+        ("?", "Show this reference"),
+        ("g d", "Go to Dashboard"),
+        ("g q", "Go to Queue"),
+        ("g h", "Go to History"),
+        ("g s", "Go to Settings"),
+        ("n l", "New Label"),
+        ("n p", "New Profile"),
+        ("/", "Focus command palette"),
+        ("Esc", "Close modal / cancel"),
+        ("Ctrl+C", "Stop worker / exit dashboard"),
+    ]
+    table = data_table(["Shortcut", "Action"], title="Keyboard Shortcuts")
+    fill_table(table, [[s[0], s[1]] for s in shortcuts])
+    console.print(table)
+    console.print("")
+    console.print(widgets.info_panel(
+        "Quick commands: [bold]status[/] [bold]dashboard[/] [bold]network[/] "
+        "[bold]health[/] [bold]accounts[/] [bold]queue[/] [bold]workers[/] "
+        "[bold]history[/] [bold]logs[/] [bold]backup[/] [bold]shortcuts[/]",
+        title="Terminal Commands",
+    ))
 
 
 def _restart_service() -> None:
