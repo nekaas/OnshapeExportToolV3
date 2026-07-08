@@ -11,7 +11,7 @@
       <template x-for="tab in tabs" :key="tab">
         <button class="chip" :class="{ active: activeTab === tab }" @click="setTab(tab)" x-text="tab"></button>
       </template>
-      <button class="btn btn-ghost" @click="load()" :class="{ spinning: loading }">
+      <button class="btn btn-ghost" @click="load()" :class="{ spinning: loading }" x-show="hasTable">
         <span x-html="icons.refresh"></span><span>Refresh</span>
       </button>
     </div>

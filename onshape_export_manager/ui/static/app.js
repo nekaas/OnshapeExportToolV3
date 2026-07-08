@@ -252,7 +252,7 @@ function dashboardPage() {
       const s = d.summary || {};
       this.cards = [
         { key: "apikeys", label: "API Keys", value: s.accounts ?? 0, icon: ICONS.accounts, badge: `${s.healthy_accounts ?? 0} healthy`, accent: "", href: "/api-keys" },
-        { key: "labels", label: "Labels", value: s.labels ?? 0, icon: ICONS.labels, accent: "", href: "/labels" },
+        { key: "labels", label: "Groups", value: s.labels ?? 0, icon: ICONS.labels, accent: "", href: "/labels" },
         { key: "exports", label: "Total Exports", value: s.total_exports ?? 0, icon: ICONS.files, accent: "accent-success", href: "/history" },
         { key: "queue", label: "In Queue", value: s.queue_size ?? 0, icon: ICONS.queue, accent: "", href: "/export" },
         { key: "failed", label: "Failed", value: s.failed_exports ?? 0, icon: ICONS.alert, accent: (s.failed_exports ?? 0) > 0 ? "accent-danger" : "", href: "/history" },
@@ -377,7 +377,7 @@ const PAGE_CONFIG = {
     ],
   },
   labels: {
-    endpoint: "/api/labels", root: "labels", empty: "No labels configured yet.",
+    endpoint: "/api/labels", root: "labels", empty: "No groups configured yet.",
     columns: [],  // card-based view, not table
   },
   "export-profiles": {
@@ -1570,11 +1570,11 @@ let treeSelector = () => ({
   async createGroup() {
     const f = this.groupForm;
     if (!(f.name || "").trim()) {
-      if (window.oem) window.oem.toast("Error", "Group name is required", "error");
+      if (window.oem) window.oem.toast("Group name is required", "error");
       return;
     }
     if (!(f.onshape_id || "").trim()) {
-      if (window.oem) window.oem.toast("Error", "Onshape Label ID is required", "error");
+      if (window.oem) window.oem.toast("Onshape Label ID is required", "error");
       return;
     }
     const body = {
@@ -1593,12 +1593,12 @@ let treeSelector = () => ({
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Created", `Group '${d.friendly_name}' created`, "success");
+      if (window.oem) window.oem.toast("Created", "success", `Group '${d.friendly_name}' created`);
       this.showCreateForm = false;
       this.createTargetAccount = "";
       await this.loadTree();
     } catch (e) {
-      if (window.oem) window.oem.toast("Error", e.message, "error");
+      if (window.oem) window.oem.toast(e.message, "error");
     }
   },
 
@@ -1617,7 +1617,7 @@ let treeSelector = () => ({
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Deleted", `Group '${groupName}' removed`, "success");
+      if (window.oem) window.oem.toast("Deleted", "success", `Group '${groupName}' removed`);
       this.deleteConfirm = null;
       // Clear selection
       this.selected[groupName] = false;
@@ -1637,10 +1637,10 @@ let treeSelector = () => ({
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Moved", `Group moved to ${targetAccount}`, "success");
+      if (window.oem) window.oem.toast("Moved", "success", `Group moved to ${targetAccount}`);
       await this.loadTree();
     } catch (e) {
-      if (window.oem) window.oem.toast("Error", e.message, "error");
+      if (window.oem) window.oem.toast(e.message, "error");
     }
   },
 
@@ -1655,7 +1655,7 @@ let treeSelector = () => ({
       if (d.error) throw new Error(d.error);
       await this.loadTree();
     } catch (e) {
-      if (window.oem) window.oem.toast("Error", e.message, "error");
+      if (window.oem) window.oem.toast(e.message, "error");
     }
   },
 
@@ -1672,12 +1672,12 @@ let treeSelector = () => ({
       .then(r => r.json())
       .then(r => {
         if (r.error) throw new Error(r.error);
-        if (window.oem) window.oem.toast("Queued", `${r.count} export(s) enqueued`, "success");
+        if (window.oem) window.oem.toast("Queued", "success", `${r.count} export(s) enqueued`);
         for (const l of labels) this.selected[l] = false;
         for (const k of Object.keys(this.selectAllAccounts)) this.selectAllAccounts[k] = false;
       })
       .catch(e => {
-        if (window.oem) window.oem.toast("Error", "Export failed: " + e.message, "error");
+        if (window.oem) window.oem.toast("Export failed: " + e.message, "error");
       });
   },
 });

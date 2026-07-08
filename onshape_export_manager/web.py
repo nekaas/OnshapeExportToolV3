@@ -1485,8 +1485,10 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
 
     manager = application.config_manager
     config = manager.load()
+    import re
+    name = re.sub(r"<[^>]*>", "", str(body.get("friendly_name", "")).strip()).strip()
     new = {
-        "friendly_name": str(body.get("friendly_name", "")).strip(),
+        "friendly_name": name,
         "onshape_label_id": str(body.get("onshape_label_id", "")).strip(),
         "assigned_accounts": list(body.get("assigned_accounts", []) or []),
         "export_location": str(body.get("export_location", "exports")),
@@ -1494,6 +1496,8 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
         "scheduler": body.get("scheduler") or None,
         "enabled": bool(body.get("enabled", True)),
     }
+    if not new["friendly_name"]:
+        raise ValueError("friendly_name must not be empty")
     labels = read_json(manager.labels_file).get("labels", [])
     if any(label.get("friendly_name") == new["friendly_name"] for label in labels):
         raise ValueError(f"label '{new['friendly_name']}' already exists")
@@ -1531,8 +1535,11 @@ def _update_label(application: Application, group_name: str, updates: dict[str, 
         raise ValueError(f"group '{group_name}' not found")
 
     current = dict(labels[idx])
+    import re
     if "friendly_name" in updates and updates["friendly_name"] != current["friendly_name"]:
-        new_name = updates["friendly_name"]
+        new_name = re.sub(r"<[^>]*>", "", str(updates["friendly_name"]).strip()).strip()
+        if not new_name:
+            raise ValueError("friendly_name must not be empty after sanitization")
         if any(lbl.get("friendly_name") == new_name for lbl in labels):
             raise ValueError(f"group '{new_name}' already exists")
         current["friendly_name"] = new_name

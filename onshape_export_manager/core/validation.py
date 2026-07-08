@@ -52,9 +52,15 @@ class CreateLabelRequest(BaseModel):
 
     @field_validator("friendly_name")
     @classmethod
-    def _name_not_empty(cls, v: str) -> str:
-        if not v.strip():
+    def _sanitize_name(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
             raise ValueError("friendly_name must not be empty or whitespace")
+        # Strip HTML tags to prevent XSS
+        import re
+        v = re.sub(r"<[^>]*>", "", v)
+        if not v.strip():
+            raise ValueError("friendly_name must not be empty after sanitization")
         return v.strip()
 
 
@@ -73,10 +79,18 @@ class UpdateGroupRequest(BaseModel):
 
     @field_validator("friendly_name")
     @classmethod
-    def _name_not_empty(cls, v: str | None) -> str | None:
-        if v is not None and not v.strip():
+    def _sanitize_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
             raise ValueError("friendly_name must not be empty or whitespace")
-        return v.strip() if v is None else v.strip()
+        # Strip HTML tags to prevent XSS
+        import re
+        v = re.sub(r"<[^>]*>", "", v)
+        if not v.strip():
+            raise ValueError("friendly_name must not be empty after sanitization")
+        return v.strip()
 
 
 # -- Organizations -----------------------------------------------------------
