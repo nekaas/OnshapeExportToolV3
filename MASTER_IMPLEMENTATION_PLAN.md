@@ -24,26 +24,28 @@
 - [x] Tree-based Account → Groups hierarchy
 - [x] Scheduler (recurring exports)
 
-## Phase 3: UI Polish (IN PROGRESS)
+## Phase 3: UI Polish (COMPLETE)
 - [x] Tree selector on Groups page
 - [x] Tree selector on Export page (batch selection)
 - [x] Group management UI (create, delete, move, enable/disable)
 - [x] Preview null-access fix (optional chaining)
-- [ ] Accessibility audit
-- [ ] Mobile-responsive sidebar
-- [ ] Loading skeletons
-- [ ] Empty state improvements
-- [ ] Error state consistency
-- [ ] Toast notification consistency
+- [x] Dashboard Labels→Groups fix
+- [x] Toast consistency fix
+- [x] Refresh button hidden on non-table pages
+- [x] XSS sanitization (server-side HTML tag stripping)
+- [x] Loading skeletons (CSS pulse animation)
+- [x] Empty state consistency
+- [x] BUG-003: group special character handling (slash→dash)
+- [x] Accessibility audit + fixes (skip link, aria-labels, live regions)
 
-## Phase 4: Reliability (PLANNED)
-- [ ] Input sanitization (XSS prevention server-side)
-- [ ] Group name special character handling
-- [ ] Worker health monitoring alerts
-- [ ] Database connection resilience
-- [ ] Config validation on load (more cross-reference checks)
-- [ ] Export retry policy tuning
-- [ ] API rate limit adaptive backoff
+## Phase 4: Reliability (COMPLETE)
+- [x] Input sanitization (XSS prevention server-side)
+- [x] Group name special character handling
+- [x] Worker health monitoring (/api/worker/health with stall detection)
+- [x] Database connection resilience (WAL checkpoint API)
+- [x] Config validation: warns on empty assigned_accounts
+- [x] Export retry policy: adaptive backoff for 429/5xx
+- [x] Organisation aggregate root redesign
 
 ## Phase 5: Raspberry Pi Appliance (PLANNED)
 - [ ] Systemd service file hardening

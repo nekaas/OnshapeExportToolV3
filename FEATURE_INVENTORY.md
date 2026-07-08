@@ -117,7 +117,7 @@
 - [~] Search — global search endpoint exists, UI is placeholder
 - [~] Mobile responsive — basic hamburger menu, not fully tested
 - [~] Empty states — some pages lack designed empty states
-- [~] Error messages — some toasts show raw "error" instead of descriptive messages
+- [~] Error messages — some toasts show raw "error" instead of descriptive messages — **FIXED**
 
 ---
 
@@ -134,7 +134,6 @@
 - [ ] Drag-and-drop group reordering
 - [ ] Undo for destructive operations
 - [ ] Pagination for history
-- [ ] Loading skeletons
 - [ ] Keyboard shortcuts
 - [ ] Dark/light theme persistence across sessions
 - [ ] Production Tailwind CSS build (currently using CDN)
