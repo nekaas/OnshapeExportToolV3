@@ -1486,7 +1486,7 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
     manager = application.config_manager
     config = manager.load()
     import re
-    name = re.sub(r"<[^>]*>", "", str(body.get("friendly_name", "")).strip()).strip()
+    name = re.sub(r"<[^>]*>", "", str(body.get("friendly_name", "")).strip()).replace("/", "-").strip()
     new = {
         "friendly_name": name,
         "onshape_label_id": str(body.get("onshape_label_id", "")).strip(),
@@ -1537,7 +1537,7 @@ def _update_label(application: Application, group_name: str, updates: dict[str, 
     current = dict(labels[idx])
     import re
     if "friendly_name" in updates and updates["friendly_name"] != current["friendly_name"]:
-        new_name = re.sub(r"<[^>]*>", "", str(updates["friendly_name"]).strip()).strip()
+        new_name = re.sub(r"<[^>]*>", "", str(updates["friendly_name"]).strip()).replace("/", "-").strip()
         if not new_name:
             raise ValueError("friendly_name must not be empty after sanitization")
         if any(lbl.get("friendly_name") == new_name for lbl in labels):

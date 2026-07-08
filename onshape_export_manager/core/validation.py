@@ -56,9 +56,10 @@ class CreateLabelRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("friendly_name must not be empty or whitespace")
-        # Strip HTML tags to prevent XSS
+        # Strip HTML tags and forward slashes (breaks URL path params) to prevent XSS
         import re
         v = re.sub(r"<[^>]*>", "", v)
+        v = v.replace("/", "-")
         if not v.strip():
             raise ValueError("friendly_name must not be empty after sanitization")
         return v.strip()
@@ -85,9 +86,10 @@ class UpdateGroupRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("friendly_name must not be empty or whitespace")
-        # Strip HTML tags to prevent XSS
+        # Strip HTML tags and forward slashes (breaks URL path params) to prevent XSS
         import re
         v = re.sub(r"<[^>]*>", "", v)
+        v = v.replace("/", "-")
         if not v.strip():
             raise ValueError("friendly_name must not be empty after sanitization")
         return v.strip()
