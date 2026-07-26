@@ -25,7 +25,7 @@ class ManualExportRequest(BaseModel):
     profile: str | None = Field(None, description="Export profile name (uses label default if omitted)")
     start: str | None = Field(None, description="ISO 8601 start date filter (inclusive)")
     end: str | None = Field(None, description="ISO 8601 end date filter (inclusive)")
-    destination: str | None = Field(None, min_length=1, description="Custom export destination path")
+    destination: str | None = Field(None, description="Custom export destination path (uses label default if omitted)")
 
     @model_validator(mode="after")
     def _at_least_one_label(self) -> "ManualExportRequest":
@@ -213,6 +213,15 @@ class StepOptions(BaseModel):
     stepVersionString: str | None = None
 
 
+class Mf3Options(BaseModel):
+    """Options for 3MF export."""
+
+    model_config = ConfigDict(extra="allow")
+
+    formatName: str = Field(default="3MF")
+    storeInDocument: bool = False
+
+
 class ParasolidOptions(BaseModel):
     """Options for Parasolid export."""
 
@@ -231,22 +240,14 @@ class ObjOptions(BaseModel):
     storeInDocument: bool = False
 
 
-class IgesOptions(BaseModel):
-    """Options for IGES export."""
-
-    model_config = ConfigDict(extra="allow")
-
-    formatName: str = Field(default="IGES")
-    storeInDocument: bool = False
-
-
 # Per-format option validator lookup
 _FORMAT_OPTION_VALIDATORS: dict[str, type[BaseModel]] = {
     "stl": StlOptions,
     "step": StepOptions,
+    "3mf": Mf3Options,
     "parasolid": ParasolidOptions,
     "obj": ObjOptions,
-    "iges": IgesOptions,
+    # gltf, dxf, native pass through with no special validation
 }
 
 

@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <div x-data="sectionPage('{{ page }}')" x-init="load()" class="page">
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <div class="toolbar-search" x-show="hasTable">
+  <!-- Toolbar (only for pages with data tables) -->
+  <div class="toolbar" x-show="hasTable">
+    <div class="toolbar-search">
       <span x-html="icons.search"></span>
       <input type="text" placeholder="Filter…" x-model="filter" />
     </div>
     <div class="toolbar-actions">
-      <template x-for="tab in tabs" :key="tab">
-        <button class="chip" :class="{ active: activeTab === tab }" @click="setTab(tab)" x-text="tab"></button>
-      </template>
-      <button class="btn btn-ghost" @click="load()" :class="{ spinning: loading }" x-show="hasTable">
+      <button class="btn btn-ghost" @click="load()" :class="{ spinning: loading }">
         <span x-html="icons.refresh"></span><span>Refresh</span>
       </button>
     </div>
@@ -30,8 +27,8 @@
     </div>
   </template>
 
-  <!-- Manual export view (also used by new /export page) -->
-  <template x-if="page === 'manual-export' || page === 'export'">
+  <!-- Manual export view (only /export page) -->
+  <template x-if="page === 'export'">
     <div class="manual-workflow" x-init="$nextTick(() => initManualPlanner())">
 
       <!-- Tree-based batch group selection -->
@@ -47,19 +44,19 @@
           </div>
         </div>
         <div x-show="!loading" style="max-height:300px;overflow-y:auto">
-          <template x-for="org in accounts" :key="org.name">
+          <template x-for="org in organisations" :key="org.name">
             <div style="border-bottom:1px solid var(--border-light);padding:6px 0">
-              <div @click="toggle(account.name)"
+              <div @click="expanded[org.name] = !expanded[org.name]"
                    style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0">
                 <span style="font-size:10px;transition:transform .2s"
-                      :style="expanded[account.name] ? 'transform:rotate(90deg)' : ''">▶</span>
-                <input type="checkbox" :checked="selectAllAccounts[account.name]"
-                       @click.stop @change="toggleAccount(account.name)" style="margin:0" />
-                <span style="font-weight:700;font-size:0.85rem" x-text="account.name"></span>
-                <span style="font-size:0.68rem;color:var(--text-dim)" x-text="account.group_count + ' groups'"></span>
+                      :style="expanded[org.name] ? 'transform:rotate(90deg)' : ''">▶</span>
+                <input type="checkbox" :checked="selectAllOrgs[org.name]"
+                       @click.stop @change="toggleOrg(org.name)" style="margin:0" />
+                <span style="font-weight:700;font-size:0.85rem" x-text="org.name"></span>
+                <span style="font-size:0.68rem;color:var(--text-dim)" x-text="(org.groups||[]).length + ' groups'"></span>
               </div>
-              <div x-show="expanded[account.name]" style="padding-left:24px">
-                <template x-for="group in account.groups" :key="group.friendly_name">
+              <div x-show="expanded[org.name]" style="padding-left:24px">
+                <template x-for="group in (org.groups||[])" :key="group.friendly_name">
                   <div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:0.82rem">
                     <input type="checkbox" :checked="selected[group.friendly_name]"
                            @change="toggleGroup(group.friendly_name)" style="margin:0" />
@@ -156,40 +153,6 @@
             </label>
           </div>
 
-          <div class="manual-template-row">
-            <label class="field template-select">
-              <span>Saved Templates</span>
-              <select x-model="manual.templateId" @change="applySavedTemplate(manual.templateId)">
-                <option value="">Choose template</option>
-                <template x-for="tpl in manualTemplates" :key="tpl.id">
-                  <option :value="tpl.id" x-text="tpl.name"></option>
-                </template>
-              </select>
-            </label>
-            <button class="btn btn-ghost" @click="saveManualTemplate()">
-              <span x-html="icons.save"></span><span>Save</span>
-            </button>
-            <button class="btn btn-ghost" @click="toggleFavoriteTemplate(manual.templateId)"
-                    :disabled="!manual.templateId">
-              <span x-html="icons.star"></span><span>Favorite</span>
-            </button>
-          </div>
-
-          <div class="template-strip" x-show="favoriteTemplates.length">
-            <span class="strip-label">Favorites</span>
-            <template x-for="tpl in favoriteTemplates" :key="tpl.id">
-              <button class="template-chip favorite" @click="applyTemplate(tpl)">
-                <span x-html="icons.star"></span><span x-text="tpl.name"></span>
-              </button>
-            </template>
-          </div>
-
-          <div class="template-strip" x-show="recentTemplates.length">
-            <span class="strip-label">Recent</span>
-            <template x-for="tpl in recentTemplates" :key="tpl.id">
-              <button class="template-chip" @click="applyTemplate(tpl)" x-text="tpl.name"></button>
-            </template>
-          </div>
         </div>
 
         <div class="manual-panel glass">
@@ -209,12 +172,14 @@
             </template>
           </div>
 
-          <div class="summary-list" x-if="preview && preview.valid">
+          <template x-if="preview && preview.valid">
+          <div class="summary-list">
             <div><span>Label</span><strong x-text="preview?.label?.name || '—'"></strong></div>
             <div><span>Profile</span><strong x-text="preview?.profile?.name || '—'"></strong></div>
             <div><span>Window</span><strong x-text="(preview?.window?.start_display || '—') + ' → ' + (preview?.window?.end_display || '—')"></strong></div>
             <div><span>Formats</span><strong x-text="(preview?.formats || []).map((f) => f.display_name).join(', ') || '—'"></strong></div>
           </div>
+          </template>
 
           <div class="validation-list">
             <template x-for="check in previewChecks" :key="check.key">
@@ -290,173 +255,10 @@
     </template>
   </template>
 
-  <!-- ── Organisations (tree: Organisations → Groups hierarchy) ── -->
-  <template x-if="page === 'organizations'" x-data="treeSelector">
-    <div class="page" style="gap:16px">
-
-      <!-- Header -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-        <h2 style="font-size:1.25rem;font-weight:700;margin:0">Organisations</h2>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="badge badge-muted" x-show="loading" style="display:none" x-transition></span>
-          <span class="badge badge-ok" x-show="!loading && selectedCount > 0"
-                x-text="selectedCount + ' selected'"></span>
-          <button class="btn btn-primary btn-sm" @click="queueExport()" :disabled="selectedCount === 0">
-            <span x-html="icons.bolt"></span><span>Export Selected</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Create Group Form -->
-      <div class="card glass" x-show="showCreateForm" x-transition style="padding:16px 20px">
-        <h3 style="font-size:1rem;font-weight:700;margin:0 0 12px">
-          Create Group <span x-show="createTargetAccount" x-text="'in ' + createTargetAccount"></span>
-        </h3>
-        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">
-          <label class="field"><span>Group Name</span><input x-model="groupForm.name" placeholder="e.g. Robotics Team" /></label>
-          <label class="field"><span>Onshape Label ID</span><input x-model="groupForm.onshape_id" placeholder="24-character ID" /></label>
-          <label class="field"><span>Export Profile</span>
-            <select x-model="groupForm.profile">
-              <option value="STL">STL</option>
-              <option value="STEP">STEP</option>
-            </select>
-          </label>
-          <label class="field"><span>Schedule (optional)</span>
-            <select x-model="groupForm.schedule">
-              <option value="">None</option>
-              <option value="15min">Every 15 min</option>
-              <option value="30min">Every 30 min</option>
-              <option value="hourly">Hourly</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-            </select>
-          </label>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-primary btn-sm" @click="createGroup()">Create</button>
-          <button class="btn btn-ghost btn-sm" @click="cancelCreate()">Cancel</button>
-        </div>
-      </div>
-
-      <!-- Delete Confirmation -->
-      <div class="card glass" x-show="deleteConfirm" x-transition
-           style="padding:16px 20px;border:1px solid var(--red);background:rgba(239,68,68,0.08)">
-        <p style="margin:0 0 12px;font-weight:600">
-          Delete group "<span x-text="deleteConfirm"></span>"? This cannot be undone.
-        </p>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-sm" style="background:var(--red);color:#fff" @click="deleteGroup(deleteConfirm)">Delete</button>
-          <button class="btn btn-ghost btn-sm" @click="cancelDelete()">Cancel</button>
-        </div>
-      </div>
-
-      <!-- Tree Skeleton Loading -->
-      <div x-show="loading" style="display:flex;flex-direction:column;gap:8px">
-        <div class="skeleton skeleton-tree-account"></div>
-        <div class="skeleton skeleton-tree-group"></div>
-        <div class="skeleton skeleton-tree-group" style="width:calc(100% - 36px)"></div>
-        <div class="skeleton skeleton-tree-account" style="margin-top:8px"></div>
-      </div>
-
-      <!-- Tree -->
-      <div x-show="!loading">
-        <template x-for="org in organisations" :key="org.name">
-          <div class="tree-account card glass" style="padding:0;overflow:hidden">
-            <div class="tree-account-header"
-                 @click="toggle(org.name)"
-                 style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border-light)">
-              <span class="tree-caret" :class="{ open: expanded[org.name] }"
-                    style="display:inline-block;transition:transform .2s;font-size:10px"
-                    :style="expanded[org.name] ? 'transform:rotate(90deg)' : ''">▶</span>
-              <input type="checkbox"
-                     :checked="selectAllOrgs[org.name]"
-                     @click.stop
-                     @change="toggleOrg(org.name)"
-                     style="margin:0" />
-              <span class="tree-account-name" x-text="org.name"
-                    style="font-weight:700;font-size:0.95rem"></span>
-              <span class="badge" :class="org.credentials_healthy > 0 ? 'badge-ok' : 'badge-muted'"
-                    x-text="org.credentials_healthy + '/' + org.credential_count + ' keys'"
-                    style="font-size:0.68rem"></span>
-              <span x-show="org.type" x-text="org.type"
-                    style="font-size:0.7rem;color:var(--text-dim);text-transform:capitalize"></span>
-              <span class="tree-count" x-text="org.group_count + ' groups'"
-                    style="margin-left:auto;font-size:0.75rem;color:var(--text-dim)"></span>
-            </div>
-
-            <!-- Groups within this Organisation -->
-            <div class="tree-groups" x-show="expanded[org.name]"
-                 style="padding:4px 0">
-              <template x-for="group in org.groups" :key="group.friendly_name">
-                <div class="tree-group"
-                     style="display:flex;align-items:center;gap:10px;padding:8px 16px 8px 36px;transition:background .15s"
-                     @mouseenter="$el.style.background='var(--hover-bg)'"
-                     @mouseleave="$el.style.background=''">
-                  <input type="checkbox"
-                         :checked="selected[group.friendly_name]"
-                         @change="toggleGroup(group.friendly_name)"
-                         style="margin:0" />
-                  <span x-text="group.friendly_name"
-                        style="font-weight:600;font-size:0.88rem"></span>
-                  <!-- Enable/disable toggle -->
-                  <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:0.62rem"
-                          @click.stop="toggleGroupEnabled(group.friendly_name, group.enabled)"
-                          x-text="group.enabled !== false ? 'Disable' : 'Enable'"
-                          :title="group.enabled !== false ? 'Disable this group' : 'Enable this group'"></button>
-                  <span x-text="group.export_profile"
-                        style="font-size:0.72rem;color:var(--text-dim)"></span>
-                  <span x-show="group.schedule"
-                        x-text="'⏱ ' + group.schedule"
-                        style="font-size:0.68rem;color:var(--text-dim)"></span>
-                  <!-- Move to another account -->
-                  <select class="tree-move-select"
-                          @click.stop
-                          @change="moveGroup(group.friendly_name, $event.target.value)"
-                          style="font-size:0.62rem;margin-left:auto;padding:2px 4px;border-radius:4px;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border-light)">
-                    <option value="">Move to…</option>
-                    <template x-for="o in organisations" :key="o.name">
-                      <option :value="o.name" x-text="o.name"
-                              :selected="o.name === org.name"></option>
-                    </template>
-                  </select>
-                  <!-- Delete -->
-                  <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:0.62rem;color:var(--red)"
-                          @click.stop="confirmDelete(group.friendly_name)"
-                          title="Delete this group">✕</button>
-                </div>
-              </template>
-              <!-- Empty & Create -->
-              <div x-show="org.groups.length === 0"
-                   style="padding:20px 16px 20px 36px;color:var(--text-dim);font-size:0.82rem">
-                <span x-text="'No groups in ' + org.name"></span>
-              </div>
-              <div style="padding:8px 16px 8px 36px">
-                <button class="btn btn-ghost btn-sm" style="font-size:0.72rem"
-                        @click.stop="openCreateForm(org.name); expanded[org.name] = true">
-                  + Create Group
-                </button>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- Empty state -->
-        <div x-show="organisations.length === 0" class="card glass" style="text-align:center;padding:40px 28px">
-          <div style="font-size:2rem;margin-bottom:12px">🏫</div>
-          <h2 style="font-size:1.15rem;font-weight:700;margin:0 0 6px">No Organisations Yet</h2>
-          <p style="color:var(--text-muted);max-width:440px;margin:0 auto 16px;font-size:0.88rem">
-            Create your first organisation — a school, company, or team — to start managing exports.
-          </p>
-          <button class="btn btn-primary" @click="openCreateForm('')">Create Organisation</button>
-        </div>
-      </div>
-    </div>
-  </template>
-
   <!-- Generic data table -->
   <template x-if="hasTable">
     <div class="card glass">
-      <div class="table-wrap" @click="page === 'queue' && onQueueAction($event)">
+      <div class="table-wrap" @click="onQueueAction($event)">
         <table class="data-table">
           <thead>
             <tr>
@@ -479,17 +281,7 @@
           </tbody>
         </table>
       </div>
-      <!-- Table skeleton loading -->
-      <div x-show="loading" style="display:flex;flex-direction:column;gap:4px;padding:8px 0">
-        <div class="skeleton skeleton-row"></div>
-        <div class="skeleton skeleton-row"></div>
-        <div class="skeleton skeleton-row"></div>
-        <div class="skeleton skeleton-row" style="width:70%"></div>
-      </div>
-      <div class="empty" x-show="!visibleRows.length && !loading" style="text-align:center;padding:36px 28px">
-        <p style="color:var(--text-muted);font-size:0.92rem;margin:0 0 8px" x-text="emptyText"></p>
-        <p style="color:var(--text-dim);font-size:0.78rem;margin:0" x-text="'Use the ' + page + ' page to get started.'"></p>
-      </div>
+      <div class="empty" x-show="!visibleRows.length && !loading" x-text="emptyText"></div>
       <div class="table-foot" x-show="visibleRows.length">
         <span x-text="visibleRows.length + ' of ' + rows.length"></span>
       </div>
@@ -514,8 +306,8 @@
           <div class="card glass">
             <div class="card-head"><h2 class="card-title">Appearance</h2></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="chip" :class="{ active: !isDark }" @click="setTheme('light')">☀️ Light</button>
-              <button class="chip" :class="{ active: isDark }" @click="setTheme('dark')">🌙 Dark</button>
+              <button class="chip" :class="{ active: !(window.oem && window.oem.isDark) }" @click="setTheme('light')">☀️ Light</button>
+              <button class="chip" :class="{ active: (window.oem && window.oem.isDark) }" @click="setTheme('dark')">🌙 Dark</button>
             </div>
           </div>
           <div class="card glass">
@@ -538,6 +330,20 @@
               <div class="kv-row"><dt>Disk</dt><dd x-text="(systemCards && systemCards.length && systemCards[3] && systemCards[3].value) || '—'"></dd></div>
               <div class="kv-row"><dt>Uptime</dt><dd x-text="(systemCards && systemCards.length && systemCards[4] && systemCards[4].value) || '—'"></dd></div>
             </dl>
+          </div>
+          <div class="card glass">
+            <div class="card-head"><h2 class="card-title">Export Cleanup</h2></div>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin:0 0 12px">Automatically delete export folders older than the specified number of days.</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <label class="field" style="flex:0 0 auto"><span>Retention (days)</span>
+                <input type="number" min="0" x-model.number="retentionDays" style="width:80px" />
+              </label>
+              <span style="font-size:0.75rem;color:var(--text-dim)" x-text="retentionDays > 0 ? 'Cleanup enabled' : 'Cleanup disabled (0 = keep forever)'"></span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" @click="saveRetention()">Save</button>
+              <button class="btn btn-ghost btn-sm" @click="runCleanup()" :disabled="retentionDays <= 0">Run Cleanup Now</button>
+            </div>
           </div>
         </div>
       </template>
@@ -677,91 +483,204 @@
     </div>
   </template>
 
-  <!-- ── API Keys (legacy — organizations now uses tree view above) ── -->
-  <template x-if="page === 'api-keys'">
+  <!-- ── Schools (self-contained treeSelector) ── -->
+  <template x-if="page === 'organizations'" x-data="treeSelector">
     <div class="page" style="gap:18px">
-      <!-- Onboarding: shown when no orgs exist -->
-      <div x-show="!orgs.length && !loading" class="card glass" style="text-align:center;padding:32px 24px">
-        <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 6px">No API Keys Yet</h2>
-        <p style="color:var(--text-muted);max-width:440px;margin:0 auto 20px;font-size:0.88rem">
-          Add your Onshape API keys to start exporting. Create an organization to group related keys, or add them directly.
-        </p>
-        <button class="btn btn-primary" @click="newOrg.name = ''; document.querySelector('.org-create-card')?.scrollIntoView({behavior:'smooth'})">
-          ➕ Add Your First API Key
-        </button>
-        <button class="btn btn-ghost btn-sm" style="margin-left:8px" @click="importAccounts()">Import from Legacy Accounts</button>
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <h2 style="font-size:1.25rem;font-weight:700;margin:0">Schools</h2>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="badge badge-muted" x-show="loading">Loading…</span>
+          <button class="btn btn-primary" @click="showNewOrgForm = !showNewOrgForm">
+            <span x-text="showNewOrgForm ? 'Cancel' : '＋ Create School'"></span>
+          </button>
+        </div>
       </div>
 
-      <!-- New organization form -->
-      <div class="card glass org-create-card">
-        <div class="card-head">
-          <h2 class="card-title">New Organization</h2>
-          <button class="btn btn-ghost btn-sm" @click="importAccounts()">Import from Accounts</button>
-        </div>
-        <div class="form-grid">
-          <label class="field"><span>Name</span><input x-model="newOrg.name" placeholder="Engineering Team" /></label>
+      <!-- Create School Form (inline) -->
+      <div class="card glass" x-show="showNewOrgForm" x-transition style="padding:20px">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 14px">New School</h3>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+          <label class="field"><span>Name</span><input x-model="newOrgForm.name" placeholder="Engineering Department" /></label>
           <label class="field"><span>Type</span>
-            <select x-model="newOrg.type">
-              <template x-for="t in orgTypes" :key="t"><option x-text="t"></option></template>
+            <select x-model="newOrgForm.type">
+              <option value="school">School</option>
+              <option value="company">Company</option>
+              <option value="team">Team</option>
+              <option value="personal">Personal</option>
             </select>
           </label>
           <label class="field" style="grid-column:1/-1"><span>Description (optional)</span>
-            <input x-model="newOrg.description" placeholder="Main engineering Onshape account" /></label>
+            <input x-model="newOrgForm.description" placeholder="Main Onshape account for this school" /></label>
         </div>
-        <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="createOrg()">Create Organization</button>
+        <button class="btn btn-primary btn-sm" style="margin-top:14px" @click="createOrg()">Create School</button>
       </div>
 
-      <!-- Organization cards -->
-      <template x-for="org in orgs" :key="org.id">
-        <div class="card glass">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title" x-text="org.name"></h2>
-              <p class="card-sub">
-                <span class="badge badge-muted" x-text="org.type"></span>
-                <span x-text="org.credential_count + ' key' + (org.credential_count === 1 ? '' : 's')"></span>
-                <span x-show="org.description" x-text="' · ' + org.description"></span>
-              </p>
+      <!-- School Cards -->
+      <div x-show="!loading">
+        <template x-for="org in organisations" :key="org.id || org.name">
+          <div class="card glass" style="padding:0;overflow:hidden;margin-bottom:16px">
+            <!-- Card Header -->
+            <div @click="expanded[org.name || org.id] = !expanded[org.name || org.id]"
+                 style="display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border-light)">
+              <span style="display:inline-block;transition:transform .2s;font-size:10px"
+                    :style="expanded[org.name || org.id] ? 'transform:rotate(90deg)' : ''">▶</span>
+              <span style="font-weight:700;font-size:1rem" x-text="org.name"></span>
+              <span class="badge badge-muted" style="font-size:0.72rem" x-text="org.type || 'company'"></span>
+              <span style="font-size:0.72rem;color:var(--text-dim);margin-left:auto"
+                    x-text="(org.credentials || []).length + ' key' + ((org.credentials || []).length !== 1 ? 's' : '') + ' · ' + (org.groups || []).length + ' group' + ((org.groups || []).length !== 1 ? 's' : '')"></span>
+              <button class="btn btn-ghost btn-sm" @click.stop="confirmOrgDelete(org.id||org.name, org.name)" style="font-size:0.65rem;color:var(--red)">✕</button>
             </div>
-            <div class="toolbar-actions">
-              <button class="btn btn-ghost btn-sm" @click="duplicateOrg(org.id)">Duplicate</button>
-              <button class="btn btn-ghost btn-sm" @click="deleteOrg(org.id)">Delete</button>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Key Name</th><th>Health</th><th>Priority</th><th>Usage Today</th><th>Access Key</th><th></th></tr></thead>
-              <tbody>
-                <template x-for="c in org.credentials" :key="c.id">
-                  <tr>
-                    <td><strong x-text="c.name"></strong><br><span style="font-size:0.72rem;color:var(--text-dim)" x-text="c.environment"></span></td>
-                    <td><span class="badge" :class="healthClass(c.health)" x-text="c.health"></span></td>
-                    <td x-text="c.priority"></td>
-                    <td x-text="c.requests_today"></td>
-                    <td><code x-text="c.access_key"></code></td>
-                    <td style="white-space:nowrap">
-                      <button class="btn btn-ghost btn-sm" @click="testCredential(org.id, c.id)">Test</button>
-                      <button class="btn btn-ghost btn-sm" @click="deleteCredential(org.id, c.id)">✕</button>
-                    </td>
-                  </tr>
+
+            <!-- Expanded Content -->
+            <div x-show="expanded[org.name || org.id]">
+              <!-- Edit Org -->
+              <template x-if="editingOrgId === (org.id || org.name)">
+                <div style="padding:14px 20px;border-bottom:1px solid var(--border-light);background:var(--surface-1)">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px">
+                    <label class="field"><span>Name</span><input x-model="editOrgForm.name" /></label>
+                    <label class="field"><span>Type</span>
+                      <select x-model="editOrgForm.type">
+                        <option value="company">Company</option><option value="school">School</option>
+                        <option value="team">Team</option><option value="personal">Personal</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div style="display:flex;gap:8px;margin-top:10px">
+                    <button class="btn btn-primary btn-sm" @click="saveEditOrg(org.id||org.name)">Save</button>
+                    <button class="btn btn-ghost btn-sm" @click="cancelEditOrg()">Cancel</button>
+                  </div>
+                </div>
+              </template>
+
+              <!-- API Keys -->
+              <div style="padding:14px 20px;border-bottom:1px solid var(--border-light)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                  <h4 style="font-size:0.9rem;font-weight:700;margin:0">API Keys</h4>
+                  <button class="btn btn-ghost btn-sm" @click="toggleCredForm(org.id||org.name)"
+                          x-text="credFormOrgId === (org.id||org.name) ? 'Cancel' : '+ Add Key'"></button>
+                </div>
+                <!-- Add Key Form -->
+                <div x-show="credFormOrgId === (org.id||org.name)" style="margin-bottom:12px;padding:12px;background:var(--surface-1);border-radius:8px">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px">
+                    <label class="field"><span>Key Name</span><input x-model="credForm.name" placeholder="Primary" /></label>
+                    <label class="field"><span>Environment</span><input x-model="credForm.environment" placeholder="production" /></label>
+                    <label class="field"><span>Access Key</span><input x-model="credForm.access_key" placeholder="Your Onshape access key" /></label>
+                    <label class="field"><span>Secret Key</span><input type="password" x-model="credForm.secret_key" placeholder="Your Onshape secret key" /></label>
+                  </div>
+                  <button class="btn btn-primary btn-sm" style="margin-top:8px" @click="addCredential(org.id||org.name)">Save Key</button>
+                </div>
+                <!-- Credential List -->
+                <div class="table-wrap">
+                  <table class="data-table" x-show="(org.credentials||[]).length">
+                    <thead><tr><th>Key Name</th><th>Environment</th><th>Access Key</th><th></th></tr></thead>
+                    <tbody>
+                      <template x-for="c in (org.credentials||[])" :key="c.id || c.name">
+                        <tr>
+                          <td><strong x-text="c.name"></strong></td>
+                          <td x-text="c.environment || 'production'"></td>
+                          <td><code x-text="(c.access_key || '').substring(0,12) + '…'"></code></td>
+                          <td>
+                            <button class="btn btn-ghost btn-sm" @click="confirmCredDelete(org.id||org.name, c.id||c.name, c.name)">✕</button>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Confirm cred delete -->
+                <div x-show="credToDelete && credToDelete.startsWith((org.id||org.name)+'::')"
+                     style="margin-top:8px;padding:8px 12px;background:rgba(239,68,68,0.1);border-radius:6px;display:flex;align-items:center;gap:8px">
+                  <span style="font-size:0.82rem">Delete "<span x-text="credToDeleteName"></span>"?</span>
+                  <button class="btn btn-sm" style="background:var(--red);color:#fff" @click="deleteCredential()">Delete</button>
+                  <button class="btn btn-ghost btn-sm" @click="cancelCredDelete()">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Groups -->
+              <div style="padding:14px 20px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                  <h4 style="font-size:0.9rem;font-weight:700;margin:0">Groups</h4>
+                  <button class="btn btn-ghost btn-sm" @click="toggleGroupForm(org.id||org.name)"
+                          x-text="groupFormOrgId === (org.id||org.name) ? 'Cancel' : '+ Create Group'"></button>
+                </div>
+                <!-- Create Group Form -->
+                <div x-show="groupFormOrgId === (org.id||org.name)" style="margin-bottom:12px;padding:12px;background:var(--surface-1);border-radius:8px">
+                  <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px">
+                    <label class="field"><span>Group Name</span><input x-model="groupForm.name" placeholder="e.g. Robotics Team" /></label>
+                    <label class="field"><span>Onshape Label ID</span><input x-model="groupForm.onshape_id" placeholder="24-char hex ID" /></label>
+                    <label class="field"><span>Export Profile</span>
+                      <select x-model="groupForm.profile">
+                        <option value="STL">STL</option>
+                        <option value="STEP">STEP</option>
+                        <option value="3MF">3MF</option>
+                        <option value="STL + STEP">STL + STEP</option>
+                        <option value="All Formats">All Formats</option>
+                      </select>
+                    </label>
+                    <label class="field"><span>Schedule (optional)</span>
+                      <select x-model="groupForm.schedule">
+                        <option value="">None</option>
+                        <option value="15min">Every 15 min</option>
+                        <option value="30min">Every 30 min</option>
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                      </select>
+                    </label>
+                  </div>
+                  <button class="btn btn-primary btn-sm" style="margin-top:8px" @click="createGroup(org.id||org.name)">Create Group</button>
+                </div>
+                <!-- Group List -->
+                <div x-show="(org.groups||[]).length === 0" style="padding:16px;text-align:center;color:var(--text-dim);font-size:0.82rem">
+                  No groups yet. Create one to start exporting.
+                </div>
+                <template x-for="g in (org.groups||[])" :key="g.friendly_name">
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:0.85rem">
+                    <span x-text="g.friendly_name" style="font-weight:600"></span>
+                    <span x-text="g.export_profile" style="font-size:0.72rem;color:var(--text-dim)"></span>
+                    <span x-show="g.schedule" x-text="'⏱ ' + g.schedule" style="font-size:0.68rem;color:var(--text-dim)"></span>
+                    <button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:0.65rem"
+                            @click="toggleGroupEnabled(g.friendly_name, g.enabled)"
+                            x-text="g.enabled !== false ? 'Disable' : 'Enable'"></button>
+                    <button class="btn btn-ghost btn-sm" style="font-size:0.65rem;color:var(--red)"
+                            @click="confirmDelete(g.friendly_name)">✕</button>
+                  </div>
                 </template>
-              </tbody>
-            </table>
-          </div>
-          <div class="empty" x-show="!org.credentials.length" style="padding:18px">No keys yet — add one below.</div>
-          <details class="cred-add">
-            <summary>+ Add API Key</summary>
-            <div class="form-grid" style="margin-top:12px">
-              <label class="field"><span>Key Name</span><input x-model="credForm.name" placeholder="Primary" /></label>
-              <label class="field"><span>Environment</span><input x-model="credForm.environment" placeholder="production" /></label>
-              <label class="field"><span>Access Key</span><input x-model="credForm.access_key" placeholder="env:ONSHAPE_ACCESS_KEY" /></label>
-              <label class="field"><span>Secret Key</span><input type="password" x-model="credForm.secret_key" placeholder="env:ONSHAPE_SECRET_KEY" /></label>
-              <label class="field"><span>Priority (1 = primary)</span><input type="number" min="1" x-model.number="credForm.priority" /></label>
+                <!-- Confirm group delete -->
+                <div x-show="groupToDelete" style="margin-top:8px;padding:8px 12px;background:rgba(239,68,68,0.1);border-radius:6px;display:flex;align-items:center;gap:8px">
+                  <span style="font-size:0.82rem">Delete "<span x-text="groupToDelete"></span>"?</span>
+                  <button class="btn btn-sm" style="background:var(--red);color:#fff" @click="deleteGroup(groupToDelete)">Delete</button>
+                  <button class="btn btn-ghost btn-sm" @click="cancelDelete()">Cancel</button>
+                </div>
+              </div>
             </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:12px" @click="addCredential(org.id)">Add Key</button>
-          </details>
+          </div>
+        </template>
+      </div>
+
+      <!-- Confirm school delete -->
+      <div x-show="orgToDelete" class="card glass" style="padding:20px;border:1px solid var(--red);background:rgba(239,68,68,0.08)">
+        <p style="margin:0 0 12px;font-weight:600">
+          Delete school "<span x-text="orgToDeleteName"></span>"? This removes all its API keys and groups.
+        </p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" style="background:var(--red);color:#fff" @click="deleteOrg(orgToDelete)">Delete</button>
+          <button class="btn btn-ghost btn-sm" @click="cancelOrgDelete()">Cancel</button>
         </div>
-      </template>
+      </div>
+
+      <!-- Empty state -->
+      <div x-show="!organisations.length && !loading" class="card glass" style="text-align:center;padding:36px 28px">
+        <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 6px">No Schools Yet</h2>
+        <p style="color:var(--text-soft);max-width:440px;margin:0 auto 20px;font-size:0.88rem">
+          Create a school to group your Onshape API keys and export groups.
+        </p>
+        <button class="btn btn-primary" @click="showNewOrgForm = true">
+          ➕ Create Your First School
+        </button>
+      </div>
     </div>
   </template>
 

@@ -4,3 +4,25 @@
 2026-06-26 17:34:14 INFO     [onshape_export_manager.export] label=Adriana API account=Adrians profile=STL files_exported=9 failed_files=0 skipped_files=0 retries=0 duration_seconds=22.375
 2026-06-26 17:50:57 INFO     [onshape_export_manager.export] Starting manual export label=Adriana API profile=Bambu STL account=Adrians
 2026-06-26 17:51:19 INFO     [onshape_export_manager.export] label=Adriana API account=Adrians profile=Bambu STL files_exported=9 failed_files=0 skipped_files=0 retries=0 duration_seconds=22.265
+2026-07-09 12:27:22 INFO     [onshape_export_manager.export] Starting manual export label=Electronics profile=STL account=Primary
+2026-07-09 12:27:23 ERROR    [onshape_export_manager.export] label=Electronics account=Primary profile=STL files_exported=0 failed_files=1 skipped_files=0 retries=1 duration_seconds=0.599
+2026-07-09 12:27:27 INFO     [onshape_export_manager.export] Starting manual export label=Electronics profile=STL account=Primary
+2026-07-09 12:27:28 ERROR    [onshape_export_manager.export] label=Electronics account=Primary profile=STL files_exported=0 failed_files=1 skipped_files=0 retries=1 duration_seconds=0.489
+2026-07-09 12:27:32 INFO     [onshape_export_manager.export] Starting manual export label=Electronics profile=STL account=Primary
+2026-07-09 12:27:33 ERROR    [onshape_export_manager.export] label=Electronics account=Primary profile=STL files_exported=0 failed_files=1 skipped_files=0 retries=1 duration_seconds=0.395
+2026-07-09 12:27:37 INFO     [onshape_export_manager.export] Starting manual export label=Electronics profile=STL account=Primary
+2026-07-09 12:27:38 ERROR    [onshape_export_manager.export] label=Electronics account=Primary profile=STL files_exported=0 failed_files=1 skipped_files=0 retries=1 duration_seconds=0.428
+2026-07-09 12:28:25 INFO     [onshape_export_manager.export] Starting manual export label=Electronics profile=STL account=Primary
+2026-07-09 12:28:32 INFO     [onshape_export_manager.export] label=Electronics account=Primary profile=STL files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=7.435
+2026-07-10 16:23:59 INFO     [onshape_export_manager.export] Starting manual export label=testins profile=STEP account=tests
+2026-07-10 16:24:09 INFO     [onshape_export_manager.export] label=testins account=tests profile=STEP files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=9.313
+2026-07-10 16:24:54 INFO     [onshape_export_manager.export] Starting manual export label=testins profile=STEP account=tests
+2026-07-10 16:24:59 INFO     [onshape_export_manager.export] label=testins account=tests profile=STEP files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=4.664
+2026-07-10 16:25:39 INFO     [onshape_export_manager.export] Starting manual export label=testins profile=STEP account=tests
+2026-07-10 16:25:43 INFO     [onshape_export_manager.export] label=testins account=tests profile=STEP files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=4.134
+2026-07-10 16:27:23 INFO     [onshape_export_manager.export] Starting manual export label=Tests profile=STEP account=tests
+2026-07-10 16:27:27 INFO     [onshape_export_manager.export] label=Tests account=tests profile=STEP files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=4.274
+2026-07-10 16:28:50 INFO     [onshape_export_manager.export] Starting manual export label=Tests profile=STEP account=tests
+2026-07-10 16:28:54 INFO     [onshape_export_manager.export] label=Tests account=tests profile=STEP files_exported=0 failed_files=0 skipped_files=0 retries=0 duration_seconds=4.318
+2026-07-10 16:28:59 INFO     [onshape_export_manager.export] Starting manual export label=Tests profile=STEP account=tests
+2026-07-10 16:29:09 INFO     [onshape_export_manager.export] label=Tests account=tests profile=STEP files_exported=1 failed_files=0 skipped_files=0 retries=0 duration_seconds=9.986

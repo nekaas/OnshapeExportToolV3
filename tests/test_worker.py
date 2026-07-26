@@ -32,6 +32,19 @@ def _seed_config(base_dir: Path) -> None:
         json.dumps({"accounts": [{"name": "acct", "access_key": "a", "secret_key": "s"}]}),
         encoding="utf-8",
     )
+    # Seed a "STL" profile so labels can reference it
+    (config_dir / "export_profiles.json").write_text(
+        json.dumps({
+            "profiles": [
+                {"name": "STL", "formats": ["stl"], "enabled": True,
+                 "options": {}, "bambu": {"enabled": False, "create_3mf": False,
+                 "open_bambu_studio": False, "auto_arrange": True,
+                 "auto_split_plates": True, "machine_profile": "",
+                 "process_profile": "", "output_folder": ""}}
+            ]
+        }),
+        encoding="utf-8",
+    )
     (config_dir / "labels.json").write_text(
         json.dumps(
             {

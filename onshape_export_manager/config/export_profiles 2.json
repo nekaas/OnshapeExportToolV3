@@ -1,0 +1,122 @@
+{
+  "profiles": [
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": ["stl"],
+      "name": "STL",
+      "options": {
+        "mode": "binary",
+        "resolution": "medium",
+        "units": "millimeter"
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": ["step"],
+      "name": "STEP",
+      "options": {
+        "formatName": "STEP",
+        "stepVersionString": "AP242",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": ["3mf"],
+      "name": "3MF",
+      "options": {
+        "formatName": "3MF",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": ["stl", "step"],
+      "name": "STL + STEP",
+      "options": {
+        "step": {
+          "formatName": "STEP",
+          "stepVersionString": "AP242",
+          "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "medium",
+          "units": "millimeter"
+        }
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": ["stl", "step", "3mf"],
+      "name": "All Formats",
+      "options": {
+        "3mf": {
+          "formatName": "3MF",
+          "storeInDocument": false
+        },
+        "step": {
+          "formatName": "STEP",
+          "stepVersionString": "AP242",
+          "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "medium",
+          "units": "millimeter"
+        }
+      }
+    }
+  ]
+}
+

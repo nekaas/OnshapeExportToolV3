@@ -158,8 +158,8 @@ class CliIntegrationTests(unittest.TestCase):
         self._init()
         result = self._run("--list-export-profiles")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("STL:", result.stdout)
-        self.assertIn("STEP:", result.stdout)
+        self.assertIn("STL — 3D Printing", result.stdout)
+        self.assertIn("STEP — Maximum Quality", result.stdout)
 
     # -- profile management -------------------------------------------------
 

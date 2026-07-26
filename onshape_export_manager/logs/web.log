@@ -138,3 +138,316 @@
 2026-07-08 21:51:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
 2026-07-08 21:51:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 21:59:24 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 22:01:22 INFO     [onshape_export_manager.web] Organization created: Tests
+2026-07-08 22:03:22 INFO     [onshape_export_manager.web] Credential added to 4156e276efff47978b203f9e1be55c29: Tests
+2026-07-08 22:16:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:17:23 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:17:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:17:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:23:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:26 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:26 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:24:31 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:25:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:25:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:26:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:26:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:27:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:27:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:27:32 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 22:34:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:34:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:35:04 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:35:04 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:37:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:37:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:39:24 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 22:50:13 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:09:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:13:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:20:49 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:21:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:21:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:28:00 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:28:01 WARNING  [onshape_export_manager.web] Unhandled AttributeError in GET /api/tree: 'OrganizationManager' object has no attribute 'list_organizations'
+2026-07-08 23:28:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:28:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:28:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:28:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:29:20 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:30:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:30:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:30:38 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:31:19 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:31:47 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:32:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:32:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:32:21 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:33:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:33:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:33:40 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:34:04 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:34:04 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:34:25 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:34:25 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:34:53 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:35:02 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:35:39 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:35:39 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:35:59 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-08 23:40:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-08 23:40:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:03:12 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 00:08:34 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:08:34 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:12:27 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 00:13:08 INFO     [onshape_export_manager.web] Organization created: Acme Corp
+2026-07-09 00:13:08 INFO     [onshape_export_manager.web] Credential added to 357e1343490b41d6899ae587d0aa33cb: Backup
+2026-07-09 00:14:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:15:08 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 00:15:30 INFO     [onshape_export_manager.web] Organization created: skola
+2026-07-09 00:21:00 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:21:00 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:21:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:24:45 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Adriana API: name 'logger' is not defined
+2026-07-09 00:29:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:30:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:30:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:31:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:31:30 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:32:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:32:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:32:16 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Robotics: name 'logger' is not defined
+2026-07-09 00:33:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:33:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:33:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:33:29 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Robotics: name 'logger' is not defined
+2026-07-09 00:33:46 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Robotics: name 'logger' is not defined
+2026-07-09 00:33:58 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Demo: name 'logger' is not defined
+2026-07-09 00:34:37 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:35:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:35:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:36:12 WARNING  [onshape_export_manager.web] Unhandled NameError in DELETE /api/groups/Test: name 'logger' is not defined
+2026-07-09 00:36:53 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:37:18 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:37:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 00:37:20 INFO     [onshape_export_manager.web] Deleted group 'QATest'
+2026-07-09 00:39:16 INFO     [onshape_export_manager.web] Organization updated: Tests
+2026-07-09 10:12:49 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:04:09 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:04:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:04:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:12:03 INFO     [onshape_export_manager.web] Credential added to 4156e276efff47978b203f9e1be55c29: tests
+2026-07-09 11:13:49 INFO     [onshape_export_manager.web] Manual export enqueued id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 label=testins
+2026-07-09 11:14:18 INFO     [onshape_export_manager.web] Manual export enqueued id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 label=testins
+2026-07-09 11:14:52 INFO     [onshape_export_manager.web] Manual export enqueued id=bde809d8-09cf-4f50-9cc3-ee5570adc19f label=testins
+2026-07-09 11:15:15 INFO     [onshape_export_manager.web] Manual export enqueued id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 label=testins
+2026-07-09 11:16:26 INFO     [onshape_export_manager.web] Manual export enqueued id=ff118aa3-927a-433f-aca3-5d3f86282514 label=testins
+2026-07-09 11:23:33 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:23:57 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:23:57 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:23:59 WARNING  [onshape_export_manager.web] Unhandled ValidationError in PUT /api/settings/retention: 1 validation error for AppConfig
+export_retention_days
+  Extra inputs are not permitted [type=extra_forbidden, input_value=14, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+2026-07-09 11:24:48 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:25:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:25:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:25:04 INFO     [onshape_export_manager.web] Export retention set to 14 days
+2026-07-09 11:37:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:37:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:37:38 INFO     [onshape_export_manager.web] Manual export enqueued id=6d107631-5356-44bd-8112-0c6a4e16b90b label=Electronics
+2026-07-09 11:37:38 INFO     [onshape_export_manager.web] Export retention set to 14 days
+2026-07-09 11:37:38 WARNING  [onshape_export_manager.web] Unhandled ImportError in POST /api/cleanup/run: cannot import name '_human_size' from 'onshape_export_manager.core.metrics' (/Users/hrebis/Desktop/OnshapeExportTool/onshape_export_manager/core/metrics.py)
+2026-07-09 11:38:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:38:16 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:38:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:38:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:38:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 11:38:54 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 11:38:54 INFO     [onshape_export_manager.web] Manual export enqueued id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 label=Electronics
+2026-07-09 12:26:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 12:27:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 12:27:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 12:27:19 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 12:27:19 INFO     [onshape_export_manager.web] Manual export enqueued id=db67c8b3-c8e6-4188-9784-42a4b62fa34b label=Electronics
+2026-07-09 12:28:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 12:28:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-09 12:28:22 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-09 12:28:22 INFO     [onshape_export_manager.web] Manual export enqueued id=57c8e2b8-c4fb-416c-b4fb-afcffb3b83ab label=Electronics
+2026-07-10 16:03:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:05:28 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:06:00 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:08:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:08:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:08:52 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 16:11:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:11:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:11:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:18:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:19:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:20:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:20:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:21:49 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 16:23:59 INFO     [onshape_export_manager.web] Manual export enqueued id=7c321a71-442f-4e79-9c4e-ed78f95225f2 label=testins
+2026-07-10 16:24:53 INFO     [onshape_export_manager.web] Manual export enqueued id=e3158eab-bf75-4e7e-aedf-7041622eab13 label=testins
+2026-07-10 16:25:37 INFO     [onshape_export_manager.web] Manual export enqueued id=e54585ab-b122-467e-844b-0288356a194d label=testins
+2026-07-10 16:26:20 INFO     [onshape_export_manager.web] Deleted group 'testins'
+2026-07-10 16:27:21 INFO     [onshape_export_manager.web] Manual export enqueued id=16e9d26d-5f2c-4688-a6af-79f8caee6169 label=Tests
+2026-07-10 16:28:49 INFO     [onshape_export_manager.web] Manual export enqueued id=2ed383ea-f851-45ea-9972-152194888f5b label=Tests
+2026-07-10 16:28:58 INFO     [onshape_export_manager.web] Manual export enqueued id=6cc901cd-63bb-4912-8921-deef8603ec76 label=Tests
+2026-07-10 16:41:35 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:42:05 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:42:34 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:42:55 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:43:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:44:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:44:35 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:45:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 16:46:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:19:31 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:19:59 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:20:23 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:20:23 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:21:03 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 17:33:16 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:35:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:42:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:42:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:42:50 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 17:42:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:45:36 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:45:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:46:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:46:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:46:45 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 17:48:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:48:53 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:48:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:32 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:45 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:46 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:47 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:48 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:49 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:53 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:57 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:49:59 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:00 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:02 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:04 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:05 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:05 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:06 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:06 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:09 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:14 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:15 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:16 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:17 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:19 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:50:54 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:51:44 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:52:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 17:52:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 18:25:22 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 18:25:41 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 18:25:41 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 18:25:43 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-10 22:39:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-10 22:41:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:24:29 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:26:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:27:06 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:30:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:31:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:31:58 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:32:21 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:32:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:32:38 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:32:41 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 17:33:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:33:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:33:10 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 17:34:31 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:34:49 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:35:06 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:35:23 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:35:23 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:35:25 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 17:36:32 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:37:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:37:41 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:37:41 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:37:43 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 17:39:12 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:40:08 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:40:43 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:40:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:40:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:40:53 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 17:41:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:42:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:42:07 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 17:44:01 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:01:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:05:52 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:06:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:06:01 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:14:03 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:14:24 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:14:50 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:15:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:16:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:16:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:16:27 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:16:44 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:17:35 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:29:46 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:35:10 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:35:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:35:20 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:36:16 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:36:56 INFO     [onshape_export_manager.web] Cleanup: removed Adriana_API (13770112 bytes)
+2026-07-26 18:43:57 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:44:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:44:11 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:45:25 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:52:26 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:54:42 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:54:42 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:54:54 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:55:17 INFO     [onshape_export_manager.web] Owner signed in
+2026-07-26 18:57:56 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:58:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 18:58:13 INFO     [onshape_export_manager.web] Web application initialized version=0.1.0
+2026-07-26 19:00:24 INFO     [onshape_export_manager.web] Owner signed in

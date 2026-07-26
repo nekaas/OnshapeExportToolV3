@@ -58,7 +58,7 @@ class MetricsServiceTests(unittest.TestCase):
             metrics = MetricsService(app)
             snapshot = metrics.dashboard_snapshot()
 
-            self.assertEqual(snapshot["summary"]["export_profiles"], 8)
+            self.assertEqual(snapshot["summary"]["export_profiles"], 15)
             self.assertIn("activity", snapshot["exports"])
             self.assertIn("counts", snapshot["queue"])
             self.assertIn("schema_version", snapshot["database"])
@@ -69,13 +69,13 @@ class MetricsServiceTests(unittest.TestCase):
             app = create_app(Path(tmp))
             metrics = MetricsService(app)
 
-            results = metrics.global_search("bundle")
+            results = metrics.global_search("STL")
             titles = [
                 item["title"]
                 for group in results["groups"]
                 for item in group["items"]
             ]
-            self.assertTrue(any("Bundle" in title for title in titles))
+            self.assertTrue(any("STL" in title for title in titles))
             self.assertEqual(metrics.global_search("")["total"], 0)
 
     def test_summary_counts_records_history(self) -> None:

@@ -70,6 +70,7 @@ class ExportEngineTests(unittest.TestCase):
                 api_pool=pool,
                 database=database,
                 client_factory=lambda _: fake_client,  # type: ignore[arg-type]
+                max_workers=1,  # single-threaded for deterministic test ordering
             )
             request = ExportJobRequest(
                 label=LabelDefinition(
@@ -84,8 +85,7 @@ class ExportEngineTests(unittest.TestCase):
                     formats=[
                         ExportFormat.STL,
                         ExportFormat.STEP,
-                        ExportFormat.OBJ,
-                        ExportFormat.IGES,
+                        ExportFormat.MF3,
                     ],
                     options={"mode": "binary", "step": {"stepVersionString": "AP242"}},
                 ),
@@ -96,17 +96,16 @@ class ExportEngineTests(unittest.TestCase):
             result = asyncio.run(engine.run_manual_export(request))
 
             self.assertTrue(result.success)
-            self.assertEqual(len(result.exported_files), 4)
+            self.assertEqual(len(result.exported_files), 3)
             self.assertEqual(
                 [call[0] for call in fake_client.calls],
-                [ExportFormat.STL, ExportFormat.STEP, ExportFormat.OBJ, ExportFormat.IGES],
+                [ExportFormat.STL, ExportFormat.STEP, ExportFormat.MF3],
             )
-            self.assertTrue((result.export_folder / "STL").exists())
-            self.assertTrue((result.export_folder / "STEP").exists())
-            self.assertTrue((result.export_folder / "IGES").exists())
+            self.assertTrue(result.export_folder.exists())
+            # Flat structure: all files in the batch folder, no format subfolders
             history = database.list_export_history()
             self.assertEqual(len(history), 1)
-            self.assertEqual(len(history[0].exported_files), 4)
+            self.assertEqual(len(history[0].exported_files), 3)
             self.assertTrue(history[0].success)
 
     def test_manual_export_records_part_studio_failure(self) -> None:

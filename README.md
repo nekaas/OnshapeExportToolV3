@@ -102,10 +102,10 @@ Pluggable notification channels: Discord, Slack, Teams, Email, Webhook. Each cha
 | Page | Purpose |
 |------|---------|
 | **Dashboard** | Overview — cards, charts, system health, recent exports |
-| **Organisations** | Primary hub: Organisation tree → Groups, credentials, export management |
-| **Export** | Manual export — Organisation → Group tree selector + detailed form with preview |
-| **History** | Export history table — filterable, sortable |
-| **Settings** | General (theme, worker), Notifications, Backups, Remote Access, Logs, About |
+| **Organisations** | Primary hub: Organisation tree with inline API key and Group management |
+| **Export** | Manual export with Organisation → Group tree selector, preview, templates, date window |
+| **History** | Export history table — filterable, sortable, searchable |
+| **Settings** | General (theme, worker, cleanup), Notifications, Backups, Remote Access, Logs, About |
 
 ---
 

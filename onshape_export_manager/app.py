@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from onshape_export_manager.core.api_pool import ApiPool
 from onshape_export_manager.core.audit import AuditService, TelemetryStore
-from onshape_export_manager.core.configuration import ConfigError, ConfigManager, ConfigWatcher
+from onshape_export_manager.core.configuration import ConfigError, ConfigManager
 from onshape_export_manager.core.database import Database
 from onshape_export_manager.core.events import EventBus
 from onshape_export_manager.core.export_engine import ExportEngine
@@ -37,7 +37,6 @@ class Application:
     audit: AuditService | None = None
     telemetry: TelemetryStore | None = None
     notifications: NotificationService | None = None
-    config_watcher: ConfigWatcher | None = None
 
     def bootstrap(self) -> "Application":
         """Create required directories and initialize process-wide services."""
@@ -45,17 +44,10 @@ class Application:
         self.config_manager.ensure_default_files()
         self._configure_logging()
         self.database.initialize()
-        # The event bus is the backbone for live updates, audit, and AI-readiness.
-        # It is created unconditionally so every subsystem can publish even if
-        # configuration is incomplete.
         self.event_bus = EventBus()
         self.audit = AuditService(self.database, self.event_bus)
         self.audit.start()
         self.telemetry = TelemetryStore(self.database)
-        # Notifications subscribe to the same bus; channels are configured via
-        # the browser. The delivery thread is started lazily by the web/CLI
-        # entrypoint (start_notifications) so short-lived CLI invocations and
-        # tests do not spawn a background thread they never use.
         self.notifications = NotificationService(self.config_manager, self.event_bus)
         try:
             self.queue_manager = self.create_queue_manager()
@@ -67,10 +59,6 @@ class Application:
             self.api_pool = self.create_api_pool()
         except (ConfigError, ValidationError):
             self.api_pool = None
-        # Start config file watcher for hot-reload on headless deployments
-        self.config_watcher = ConfigWatcher(self.config_manager)
-        self.config_watcher.set_event_bus(self.event_bus)
-        self.config_watcher.start()
         return self
 
     def _configure_logging(self) -> None:
@@ -84,10 +72,25 @@ class Application:
         configure_logging(self.paths.logs_dir, level)
 
     def create_api_pool(self, *, resolve_env: bool = False) -> ApiPool:
-        """Create an API pool from validated account configuration."""
+        """Create an API pool from validated account + organization configuration."""
         config = self.config_manager.load()
+        accounts = list(config.runtime_accounts(resolve_env=resolve_env))
+        # Also include credentials from organizations.json
+        from onshape_export_manager.core.organizations import OrganizationsConfig
+        from onshape_export_manager.core.configuration import OnshapeAccount, read_json
+        orgs_data = read_json(self.config_manager.organizations_file)
+        orgs_cfg = OrganizationsConfig.model_validate(orgs_data)
+        for cred in orgs_cfg.runtime_credentials(resolve_env=resolve_env):
+            if cred.enabled:
+                accounts.append(OnshapeAccount(
+                    name=cred.name,
+                    access_key=cred.access_key,
+                    secret_key=cred.secret_key,
+                    description=f"{cred.organization} / {cred.environment}",
+                    enabled=True,
+                ))
         return ApiPool(
-            config.runtime_accounts(resolve_env=resolve_env),
+            accounts,
             database=self.database,
         )
 

@@ -2,13 +2,46 @@
   "labels": [
     {
       "assigned_accounts": [
-        "Adrians"
+        "Primary"
       ],
       "enabled": true,
       "export_location": "exports",
       "export_profile": "STL",
-      "friendly_name": "Adriana API",
-      "onshape_label_id": "6a3d2ee060504cc7bfa7ce35",
+      "friendly_name": "Electronics",
+      "onshape_label_id": "abcd1234efgh5678ijkl9012",
+      "scheduler": null
+    },
+    {
+      "assigned_accounts": [
+        "Primary"
+      ],
+      "enabled": true,
+      "export_location": "exports",
+      "export_profile": "STEP",
+      "friendly_name": "Robotics",
+      "onshape_label_id": "abcd1234efgh5678ijkl9013",
+      "scheduler": null
+    },
+    {
+      "assigned_accounts": [
+        "Primary"
+      ],
+      "enabled": true,
+      "export_location": "exports",
+      "export_profile": "STL",
+      "friendly_name": "Teachers",
+      "onshape_label_id": "abcd1234efgh5678ijkl9014",
+      "scheduler": null
+    },
+    {
+      "assigned_accounts": [
+        "tests"
+      ],
+      "enabled": true,
+      "export_location": "exports",
+      "export_profile": "STEP",
+      "friendly_name": "Tests",
+      "onshape_label_id": "6a4ea84fa868f7e1f508d1f7",
       "scheduler": null
     }
   ]

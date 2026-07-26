@@ -259,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Scheduler jobs: {len(jobs)}")
         print(f"Enabled jobs: {len(enabled)}")
     elif args.list_export_formats:
-        for item in list_format_definitions(part_studio_only=True):
+        for item in list_format_definitions():
             print(f"{item.format.value}: {item.display_name} ({item.default_extension})")
     elif args.list_export_profiles:
         try:

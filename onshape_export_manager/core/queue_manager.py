@@ -56,7 +56,17 @@ class QueueManager:
         reason: str = "",
         next_run_at: datetime | None = None,
     ) -> str:
-        """Queue an export job."""
+        """Queue an export job, skipping duplicates (same label+profile pending)."""
+        # Deduplication: skip if a pending/running job for the same label+profile exists
+        existing = self.database.list_due_queue(now=self._now(), limit=500)
+        for entry in existing:
+            if entry.label_name == label_name and entry.profile_name == profile_name:
+                self.logger.info(
+                    "Skipped duplicate enqueue id=%s label=%s profile=%s",
+                    entry.id, label_name, profile_name,
+                )
+                return entry.id
+
         job = QueueEntry(
             label_name=label_name,
             profile_name=profile_name,

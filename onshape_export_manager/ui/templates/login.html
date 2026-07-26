@@ -45,13 +45,6 @@
           <p class="auth-hint">Password must be at least 8 characters.</p>
           {% endif %}
 
-          {% if totp_enabled and not setup %}
-          <label class="field">
-            <span>Two-factor code</span>
-            <input type="text" name="totp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" placeholder="123456" />
-          </label>
-          {% endif %}
-
           {% if not setup %}
           <label class="auth-remember">
             <input type="checkbox" name="remember" value="1" />

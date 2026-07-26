@@ -8,7 +8,6 @@ lifting lives in :mod:`onshape_export_manager.core`.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -23,7 +22,6 @@ from onshape_export_manager.core.auth import (
     SESSION_COOKIE,
     AuthError,
     AuthService,
-    totp_provisioning_uri,
 )
 from onshape_export_manager.core.backup import BackupError, BackupManager
 from onshape_export_manager.core.events import EventCategory, EventSeverity, EventType
@@ -49,7 +47,6 @@ from onshape_export_manager.core.validation import (
     CreateLabelRequest,
     CreateNotificationRequest,
     CreateOwnerRequest,
-    CreateProfileRequest,
     ManualExportRequest,
     SetStorageRequest,
     UpdateGroupRequest,
@@ -58,7 +55,7 @@ from onshape_export_manager.core.validation import (
 from onshape_export_manager.core.worker import BackgroundWorker
 
 try:
-    from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect
+    from fastapi import FastAPI, Query, Request
     from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
     from fastapi.staticfiles import StaticFiles
     from fastapi.templating import Jinja2Templates
@@ -67,8 +64,6 @@ except ModuleNotFoundError:  # pragma: no cover - dependency installed by requir
     FastAPI = None  # type: ignore[assignment]
     Query = None  # type: ignore[assignment]
     Request = None  # type: ignore[assignment]
-    WebSocket = None  # type: ignore[assignment]
-    WebSocketDisconnect = None  # type: ignore[assignment]
     HTMLResponse = None  # type: ignore[assignment]
     JSONResponse = None  # type: ignore[assignment]
     RedirectResponse = None  # type: ignore[assignment]
@@ -82,7 +77,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency installed by requir
 # Notifications, and Backups live under the Settings gear.
 NAV_ITEMS: list[dict[str, str]] = [
     {"slug": "", "label": "Home", "icon": "home"},
-    {"slug": "organizations", "label": "Organisations", "icon": "key"},
+    {"slug": "organizations", "label": "Schools", "icon": "key"},
     {"slug": "export", "label": "Export", "icon": "bolt"},
     {"slug": "history", "label": "History", "icon": "history"},
 ]
@@ -104,16 +99,6 @@ LEGACY_PAGES: set[str] = {
     "plugins",
     "settings",
 }
-
-# ── Settings sub-pages (rendered within /settings via tabs) ────────────
-SETTINGS_TABS: list[str] = [
-    "general",
-    "notifications",
-    "backups",
-    "remote-access",
-    "logs",
-    "about",
-]
 
 ALLOWED_PAGES = {item["slug"] for item in NAV_ITEMS if item["slug"]} | LEGACY_PAGES
 
@@ -404,7 +389,6 @@ def create_web_app(base_dir: str | Path | None = None):
                 "page": "",
                 "page_title": "Sign In",
                 "setup": not auth.is_configured(),
-                "totp_enabled": auth.totp_enabled(),
                 "error": request.query_params.get("error", ""),
             },
         )
@@ -428,7 +412,6 @@ def create_web_app(base_dir: str | Path | None = None):
         form = await request.form()
         username = str(form.get("username", "")).strip()
         password = str(form.get("password", ""))
-        totp = str(form.get("totp", "")).strip()
         remember = bool(form.get("remember"))
 
         if not auth.is_configured():
@@ -447,15 +430,6 @@ def create_web_app(base_dir: str | Path | None = None):
                     actor=username or "unknown",
                 )
                 return RedirectResponse(f"/login?error={_q('Invalid username or password')}", status_code=302)
-            if auth.totp_enabled() and not auth.verify_login_totp(totp):
-                emit_event(
-                    EventType.AUTH_LOGIN_FAILED,
-                    f"Failed two-factor for '{username}'",
-                    severity=EventSeverity.WARNING,
-                    data={"username": username, "reason": "bad_totp"},
-                    actor=username or "unknown",
-                )
-                return RedirectResponse(f"/login?error={_q('Invalid two-factor code')}", status_code=302)
 
         token = auth.create_session(remember=remember, user_agent=request.headers.get("user-agent", ""))
         response = RedirectResponse("/", status_code=302)
@@ -645,7 +619,7 @@ def create_web_app(base_dir: str | Path | None = None):
                 "onshape_label_id": lbl.onshape_label_id,
                 "export_profile": lbl.export_profile,
                 "export_location": lbl.export_location,
-                "schedule": lbl.scheduler.interval if lbl.scheduler else None,
+                "schedule": lbl.scheduler,
                 "enabled": lbl.enabled,
             }
             assigned = False
@@ -666,6 +640,17 @@ def create_web_app(base_dir: str | Path | None = None):
                 1 for c in org.get("credentials", [])
                 if c.get("rate_limit_status", "healthy") == "healthy"
             )
+            # Build credential list with status indicators
+            creds: list[dict[str, Any]] = []
+            for c in org.get("credentials", []):
+                creds.append({
+                    "id": c.get("id", c.get("name", "")),
+                    "name": c.get("name", ""),
+                    "environment": c.get("environment", "production"),
+                    "enabled": c.get("enabled", True),
+                    "priority": c.get("priority", 1),
+                    "status": c.get("rate_limit_status", "healthy"),
+                })
             result.append({
                 "id": org.get("id", org["name"]),
                 "name": org["name"],
@@ -674,6 +659,7 @@ def create_web_app(base_dir: str | Path | None = None):
                 "enabled": org.get("enabled", True),
                 "credential_count": len(org.get("credentials", [])),
                 "credentials_healthy": healthy,
+                "credentials": creds,
                 "groups": gs,
                 "group_count": len(gs),
             })
@@ -684,6 +670,64 @@ def create_web_app(base_dir: str | Path | None = None):
     async def status() -> dict[str, Any]:
         return build_dashboard_context(application)
 
+    # -- Retention / cleanup -----------------------------------------------
+
+    @api.get("/api/settings/retention")
+    async def api_get_retention() -> dict[str, Any]:
+        """Get export retention setting (days, 0 = never cleanup)."""
+        try:
+            cfg = application.config_manager.load().app
+            days = getattr(cfg, 'export_retention_days', 0) or 0
+        except Exception:
+            days = 0
+        return {"retention_days": days, "description": "Exports older than this many days are auto-deleted. 0 = never."}
+
+    @api.put("/api/settings/retention")
+    async def api_set_retention(request: Request) -> dict[str, Any]:
+        """Set export retention period in days."""
+        body = await request.json()
+        days = int(body.get("retention_days", 0))
+        if days < 0:
+            return JSONResponse({"error": "retention_days must be >= 0"}, status_code=400)
+        _update_app_config(application, lambda data: data.update({"export_retention_days": days}))
+        logger.info("Export retention set to %d days", days)
+        return {"retention_days": days}
+
+    @api.post("/api/cleanup/run")
+    async def api_run_cleanup() -> dict[str, Any]:
+        """Manually trigger cleanup of old export folders."""
+        import shutil
+        try:
+            cfg = application.config_manager.load().app
+            retention_days = getattr(cfg, 'export_retention_days', 0) or 0
+        except Exception:
+            retention_days = 0
+        if retention_days <= 0:
+            return {"cleaned": 0, "message": "Retention is disabled (set to 0 days)"}
+
+        exports_dir = application.paths.exports_dir
+        if not exports_dir.exists():
+            return {"cleaned": 0, "message": "Exports directory does not exist"}
+
+        cutoff_ts = datetime.now(timezone.utc).timestamp() - (retention_days * 86400)
+        cleaned = 0
+        freed_bytes = 0
+        for item in exports_dir.iterdir():
+            if item.is_dir():
+                try:
+                    mtime = item.stat().st_mtime
+                    if mtime < cutoff_ts:
+                        size = sum(f.stat().st_size for f in item.rglob('*') if f.is_file())
+                        shutil.rmtree(item)
+                        freed_bytes += size
+                        cleaned += 1
+                        logger.info("Cleanup: removed %s (%d bytes)", item.name, size)
+                except Exception as exc:
+                    logger.warning("Cleanup: skipped %s: %s", item.name, exc)
+
+        from onshape_export_manager.core.metrics import human_bytes as fmt_size
+        return {"cleaned": cleaned, "freed_bytes": freed_bytes, "freed_human": fmt_size(freed_bytes)}
+
     # -- Analytics ----------------------------------------------------------
 
     @api.get("/api/metrics")
@@ -693,18 +737,6 @@ def create_web_app(base_dir: str | Path | None = None):
     @api.get("/api/summary")
     async def api_summary() -> dict[str, Any]:
         return metrics.summary_counts()
-
-    @api.get("/api/stream")
-    async def api_stream(request: Request):
-        async def event_generator():
-            while True:
-                if await request.is_disconnected():
-                    break
-                payload = json.dumps(metrics.summary_counts())
-                yield f"data: {payload}\n\n"
-                await asyncio.sleep(4)
-
-        return StreamingResponse(event_generator(), media_type="text/event-stream")
 
     # -- Resources ----------------------------------------------------------
 
@@ -744,6 +776,22 @@ def create_web_app(base_dir: str | Path | None = None):
             data={"id": org.id, "name": org.name},
         )
         return {"id": org.id, "name": org.name}
+
+    @api.put("/api/organizations/{org_id}")
+    async def api_update_organization(org_id: str, request: Request) -> dict[str, Any]:
+        """Update an organization's name, type, description, or priority."""
+        body = await request.json()
+        manager = OrganizationManager(application.config_manager)
+        try:
+            changes: dict[str, Any] = {}
+            for key in ("name", "type", "description", "enabled", "priority", "notes"):
+                if key in body and body[key] is not None:
+                    changes[key] = body[key]
+            org = manager.update_organization(org_id, **changes)
+        except (OrganizationError, ValueError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+        logger.info("Organization updated: %s", org.name)
+        return {"id": org.id, "name": org.name, "type": org.type, "description": org.description}
 
     @api.delete("/api/organizations/{org_id}")
     async def api_delete_organization(org_id: str) -> dict[str, Any]:
@@ -1160,57 +1208,6 @@ def create_web_app(base_dir: str | Path | None = None):
         result = application.notifications.test_channel(spec)
         return {"ok": result.ok, "detail": result.detail, "kind": result.kind}
 
-    if WebSocket is not None:
-
-        @api.websocket("/ws/events")
-        async def ws_events(websocket: WebSocket) -> None:
-            """Stream live events to the browser over a WebSocket.
-
-            HTTP middleware does not run for WebSocket scope, so authentication
-            is enforced here: an unconfigured app (first-run) is open; otherwise
-            a valid session cookie is required.
-            """
-            if auth_state["configured"] and not auth.validate_session(
-                websocket.cookies.get(SESSION_COOKIE)
-            ):
-                await websocket.close(code=4401)
-                return
-            await websocket.accept()
-            loop = asyncio.get_running_loop()
-            queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=1000)
-
-            def _on_event(event) -> None:
-                # Called from any thread; hop back onto the web loop safely.
-                try:
-                    loop.call_soon_threadsafe(_enqueue, event.to_dict())
-                except RuntimeError:  # pragma: no cover - loop shutting down
-                    pass
-
-            def _enqueue(payload: dict[str, Any]) -> None:
-                try:
-                    queue.put_nowait(payload)
-                except asyncio.QueueFull:
-                    pass  # drop the oldest-style: skip when client is too slow
-
-            token = None
-            if application.event_bus is not None:
-                token = application.event_bus.subscribe(_on_event)
-            try:
-                # Replay a little recent history so the feed is never empty.
-                if application.event_bus is not None:
-                    for event in application.event_bus.recent(limit=20):
-                        await websocket.send_json(event.to_dict())
-                while True:
-                    payload = await queue.get()
-                    await websocket.send_json(payload)
-            except WebSocketDisconnect:
-                pass
-            except Exception:  # noqa: BLE001 - normal on client disconnect
-                pass
-            finally:
-                if token is not None and application.event_bus is not None:
-                    application.event_bus.unsubscribe(token)
-
     @api.get("/api/system")
     async def api_system() -> dict[str, Any]:
         queue_stats = (
@@ -1315,10 +1312,6 @@ def create_web_app(base_dir: str | Path | None = None):
         lines = tail_log_file(application.paths.logs_dir / filename, limit=limit)
         return {"area": area, "lines": lines, "available": sorted(LOG_FILES)}
 
-    @api.get("/api/search")
-    async def api_search(q: str = Query("", alias="q")) -> dict[str, Any]:
-        return metrics.global_search(q)
-
     # -- Legacy page title lookup ------------------------------------------
     _LEGACY_TITLES: dict[str, str] = {
         "dashboard": "Dashboard",
@@ -1418,7 +1411,7 @@ def build_dashboard_context(application: Application) -> dict[str, Any]:
         "queue": queue_stats,
         "accounts": account_states,
         "profiles": config.export_profiles.profiles,
-        "available_formats": list_format_definitions(part_studio_only=True),
+        "available_formats": list_format_definitions(),
         "labels": config.labels.labels,
         "scheduler_jobs": scheduler_jobs,
         "recent_history": recent_history,
@@ -1562,7 +1555,12 @@ def _create_label(application: Application, body: dict[str, Any]) -> dict[str, A
     profile_names = {profile.name for profile in config.export_profiles.profiles}
     if new["export_profile"] not in profile_names:
         raise ValueError(f"export profile '{new['export_profile']}' does not exist")
+    # Accept both old accounts and org credential names as valid assigned_accounts targets
     account_names = {account.name for account in config.accounts.accounts}
+    orgs_data = read_json(application.config_manager.organizations_file)
+    for org in orgs_data.get("organizations", []):
+        for cred in org.get("credentials", []):
+            account_names.add(cred.get("name", ""))
     missing = set(new["assigned_accounts"]) - account_names
     if missing:
         raise ValueError(f"unknown accounts: {', '.join(sorted(missing))}")
@@ -1606,7 +1604,12 @@ def _update_label(application: Application, group_name: str, updates: dict[str, 
             current[field] = updates[field]
 
     if "assigned_accounts" in updates:
+        # Accept both old accounts and org credential names as valid targets
         account_names = {account.name for account in config.accounts.accounts}
+        orgs_data = read_json(application.config_manager.organizations_file)
+        for org in orgs_data.get("organizations", []):
+            for cred in org.get("credentials", []):
+                account_names.add(cred.get("name", ""))
         missing = set(updates["assigned_accounts"]) - account_names
         if missing:
             raise ValueError(f"unknown accounts: {', '.join(sorted(missing))}")
@@ -1633,6 +1636,8 @@ def _update_label(application: Application, group_name: str, updates: dict[str, 
 def _delete_label(application: Application, group_name: str) -> None:
     """Delete a label/group by friendly name."""
     from onshape_export_manager.core.configuration import LabelsConfig, read_json, write_json
+    from onshape_export_manager.core.logger import get_logger, WEB_LOGGER
+    _log = get_logger(WEB_LOGGER)
 
     manager = application.config_manager
     labels = read_json(manager.labels_file).get("labels", [])
@@ -1650,7 +1655,7 @@ def _delete_label(application: Application, group_name: str) -> None:
             "Group deleted: " + removed["friendly_name"],
             data={"label": removed["friendly_name"]},
         )
-    logger.info("Deleted group '%s'", group_name)
+    _log.info("Deleted group '%s'", group_name)
 
 
 def _move_label(application: Application, group_name: str, target_account: str) -> dict[str, Any]:
@@ -1659,7 +1664,12 @@ def _move_label(application: Application, group_name: str, target_account: str) 
 
     manager = application.config_manager
     config = manager.load()
+    # Accept both old accounts and org credential names as valid move targets
     account_names = {account.name for account in config.accounts.accounts}
+    orgs_data = read_json(application.config_manager.organizations_file)
+    for org in orgs_data.get("organizations", []):
+        for cred in org.get("credentials", []):
+            account_names.add(cred.get("name", ""))
     if target_account not in account_names:
         raise ValueError(f"unknown account '{target_account}'")
 
@@ -1719,21 +1729,23 @@ def _resolve_label_profile(application: Application, label_name: str, profile_na
 FORMAT_STORAGE_BYTES: dict[str, int] = {
     "stl": 1_800_000,
     "step": 3_200_000,
+    "3mf": 900_000,
     "parasolid": 2_600_000,
     "obj": 2_400_000,
-    "iges": 3_000_000,
+    "gltf": 1_200_000,
     "dxf": 900_000,
-    "pdf": 650_000,
+    "native": 5_000_000,
 }
 
 FORMAT_RUNTIME_SECONDS: dict[str, int] = {
     "stl": 16,
     "step": 28,
+    "3mf": 18,
     "parasolid": 24,
     "obj": 20,
-    "iges": 26,
+    "gltf": 22,
     "dxf": 12,
-    "pdf": 10,
+    "native": 30,
 }
 
 

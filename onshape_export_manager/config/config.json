@@ -7,6 +7,7 @@
     "process_profile": "",
     "profile_root": ""
   },
+  "export_retention_days": 14,
   "export_timeout_seconds": 120,
   "folders": {
     "exports_dir": "/Users/hrebis/Downloads/OnshapeExportTool-ClaudeV3/onshape_export_manager/exports",

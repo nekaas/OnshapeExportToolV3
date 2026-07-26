@@ -1,4 +1,4 @@
-"""Single-owner authentication: password hashing, sessions, and TOTP 2FA.
+"""Single-owner authentication: password hashing and session management.
 
 This module deliberately uses only the Python standard library so it adds no
 dependencies and runs efficiently on a Raspberry Pi:
@@ -6,7 +6,6 @@ dependencies and runs efficiently on a Raspberry Pi:
 * Passwords are hashed with ``hashlib.scrypt`` (salted, tunable cost).
 * Sessions are opaque random tokens; only their SHA-256 hash is stored, so a
   database leak never exposes a live session cookie.
-* Optional two-factor authentication implements RFC 6238 TOTP with HMAC-SHA1.
 
 The application is intended for a single owner, so there is exactly one account
 (``auth_owner`` row with ``id = 1``). Authentication is only enforced once that
@@ -15,13 +14,10 @@ owner has been created — a fresh install is in "setup" mode until then.
 
 from __future__ import annotations
 
-import base64
 import hashlib
 import hmac
 import os
 import secrets
-import struct
-import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
@@ -41,10 +37,6 @@ _SCRYPT_R = 8
 _SCRYPT_P = 1
 _SCRYPT_DKLEN = 32
 
-_TOTP_STEP = 30
-_TOTP_DIGITS = 6
-
-
 class AuthError(RuntimeError):
     """Raised for authentication failures that should surface to the user."""
 
@@ -54,7 +46,6 @@ class OwnerInfo:
     """Public (non-secret) information about the owner account."""
 
     username: str
-    totp_enabled: bool
     created_at: datetime
     updated_at: datetime
 
@@ -110,53 +101,6 @@ def verify_password(password: str, encoded: str) -> bool:
     return hmac.compare_digest(derived, expected)
 
 
-# -- TOTP (RFC 6238) --------------------------------------------------------
-
-
-def generate_totp_secret() -> str:
-    """Return a new base32 TOTP secret."""
-    return base64.b32encode(os.urandom(20)).decode("ascii").rstrip("=")
-
-
-def totp_code(secret: str, *, at: float | None = None, step: int = _TOTP_STEP, digits: int = _TOTP_DIGITS) -> str:
-    """Return the TOTP code for ``secret`` at the given time."""
-    counter = int((at if at is not None else time.time()) // step)
-    key = _b32decode(secret)
-    msg = struct.pack(">Q", counter)
-    digest = hmac.new(key, msg, hashlib.sha1).digest()
-    offset = digest[-1] & 0x0F
-    binary = struct.unpack(">I", digest[offset : offset + 4])[0] & 0x7FFFFFFF
-    return str(binary % (10**digits)).zfill(digits)
-
-
-def verify_totp(secret: str, code: str, *, window: int = 1, at: float | None = None) -> bool:
-    """Verify a TOTP ``code``, allowing +/- ``window`` time steps for drift."""
-    if not secret or not code:
-        return False
-    code = code.strip().replace(" ", "")
-    now = at if at is not None else time.time()
-    for delta in range(-window, window + 1):
-        if hmac.compare_digest(totp_code(secret, at=now + delta * _TOTP_STEP), code):
-            return True
-    return False
-
-
-def totp_provisioning_uri(secret: str, *, account: str, issuer: str = "Onshape Export Manager") -> str:
-    """Return an otpauth:// URI for authenticator apps / QR codes."""
-    from urllib.parse import quote
-
-    label = quote(f"{issuer}:{account}")
-    return (
-        f"otpauth://totp/{label}?secret={secret}"
-        f"&issuer={quote(issuer)}&algorithm=SHA1&digits={_TOTP_DIGITS}&period={_TOTP_STEP}"
-    )
-
-
-def _b32decode(secret: str) -> bytes:
-    padded = secret.upper() + "=" * (-len(secret) % 8)
-    return base64.b32decode(padded)
-
-
 # -- Auth service -----------------------------------------------------------
 
 
@@ -178,13 +122,12 @@ class AuthService:
     def owner_info(self) -> OwnerInfo | None:
         with self.db.connect() as conn:
             row = conn.execute(
-                "SELECT username, totp_enabled, created_at, updated_at FROM auth_owner WHERE id = 1"
+                "SELECT username, created_at, updated_at FROM auth_owner WHERE id = 1"
             ).fetchone()
         if row is None:
             return None
         return OwnerInfo(
             username=str(row["username"]),
-            totp_enabled=bool(row["totp_enabled"]),
             created_at=datetime.fromisoformat(row["created_at"]),
             updated_at=datetime.fromisoformat(row["updated_at"]),
         )
@@ -202,9 +145,8 @@ class AuthService:
         with self.db.connect() as conn:
             conn.execute(
                 """
-                INSERT INTO auth_owner (id, username, password_hash, totp_secret,
-                                        totp_enabled, created_at, updated_at)
-                VALUES (1, ?, ?, NULL, 0, ?, ?)
+                INSERT INTO auth_owner (id, username, password_hash, created_at, updated_at)
+                VALUES (1, ?, ?, ?, ?)
                 """,
                 (username, hash_password(password), now, now),
             )
@@ -243,52 +185,6 @@ class AuthService:
             )
             conn.execute("DELETE FROM auth_sessions")
         self.logger.warning("Owner password reset; all sessions invalidated")
-
-    # -- TOTP -----------------------------------------------------------
-
-    def totp_enabled(self) -> bool:
-        info = self.owner_info()
-        return bool(info and info.totp_enabled)
-
-    def begin_totp_enrollment(self) -> str:
-        """Generate and store a pending TOTP secret; returns the secret."""
-        secret = generate_totp_secret()
-        with self.db.connect() as conn:
-            conn.execute(
-                "UPDATE auth_owner SET totp_secret = ?, totp_enabled = 0, updated_at = ? WHERE id = 1",
-                (secret, _now_iso()),
-            )
-        return secret
-
-    def confirm_totp(self, code: str) -> bool:
-        """Confirm enrollment by verifying a code against the pending secret."""
-        secret = self._totp_secret()
-        if secret is None or not verify_totp(secret, code):
-            return False
-        with self.db.connect() as conn:
-            conn.execute(
-                "UPDATE auth_owner SET totp_enabled = 1, updated_at = ? WHERE id = 1",
-                (_now_iso(),),
-            )
-        self.logger.info("TOTP two-factor authentication enabled")
-        return True
-
-    def verify_login_totp(self, code: str) -> bool:
-        secret = self._totp_secret()
-        return bool(secret) and verify_totp(secret, code)
-
-    def disable_totp(self) -> None:
-        with self.db.connect() as conn:
-            conn.execute(
-                "UPDATE auth_owner SET totp_secret = NULL, totp_enabled = 0, updated_at = ? WHERE id = 1",
-                (_now_iso(),),
-            )
-        self.logger.info("TOTP two-factor authentication disabled")
-
-    def _totp_secret(self) -> str | None:
-        with self.db.connect() as conn:
-            row = conn.execute("SELECT totp_secret FROM auth_owner WHERE id = 1").fetchone()
-        return str(row["totp_secret"]) if row and row["totp_secret"] else None
 
     # -- Sessions -------------------------------------------------------
 

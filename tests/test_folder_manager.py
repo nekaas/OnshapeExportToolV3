@@ -5,7 +5,6 @@ from pathlib import Path
 
 from onshape_export_manager.core.folder_manager import (
     FolderManager,
-    format_folder_name,
     sanitize_filename,
     unique_path,
 )
@@ -29,21 +28,24 @@ class FolderManagerTests(unittest.TestCase):
         manager = FolderManager(now_fn=lambda: now)
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            first = manager.create_export_folder(root, "Customer A")
-            second = manager.create_export_folder(root, "Customer A")
+            first = manager.create_export_folder(root, "MyOrg", "Customer A")
+            second = manager.create_export_folder(root, "MyOrg", "Customer A")
 
             self.assertTrue(first.exists())
             self.assertTrue(second.exists())
             self.assertEqual(second.name, f"{first.name}_2")
 
-    def test_create_format_folder(self) -> None:
-        manager = FolderManager()
+    def test_export_folder_structure(self) -> None:
+        """Export folder is org/label/date with no format subfolder."""
+        now = datetime(2026, 7, 10, 12, 0, 0)
+        manager = FolderManager(now_fn=lambda: now)
         with tempfile.TemporaryDirectory() as tmp:
-            folder = manager.create_format_folder(Path(tmp), ExportFormat.STEP)
-
+            folder = manager.create_export_folder(Path(tmp), "Acme", "Widgets")
             self.assertTrue(folder.exists())
-            self.assertEqual(folder.name, "STEP")
-            self.assertEqual(format_folder_name(ExportFormat.OBJ), "OBJ")
+            # Structure: tmp/Acme/Widgets/2026-07-10
+            self.assertEqual(folder.parent.name, "Widgets")
+            self.assertEqual(folder.parent.parent.name, "Acme")
+            self.assertEqual(folder.name, "2026-07-10")
 
 
 if __name__ == "__main__":

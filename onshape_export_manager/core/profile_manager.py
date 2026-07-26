@@ -98,17 +98,12 @@ def parse_format_list(raw_formats: str) -> list[ExportFormat]:
 
 
 def normalize_profile_formats(formats: Iterable[ExportFormat]) -> list[ExportFormat]:
-    """Return unique, Part Studio-capable export formats in input order."""
+    """Return unique export formats in input order. All formats (STL, STEP, 3MF) are supported."""
     normalized: list[ExportFormat] = []
     seen: set[ExportFormat] = set()
     for export_format in formats:
         if export_format in seen:
             continue
-        definition = get_format_definition(export_format)
-        if export_format == ExportFormat.CUSTOM or not definition.supports_part_studio:
-            raise ExportProfileManagerError(
-                f"{export_format.value} is not available as a built-in Part Studio profile"
-            )
         normalized.append(export_format)
         seen.add(export_format)
 

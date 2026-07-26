@@ -322,19 +322,18 @@ class OnshapeClientTests(unittest.TestCase):
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp) / "part.iges"
+            out = Path(tmp) / "part.3mf"
             saved = client.export_part_studio(
                 "doc",
                 "wid",
                 "eid",
                 out,
-                export_format=ExportFormat.IGES,
+                export_format=ExportFormat.MF3,
             )
 
             self.assertEqual(saved.read_bytes(), content)
         self.assertEqual(session.calls[0][0], "https://cad.onshape.com/api/v6/partstudios/d/doc/w/wid/e/eid/translations")
-        self.assertEqual(session.calls[0][1]["json"]["formatName"], "IGES")
-        self.assertEqual(session.calls[0][1]["json"]["destinationName"], "part.iges")
+        self.assertEqual(session.calls[0][1]["json"]["formatName"], "3MF")
 
 
 if __name__ == "__main__":

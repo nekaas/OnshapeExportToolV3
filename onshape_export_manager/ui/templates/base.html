@@ -52,9 +52,7 @@
       .icon-btn,
       .toast-icon,
       .plugin-icon,
-      .search-trigger,
-      .toolbar-search,
-      .palette-input { display: inline-flex; align-items: center; justify-content: center; }
+      .toolbar-search { display: inline-flex; align-items: center; justify-content: center; }
       .brand-mark { width: 38px; height: 38px; }
       .nav-icon { width: 20px; height: 20px; }
       .nav-icon svg { width: 20px; height: 20px; }
@@ -62,7 +60,6 @@
     </style>
     <link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet" />
     <link href="/static/styles.css?v={{ asset_version }}" rel="stylesheet" />
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <!-- app.js must register Alpine components before Alpine starts, so it loads first. -->
     <script defer src="/static/app.js?v={{ asset_version }}"></script>
@@ -121,15 +118,6 @@
           <h1 class="page-heading">{% block heading %}{{ page_title }}{% endblock %}</h1>
         </div>
         <div class="topbar-right">
-          <button class="search-trigger" @click="openPalette()">
-            <span x-html="icons.search"></span>
-            <span class="search-trigger-text">Search everything…</span>
-            <kbd>⌘K</kbd>
-          </button>
-          <div class="live-indicator" :class="{ live: connected }" title="Live updates">
-            <span class="dot"></span>
-            <span x-text="connected ? 'Live' : 'Offline'"></span>
-          </div>
           <button class="icon-btn" @click="toggleTheme()" title="Toggle theme">
             <span x-show="isDark" x-html="icons.sun"></span>
             <span x-show="!isDark" x-html="icons.moon"></span>
@@ -138,52 +126,6 @@
       </header>
 
       <main class="content">{% block content %}{% endblock %}</main>
-    </div>
-
-    <!-- Command palette -->
-    <div class="palette-overlay" x-show="palette.open" x-transition.opacity @keydown.escape.window="closePalette()" @click.self="closePalette()" style="display:none">
-      <div class="palette glass" @click.stop>
-        <div class="palette-input">
-          <span x-html="icons.search"></span>
-          <input
-            type="text"
-            placeholder="Search accounts, labels, profiles, history…"
-            x-model="palette.query"
-            @input.debounce.200ms="runSearch()"
-            x-ref="paletteInput"
-          />
-          <kbd>esc</kbd>
-        </div>
-        <div class="palette-results">
-          <template x-if="palette.loading">
-            <div class="palette-empty">Searching…</div>
-          </template>
-          <template x-if="!palette.loading && palette.query && palette.groups.length === 0">
-            <div class="palette-empty">No results for "<span x-text="palette.query"></span>"</div>
-          </template>
-          <template x-for="group in palette.groups" :key="group.title">
-            <div class="palette-group">
-              <div class="palette-group-title" x-text="group.title + ' · ' + group.count"></div>
-              <template x-for="(item, i) in group.items" :key="group.title + i">
-                <a :href="item.href" class="palette-item">
-                  <div class="palette-item-title" x-text="item.title"></div>
-                  <div class="palette-item-sub" x-text="item.subtitle"></div>
-                </a>
-              </template>
-            </div>
-          </template>
-          <template x-if="!palette.query">
-            <div class="palette-hint">
-              <div class="palette-group-title">Quick actions</div>
-              <a href="/export" class="palette-item"><div class="palette-item-title">Run export</div></a>
-              <a href="/labels" class="palette-item"><div class="palette-item-title">Manage labels</div></a>
-              <a href="/api-keys" class="palette-item"><div class="palette-item-title">API keys</div></a>
-              <a href="/history" class="palette-item"><div class="palette-item-title">Export history</div></a>
-              <a href="/settings" class="palette-item"><div class="palette-item-title">Settings</div></a>
-            </div>
-          </template>
-        </div>
-      </div>
     </div>
 
     <!-- Toasts -->

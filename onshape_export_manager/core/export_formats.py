@@ -1,4 +1,4 @@
-"""Export format definitions and registry."""
+"""Export format definitions — professional presets for CAD/CAM/3D printing."""
 
 from __future__ import annotations
 
@@ -15,63 +15,67 @@ class ExportFormatDefinition:
     format: ExportFormat
     display_name: str
     default_extension: str
-    supports_part_studio: bool = True
-    supports_drawing: bool = False
     onshape_native: bool = True
     default_options: dict[str, Any] = field(default_factory=dict)
 
 
+# ── 8 export formats covering all manufacturing needs ─────────────────────
 DEFAULT_FORMATS: dict[ExportFormat, ExportFormatDefinition] = {
+    # -- STL (binary, millimeter) — standard for 3D printing ---------------
     ExportFormat.STL: ExportFormatDefinition(
         ExportFormat.STL,
         "STL",
         ".stl",
         default_options={"mode": "binary", "units": "millimeter"},
     ),
+    # -- STEP — standard for CAM / machining -------------------------------
     ExportFormat.STEP: ExportFormatDefinition(
         ExportFormat.STEP,
         "STEP",
         ".step",
         default_options={"formatName": "STEP", "storeInDocument": False},
     ),
+    # -- 3MF — modern 3D printing format -----------------------------------
+    ExportFormat.MF3: ExportFormatDefinition(
+        ExportFormat.MF3,
+        "3MF",
+        ".3mf",
+        default_options={"formatName": "3MF", "storeInDocument": False},
+    ),
+    # -- Parasolid — for SolidWorks / Siemens NX ---------------------------
     ExportFormat.PARASOLID: ExportFormatDefinition(
         ExportFormat.PARASOLID,
         "Parasolid",
         ".x_t",
         default_options={"formatName": "PARASOLID", "storeInDocument": False},
     ),
+    # -- OBJ — for Blender / rendering -------------------------------------
     ExportFormat.OBJ: ExportFormatDefinition(
         ExportFormat.OBJ,
         "OBJ",
         ".obj",
         default_options={"formatName": "OBJ", "storeInDocument": False},
     ),
-    ExportFormat.IGES: ExportFormatDefinition(
-        ExportFormat.IGES,
-        "IGES",
-        ".iges",
-        default_options={"formatName": "IGES", "storeInDocument": False},
+    # -- GLTF — for web / AR viewing ---------------------------------------
+    ExportFormat.GLTF: ExportFormatDefinition(
+        ExportFormat.GLTF,
+        "GLTF",
+        ".gltf",
+        default_options={"formatName": "GLTF", "storeInDocument": False},
     ),
+    # -- DXF — for laser cutting / 2D --------------------------------------
     ExportFormat.DXF: ExportFormatDefinition(
         ExportFormat.DXF,
         "DXF",
         ".dxf",
         default_options={"formatName": "DXF", "storeInDocument": False},
     ),
-    ExportFormat.PDF: ExportFormatDefinition(
-        ExportFormat.PDF,
-        "PDF Drawing",
-        ".pdf",
-        supports_part_studio=False,
-        supports_drawing=True,
-        default_options={"formatName": "PDF", "storeInDocument": False},
-    ),
-    ExportFormat.CUSTOM: ExportFormatDefinition(
-        ExportFormat.CUSTOM,
-        "Custom",
-        "",
-        supports_part_studio=False,
-        onshape_native=False,
+    # -- Native — Onshape document backup ----------------------------------
+    ExportFormat.NATIVE: ExportFormatDefinition(
+        ExportFormat.NATIVE,
+        "Native Backup",
+        ".onshape",
+        default_options={"formatName": "ONSHAPE", "storeInDocument": False},
     ),
 }
 
@@ -81,18 +85,9 @@ def get_format_definition(export_format: ExportFormat) -> ExportFormatDefinition
     return DEFAULT_FORMATS[export_format]
 
 
-def list_format_definitions(
-    *,
-    part_studio_only: bool = False,
-    drawing_only: bool = False,
-) -> list[ExportFormatDefinition]:
-    """Return supported export formats in display order."""
-    definitions = list(DEFAULT_FORMATS.values())
-    if part_studio_only:
-        definitions = [item for item in definitions if item.supports_part_studio]
-    if drawing_only:
-        definitions = [item for item in definitions if item.supports_drawing]
-    return definitions
+def list_format_definitions() -> list[ExportFormatDefinition]:
+    """Return all supported export formats."""
+    return list(DEFAULT_FORMATS.values())
 
 
 def default_options_for(export_format: ExportFormat) -> dict[str, Any]:

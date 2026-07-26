@@ -113,8 +113,18 @@ class MetricsService:
         healthy_accounts = sum(
             1 for state in accounts if state.rate_limit_status == "available"
         )
+        # Count organizations from the organizations config file
+        org_count = 0
+        try:
+            from onshape_export_manager.core.configuration import read_json
+            orgs_data = read_json(self.app.config_manager.organizations_file)
+            org_count = len(orgs_data.get("organizations", []))
+        except Exception:
+            pass
+
         return {
             "accounts": len(config.accounts.accounts) if config else len(accounts),
+            "organizations": org_count,
             "healthy_accounts": healthy_accounts,
             "labels": len(config.labels.labels) if config else 0,
             "export_profiles": len(config.export_profiles.profiles) if config else 0,
@@ -313,8 +323,6 @@ def serialize_format(definition: Any) -> dict[str, Any]:
         "format": definition.format.value,
         "display_name": definition.display_name,
         "extension": definition.default_extension,
-        "supports_part_studio": definition.supports_part_studio,
-        "supports_drawing": definition.supports_drawing,
         "native": definition.onshape_native,
     }
 

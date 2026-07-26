@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import threading
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from onshape_export_manager.core.database import Database, EventRecord, TelemetryPoint
 from onshape_export_manager.core.events import (
@@ -30,9 +30,6 @@ from onshape_export_manager.core.events import (
     EventSeverity,
 )
 from onshape_export_manager.core.logger import AUDIT_LOGGER, get_logger
-
-if TYPE_CHECKING:  # pragma: no cover - typing only
-    pass
 
 
 def _utc_now() -> datetime:

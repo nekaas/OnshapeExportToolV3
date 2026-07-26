@@ -32,3 +32,740 @@
 2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dab5e0d6-0d33-4dd2-95e3-ee79ee992fba retry_count=1 next_run_at=2026-07-08T18:51:04.018087+00:00 error=ValueError: unknown or disabled label 'A'
 2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=666095cb-8a86-433e-b92d-3ad60b1a3818 retry_count=1 next_run_at=2026-07-08T18:51:04.015937+00:00 error=ValueError: unknown or disabled label 'B'
 2026-07-08 21:51:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=05c46483-eb6c-4cdf-89f1-9b16455af859 retry_count=1 next_run_at=2026-07-08T18:51:04.021392+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:16:56 INFO     [onshape_export_manager.queue] Queued export job id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd label=A profile=STL reason=
+2026-07-08 22:16:56 INFO     [onshape_export_manager.queue] Queued export job id=81c36558-112c-4202-8f12-e27984db8c73 label=B profile=STL reason=
+2026-07-08 22:16:56 INFO     [onshape_export_manager.queue] Claimed queue job id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd
+2026-07-08 22:16:56 INFO     [onshape_export_manager.queue] Claimed queue job id=81c36558-112c-4202-8f12-e27984db8c73
+2026-07-08 22:16:56 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd retry_count=1 next_run_at=2026-07-08T19:16:57.596746+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:16:56 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=81c36558-112c-4202-8f12-e27984db8c73 retry_count=1 next_run_at=2026-07-08T19:16:57.598679+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:17:01 INFO     [onshape_export_manager.queue] Claimed queue job id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd
+2026-07-08 22:17:01 INFO     [onshape_export_manager.queue] Claimed queue job id=81c36558-112c-4202-8f12-e27984db8c73
+2026-07-08 22:17:01 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=81c36558-112c-4202-8f12-e27984db8c73 retry_count=2 next_run_at=2026-07-08T19:17:03.615872+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:17:01 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd retry_count=2 next_run_at=2026-07-08T19:17:03.615404+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:17:06 INFO     [onshape_export_manager.queue] Claimed queue job id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd
+2026-07-08 22:17:06 INFO     [onshape_export_manager.queue] Claimed queue job id=81c36558-112c-4202-8f12-e27984db8c73
+2026-07-08 22:17:06 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd retry_count=3 next_run_at=2026-07-08T19:17:10.628192+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:17:06 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=81c36558-112c-4202-8f12-e27984db8c73 retry_count=3 next_run_at=2026-07-08T19:17:10.631909+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:17:11 INFO     [onshape_export_manager.queue] Claimed queue job id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd
+2026-07-08 22:17:11 INFO     [onshape_export_manager.queue] Claimed queue job id=81c36558-112c-4202-8f12-e27984db8c73
+2026-07-08 22:17:11 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=81c36558-112c-4202-8f12-e27984db8c73 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:17:11 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=b967ea28-b692-4ecd-96c9-4f02fe6b06dd error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:23:45 INFO     [onshape_export_manager.queue] Queued export job id=1e31fb34-8ba2-40ad-a86c-44c089475d28 label=A profile=STL reason=
+2026-07-08 22:23:45 INFO     [onshape_export_manager.queue] Queued export job id=507cf275-ceb3-4ae5-83ec-100eb67b7a11 label=B profile=STL reason=
+2026-07-08 22:23:47 INFO     [onshape_export_manager.queue] Claimed queue job id=1e31fb34-8ba2-40ad-a86c-44c089475d28
+2026-07-08 22:23:47 INFO     [onshape_export_manager.queue] Claimed queue job id=507cf275-ceb3-4ae5-83ec-100eb67b7a11
+2026-07-08 22:23:47 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=507cf275-ceb3-4ae5-83ec-100eb67b7a11 retry_count=1 next_run_at=2026-07-08T19:23:48.311052+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:23:47 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1e31fb34-8ba2-40ad-a86c-44c089475d28 retry_count=1 next_run_at=2026-07-08T19:23:48.310599+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:23:52 INFO     [onshape_export_manager.queue] Claimed queue job id=1e31fb34-8ba2-40ad-a86c-44c089475d28
+2026-07-08 22:23:52 INFO     [onshape_export_manager.queue] Claimed queue job id=507cf275-ceb3-4ae5-83ec-100eb67b7a11
+2026-07-08 22:23:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=507cf275-ceb3-4ae5-83ec-100eb67b7a11 retry_count=2 next_run_at=2026-07-08T19:23:54.331483+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:23:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1e31fb34-8ba2-40ad-a86c-44c089475d28 retry_count=2 next_run_at=2026-07-08T19:23:54.331743+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:23:57 INFO     [onshape_export_manager.queue] Claimed queue job id=1e31fb34-8ba2-40ad-a86c-44c089475d28
+2026-07-08 22:23:57 INFO     [onshape_export_manager.queue] Claimed queue job id=507cf275-ceb3-4ae5-83ec-100eb67b7a11
+2026-07-08 22:23:57 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1e31fb34-8ba2-40ad-a86c-44c089475d28 retry_count=3 next_run_at=2026-07-08T19:24:01.350555+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:23:57 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=507cf275-ceb3-4ae5-83ec-100eb67b7a11 retry_count=3 next_run_at=2026-07-08T19:24:01.351501+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:24:02 INFO     [onshape_export_manager.queue] Claimed queue job id=1e31fb34-8ba2-40ad-a86c-44c089475d28
+2026-07-08 22:24:02 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=1e31fb34-8ba2-40ad-a86c-44c089475d28 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:24:02 INFO     [onshape_export_manager.queue] Claimed queue job id=507cf275-ceb3-4ae5-83ec-100eb67b7a11
+2026-07-08 22:24:02 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=507cf275-ceb3-4ae5-83ec-100eb67b7a11 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:24:42 INFO     [onshape_export_manager.queue] Queued export job id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa label=A profile=STL reason=
+2026-07-08 22:24:42 INFO     [onshape_export_manager.queue] Queued export job id=e04778c9-5f18-4340-8c3e-a11b5388330c label=B profile=STL reason=
+2026-07-08 22:25:55 INFO     [onshape_export_manager.queue] Claimed queue job id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa
+2026-07-08 22:25:55 INFO     [onshape_export_manager.queue] Claimed queue job id=e04778c9-5f18-4340-8c3e-a11b5388330c
+2026-07-08 22:25:55 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa retry_count=1 next_run_at=2026-07-08T19:25:56.519176+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:25:55 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e04778c9-5f18-4340-8c3e-a11b5388330c retry_count=1 next_run_at=2026-07-08T19:25:56.519504+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:26:00 INFO     [onshape_export_manager.queue] Claimed queue job id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa
+2026-07-08 22:26:00 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa retry_count=2 next_run_at=2026-07-08T19:26:02.530670+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:26:00 INFO     [onshape_export_manager.queue] Claimed queue job id=e04778c9-5f18-4340-8c3e-a11b5388330c
+2026-07-08 22:26:00 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e04778c9-5f18-4340-8c3e-a11b5388330c retry_count=2 next_run_at=2026-07-08T19:26:02.537070+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:26:05 INFO     [onshape_export_manager.queue] Claimed queue job id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa
+2026-07-08 22:26:05 INFO     [onshape_export_manager.queue] Claimed queue job id=e04778c9-5f18-4340-8c3e-a11b5388330c
+2026-07-08 22:26:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa retry_count=3 next_run_at=2026-07-08T19:26:09.555961+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:26:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e04778c9-5f18-4340-8c3e-a11b5388330c retry_count=3 next_run_at=2026-07-08T19:26:09.557496+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:26:10 INFO     [onshape_export_manager.queue] Claimed queue job id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa
+2026-07-08 22:26:10 INFO     [onshape_export_manager.queue] Claimed queue job id=e04778c9-5f18-4340-8c3e-a11b5388330c
+2026-07-08 22:26:10 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=8b3b5ee1-f465-45c7-8bbd-1162123d24fa error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:26:10 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=e04778c9-5f18-4340-8c3e-a11b5388330c error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:39:38 INFO     [onshape_export_manager.queue] Queued export job id=5ccab949-f7dd-4c75-b895-05ca1df265af label=A profile=STL reason=
+2026-07-08 22:39:38 INFO     [onshape_export_manager.queue] Queued export job id=d647e820-4d4b-4756-976c-82d3f6260ec1 label=B profile=STL reason=
+2026-07-08 22:39:41 INFO     [onshape_export_manager.queue] Claimed queue job id=5ccab949-f7dd-4c75-b895-05ca1df265af
+2026-07-08 22:39:41 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5ccab949-f7dd-4c75-b895-05ca1df265af retry_count=1 next_run_at=2026-07-08T19:39:42.347419+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:39:41 INFO     [onshape_export_manager.queue] Claimed queue job id=d647e820-4d4b-4756-976c-82d3f6260ec1
+2026-07-08 22:39:41 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=d647e820-4d4b-4756-976c-82d3f6260ec1 retry_count=1 next_run_at=2026-07-08T19:39:42.354293+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:39:46 INFO     [onshape_export_manager.queue] Claimed queue job id=5ccab949-f7dd-4c75-b895-05ca1df265af
+2026-07-08 22:39:46 INFO     [onshape_export_manager.queue] Claimed queue job id=d647e820-4d4b-4756-976c-82d3f6260ec1
+2026-07-08 22:39:46 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5ccab949-f7dd-4c75-b895-05ca1df265af retry_count=2 next_run_at=2026-07-08T19:39:48.374826+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:39:46 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=d647e820-4d4b-4756-976c-82d3f6260ec1 retry_count=2 next_run_at=2026-07-08T19:39:48.374893+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:39:51 INFO     [onshape_export_manager.queue] Claimed queue job id=5ccab949-f7dd-4c75-b895-05ca1df265af
+2026-07-08 22:39:51 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5ccab949-f7dd-4c75-b895-05ca1df265af retry_count=3 next_run_at=2026-07-08T19:39:55.386463+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:39:51 INFO     [onshape_export_manager.queue] Claimed queue job id=d647e820-4d4b-4756-976c-82d3f6260ec1
+2026-07-08 22:39:51 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=d647e820-4d4b-4756-976c-82d3f6260ec1 retry_count=3 next_run_at=2026-07-08T19:39:55.395760+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 22:39:56 INFO     [onshape_export_manager.queue] Claimed queue job id=5ccab949-f7dd-4c75-b895-05ca1df265af
+2026-07-08 22:39:56 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=5ccab949-f7dd-4c75-b895-05ca1df265af error=ValueError: unknown or disabled label 'A'
+2026-07-08 22:39:56 INFO     [onshape_export_manager.queue] Claimed queue job id=d647e820-4d4b-4756-976c-82d3f6260ec1
+2026-07-08 22:39:56 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=d647e820-4d4b-4756-976c-82d3f6260ec1 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:09:16 INFO     [onshape_export_manager.queue] Queued export job id=332133ee-baa0-46d9-a5e7-f5717a704bd5 label=A profile=STL reason=
+2026-07-08 23:09:16 INFO     [onshape_export_manager.queue] Queued export job id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b label=B profile=STL reason=
+2026-07-08 23:09:19 INFO     [onshape_export_manager.queue] Claimed queue job id=332133ee-baa0-46d9-a5e7-f5717a704bd5
+2026-07-08 23:09:19 INFO     [onshape_export_manager.queue] Claimed queue job id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b
+2026-07-08 23:09:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=332133ee-baa0-46d9-a5e7-f5717a704bd5 retry_count=1 next_run_at=2026-07-08T20:09:20.040721+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:09:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b retry_count=1 next_run_at=2026-07-08T20:09:20.043355+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:09:24 INFO     [onshape_export_manager.queue] Claimed queue job id=332133ee-baa0-46d9-a5e7-f5717a704bd5
+2026-07-08 23:09:24 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=332133ee-baa0-46d9-a5e7-f5717a704bd5 retry_count=2 next_run_at=2026-07-08T20:09:26.055944+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:09:24 INFO     [onshape_export_manager.queue] Claimed queue job id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b
+2026-07-08 23:09:24 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b retry_count=2 next_run_at=2026-07-08T20:09:26.068455+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:09:29 INFO     [onshape_export_manager.queue] Claimed queue job id=332133ee-baa0-46d9-a5e7-f5717a704bd5
+2026-07-08 23:09:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=332133ee-baa0-46d9-a5e7-f5717a704bd5 retry_count=3 next_run_at=2026-07-08T20:09:33.077144+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:09:29 INFO     [onshape_export_manager.queue] Claimed queue job id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b
+2026-07-08 23:09:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b retry_count=3 next_run_at=2026-07-08T20:09:33.082413+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:09:34 INFO     [onshape_export_manager.queue] Claimed queue job id=332133ee-baa0-46d9-a5e7-f5717a704bd5
+2026-07-08 23:09:34 INFO     [onshape_export_manager.queue] Claimed queue job id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b
+2026-07-08 23:09:34 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=332133ee-baa0-46d9-a5e7-f5717a704bd5 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:09:34 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=6f95b1b0-b8d3-46ba-9305-ee4529d6602b error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:13:46 INFO     [onshape_export_manager.queue] Queued export job id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb label=A profile=STL reason=
+2026-07-08 23:13:46 INFO     [onshape_export_manager.queue] Queued export job id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a label=B profile=STL reason=
+2026-07-08 23:13:49 INFO     [onshape_export_manager.queue] Claimed queue job id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb
+2026-07-08 23:13:49 INFO     [onshape_export_manager.queue] Claimed queue job id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a
+2026-07-08 23:13:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb retry_count=1 next_run_at=2026-07-08T20:13:50.543842+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:13:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a retry_count=1 next_run_at=2026-07-08T20:13:50.544328+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:13:54 INFO     [onshape_export_manager.queue] Claimed queue job id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb
+2026-07-08 23:13:54 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb retry_count=2 next_run_at=2026-07-08T20:13:56.554517+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:13:54 INFO     [onshape_export_manager.queue] Claimed queue job id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a
+2026-07-08 23:13:54 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a retry_count=2 next_run_at=2026-07-08T20:13:56.561512+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:13:59 INFO     [onshape_export_manager.queue] Claimed queue job id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb
+2026-07-08 23:13:59 INFO     [onshape_export_manager.queue] Claimed queue job id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a
+2026-07-08 23:13:59 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb retry_count=3 next_run_at=2026-07-08T20:14:03.573161+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:13:59 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a retry_count=3 next_run_at=2026-07-08T20:14:03.577462+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:14:04 INFO     [onshape_export_manager.queue] Claimed queue job id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb
+2026-07-08 23:14:04 INFO     [onshape_export_manager.queue] Claimed queue job id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a
+2026-07-08 23:14:04 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ddb6ab28-687f-440c-afe2-db79a5ab0fdb error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:14:04 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=342b5c50-7c7d-44b4-a47e-03dcf0ffee3a error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:21:01 INFO     [onshape_export_manager.queue] Queued export job id=ce4b271a-d88f-4555-84bf-ee0341d09e8d label=A profile=STL reason=
+2026-07-08 23:21:01 INFO     [onshape_export_manager.queue] Queued export job id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3 label=B profile=STL reason=
+2026-07-08 23:21:05 INFO     [onshape_export_manager.queue] Claimed queue job id=ce4b271a-d88f-4555-84bf-ee0341d09e8d
+2026-07-08 23:21:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ce4b271a-d88f-4555-84bf-ee0341d09e8d retry_count=1 next_run_at=2026-07-08T20:21:06.289841+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:21:05 INFO     [onshape_export_manager.queue] Claimed queue job id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3
+2026-07-08 23:21:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3 retry_count=1 next_run_at=2026-07-08T20:21:06.295547+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:21:10 INFO     [onshape_export_manager.queue] Claimed queue job id=ce4b271a-d88f-4555-84bf-ee0341d09e8d
+2026-07-08 23:21:10 INFO     [onshape_export_manager.queue] Claimed queue job id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3
+2026-07-08 23:21:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ce4b271a-d88f-4555-84bf-ee0341d09e8d retry_count=2 next_run_at=2026-07-08T20:21:12.309426+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:21:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3 retry_count=2 next_run_at=2026-07-08T20:21:12.313149+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:21:15 INFO     [onshape_export_manager.queue] Claimed queue job id=ce4b271a-d88f-4555-84bf-ee0341d09e8d
+2026-07-08 23:21:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ce4b271a-d88f-4555-84bf-ee0341d09e8d retry_count=3 next_run_at=2026-07-08T20:21:19.323640+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:21:15 INFO     [onshape_export_manager.queue] Claimed queue job id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3
+2026-07-08 23:21:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3 retry_count=3 next_run_at=2026-07-08T20:21:19.330633+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:21:20 INFO     [onshape_export_manager.queue] Claimed queue job id=ce4b271a-d88f-4555-84bf-ee0341d09e8d
+2026-07-08 23:21:20 INFO     [onshape_export_manager.queue] Claimed queue job id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3
+2026-07-08 23:21:20 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ce4b271a-d88f-4555-84bf-ee0341d09e8d error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:21:20 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=7bd59551-ae4a-4845-8ad7-2e6cb50542b3 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:41:07 INFO     [onshape_export_manager.queue] Queued export job id=4add9266-10b8-4f91-a5b5-7942d088985f label=A profile=STL reason=
+2026-07-08 23:41:07 INFO     [onshape_export_manager.queue] Queued export job id=3539fbe1-da08-46ce-986e-7aa1b9b0275d label=B profile=STL reason=
+2026-07-08 23:41:10 INFO     [onshape_export_manager.queue] Claimed queue job id=4add9266-10b8-4f91-a5b5-7942d088985f
+2026-07-08 23:41:10 INFO     [onshape_export_manager.queue] Claimed queue job id=3539fbe1-da08-46ce-986e-7aa1b9b0275d
+2026-07-08 23:41:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=4add9266-10b8-4f91-a5b5-7942d088985f retry_count=1 next_run_at=2026-07-08T20:41:11.298886+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:41:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3539fbe1-da08-46ce-986e-7aa1b9b0275d retry_count=1 next_run_at=2026-07-08T20:41:11.299328+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:41:15 INFO     [onshape_export_manager.queue] Claimed queue job id=4add9266-10b8-4f91-a5b5-7942d088985f
+2026-07-08 23:41:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=4add9266-10b8-4f91-a5b5-7942d088985f retry_count=2 next_run_at=2026-07-08T20:41:17.311353+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:41:15 INFO     [onshape_export_manager.queue] Claimed queue job id=3539fbe1-da08-46ce-986e-7aa1b9b0275d
+2026-07-08 23:41:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3539fbe1-da08-46ce-986e-7aa1b9b0275d retry_count=2 next_run_at=2026-07-08T20:41:17.341685+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:41:20 INFO     [onshape_export_manager.queue] Claimed queue job id=4add9266-10b8-4f91-a5b5-7942d088985f
+2026-07-08 23:41:20 INFO     [onshape_export_manager.queue] Claimed queue job id=3539fbe1-da08-46ce-986e-7aa1b9b0275d
+2026-07-08 23:41:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=4add9266-10b8-4f91-a5b5-7942d088985f retry_count=3 next_run_at=2026-07-08T20:41:24.330399+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:41:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3539fbe1-da08-46ce-986e-7aa1b9b0275d retry_count=3 next_run_at=2026-07-08T20:41:24.333948+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-08 23:41:25 INFO     [onshape_export_manager.queue] Claimed queue job id=4add9266-10b8-4f91-a5b5-7942d088985f
+2026-07-08 23:41:25 INFO     [onshape_export_manager.queue] Claimed queue job id=3539fbe1-da08-46ce-986e-7aa1b9b0275d
+2026-07-08 23:41:25 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=4add9266-10b8-4f91-a5b5-7942d088985f error=ValueError: unknown or disabled label 'A'
+2026-07-08 23:41:25 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=3539fbe1-da08-46ce-986e-7aa1b9b0275d error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:14:30 INFO     [onshape_export_manager.queue] Queued export job id=ee9b37d9-9488-4722-bb8f-4cc2b897265e label=A profile=STL reason=
+2026-07-09 00:14:30 INFO     [onshape_export_manager.queue] Queued export job id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673 label=B profile=STL reason=
+2026-07-09 00:14:35 INFO     [onshape_export_manager.queue] Claimed queue job id=ee9b37d9-9488-4722-bb8f-4cc2b897265e
+2026-07-09 00:14:35 INFO     [onshape_export_manager.queue] Claimed queue job id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673
+2026-07-09 00:14:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673 retry_count=1 next_run_at=2026-07-08T21:14:36.566792+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:14:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ee9b37d9-9488-4722-bb8f-4cc2b897265e retry_count=1 next_run_at=2026-07-08T21:14:36.566586+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:14:40 INFO     [onshape_export_manager.queue] Claimed queue job id=ee9b37d9-9488-4722-bb8f-4cc2b897265e
+2026-07-09 00:14:40 INFO     [onshape_export_manager.queue] Claimed queue job id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673
+2026-07-09 00:14:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ee9b37d9-9488-4722-bb8f-4cc2b897265e retry_count=2 next_run_at=2026-07-08T21:14:42.584712+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:14:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673 retry_count=2 next_run_at=2026-07-08T21:14:42.589717+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:14:45 INFO     [onshape_export_manager.queue] Claimed queue job id=ee9b37d9-9488-4722-bb8f-4cc2b897265e
+2026-07-09 00:14:45 INFO     [onshape_export_manager.queue] Claimed queue job id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673
+2026-07-09 00:14:45 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ee9b37d9-9488-4722-bb8f-4cc2b897265e retry_count=3 next_run_at=2026-07-08T21:14:49.607760+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:14:45 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673 retry_count=3 next_run_at=2026-07-08T21:14:49.614021+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:14:50 INFO     [onshape_export_manager.queue] Claimed queue job id=ee9b37d9-9488-4722-bb8f-4cc2b897265e
+2026-07-09 00:14:50 INFO     [onshape_export_manager.queue] Claimed queue job id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673
+2026-07-09 00:14:50 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ee9b37d9-9488-4722-bb8f-4cc2b897265e error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:14:50 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=5d02025f-55c2-41a8-8ac0-b25e0cdf6673 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:21:27 INFO     [onshape_export_manager.queue] Queued export job id=7ebc1626-d1a6-4676-b525-ed48124579bc label=A profile=STL reason=
+2026-07-09 00:21:27 INFO     [onshape_export_manager.queue] Queued export job id=26c054e7-7404-4dd7-b01e-de37104a1b93 label=B profile=STL reason=
+2026-07-09 00:21:30 INFO     [onshape_export_manager.queue] Claimed queue job id=7ebc1626-d1a6-4676-b525-ed48124579bc
+2026-07-09 00:21:30 INFO     [onshape_export_manager.queue] Claimed queue job id=26c054e7-7404-4dd7-b01e-de37104a1b93
+2026-07-09 00:21:30 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=26c054e7-7404-4dd7-b01e-de37104a1b93 retry_count=1 next_run_at=2026-07-08T21:21:31.483885+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:21:30 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7ebc1626-d1a6-4676-b525-ed48124579bc retry_count=1 next_run_at=2026-07-08T21:21:31.483969+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:21:35 INFO     [onshape_export_manager.queue] Claimed queue job id=7ebc1626-d1a6-4676-b525-ed48124579bc
+2026-07-09 00:21:35 INFO     [onshape_export_manager.queue] Claimed queue job id=26c054e7-7404-4dd7-b01e-de37104a1b93
+2026-07-09 00:21:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7ebc1626-d1a6-4676-b525-ed48124579bc retry_count=2 next_run_at=2026-07-08T21:21:37.504327+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:21:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=26c054e7-7404-4dd7-b01e-de37104a1b93 retry_count=2 next_run_at=2026-07-08T21:21:37.508378+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:21:40 INFO     [onshape_export_manager.queue] Claimed queue job id=7ebc1626-d1a6-4676-b525-ed48124579bc
+2026-07-09 00:21:40 INFO     [onshape_export_manager.queue] Claimed queue job id=26c054e7-7404-4dd7-b01e-de37104a1b93
+2026-07-09 00:21:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=26c054e7-7404-4dd7-b01e-de37104a1b93 retry_count=3 next_run_at=2026-07-08T21:21:44.525500+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:21:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7ebc1626-d1a6-4676-b525-ed48124579bc retry_count=3 next_run_at=2026-07-08T21:21:44.527469+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:21:45 INFO     [onshape_export_manager.queue] Claimed queue job id=7ebc1626-d1a6-4676-b525-ed48124579bc
+2026-07-09 00:21:45 INFO     [onshape_export_manager.queue] Claimed queue job id=26c054e7-7404-4dd7-b01e-de37104a1b93
+2026-07-09 00:21:45 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=7ebc1626-d1a6-4676-b525-ed48124579bc error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:21:45 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=26c054e7-7404-4dd7-b01e-de37104a1b93 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:30:10 INFO     [onshape_export_manager.queue] Queued export job id=b58997f7-f6d6-45f6-89e0-724e69be1b10 label=A profile=STL reason=
+2026-07-09 00:30:10 INFO     [onshape_export_manager.queue] Queued export job id=8e0e7b34-deae-4b34-95a1-60ffa972566b label=B profile=STL reason=
+2026-07-09 00:30:11 INFO     [onshape_export_manager.queue] Claimed queue job id=b58997f7-f6d6-45f6-89e0-724e69be1b10
+2026-07-09 00:30:11 INFO     [onshape_export_manager.queue] Claimed queue job id=8e0e7b34-deae-4b34-95a1-60ffa972566b
+2026-07-09 00:30:11 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8e0e7b34-deae-4b34-95a1-60ffa972566b retry_count=1 next_run_at=2026-07-08T21:30:12.400193+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:30:11 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b58997f7-f6d6-45f6-89e0-724e69be1b10 retry_count=1 next_run_at=2026-07-08T21:30:12.410079+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:30:16 INFO     [onshape_export_manager.queue] Claimed queue job id=b58997f7-f6d6-45f6-89e0-724e69be1b10
+2026-07-09 00:30:16 INFO     [onshape_export_manager.queue] Claimed queue job id=8e0e7b34-deae-4b34-95a1-60ffa972566b
+2026-07-09 00:30:16 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b58997f7-f6d6-45f6-89e0-724e69be1b10 retry_count=2 next_run_at=2026-07-08T21:30:18.425171+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:30:16 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8e0e7b34-deae-4b34-95a1-60ffa972566b retry_count=2 next_run_at=2026-07-08T21:30:18.430098+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:30:21 INFO     [onshape_export_manager.queue] Claimed queue job id=b58997f7-f6d6-45f6-89e0-724e69be1b10
+2026-07-09 00:30:21 INFO     [onshape_export_manager.queue] Claimed queue job id=8e0e7b34-deae-4b34-95a1-60ffa972566b
+2026-07-09 00:30:21 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8e0e7b34-deae-4b34-95a1-60ffa972566b retry_count=3 next_run_at=2026-07-08T21:30:25.483827+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:30:21 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b58997f7-f6d6-45f6-89e0-724e69be1b10 retry_count=3 next_run_at=2026-07-08T21:30:25.483099+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:30:26 INFO     [onshape_export_manager.queue] Claimed queue job id=b58997f7-f6d6-45f6-89e0-724e69be1b10
+2026-07-09 00:30:26 INFO     [onshape_export_manager.queue] Claimed queue job id=8e0e7b34-deae-4b34-95a1-60ffa972566b
+2026-07-09 00:30:26 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=b58997f7-f6d6-45f6-89e0-724e69be1b10 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:30:26 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=8e0e7b34-deae-4b34-95a1-60ffa972566b error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:33:16 INFO     [onshape_export_manager.queue] Queued export job id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d label=A profile=STL reason=
+2026-07-09 00:33:16 INFO     [onshape_export_manager.queue] Queued export job id=229eb897-7477-4846-8851-b4b774544c35 label=B profile=STL reason=
+2026-07-09 00:33:27 INFO     [onshape_export_manager.queue] Claimed queue job id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d
+2026-07-09 00:33:27 INFO     [onshape_export_manager.queue] Claimed queue job id=229eb897-7477-4846-8851-b4b774544c35
+2026-07-09 00:33:27 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d retry_count=1 next_run_at=2026-07-08T21:33:28.123757+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:33:27 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=229eb897-7477-4846-8851-b4b774544c35 retry_count=1 next_run_at=2026-07-08T21:33:28.124502+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:33:32 INFO     [onshape_export_manager.queue] Claimed queue job id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d
+2026-07-09 00:33:32 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d retry_count=2 next_run_at=2026-07-08T21:33:34.137341+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:33:32 INFO     [onshape_export_manager.queue] Claimed queue job id=229eb897-7477-4846-8851-b4b774544c35
+2026-07-09 00:33:32 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=229eb897-7477-4846-8851-b4b774544c35 retry_count=2 next_run_at=2026-07-08T21:33:34.143347+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:33:37 INFO     [onshape_export_manager.queue] Claimed queue job id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d
+2026-07-09 00:33:37 INFO     [onshape_export_manager.queue] Claimed queue job id=229eb897-7477-4846-8851-b4b774544c35
+2026-07-09 00:33:37 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d retry_count=3 next_run_at=2026-07-08T21:33:41.162189+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:33:37 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=229eb897-7477-4846-8851-b4b774544c35 retry_count=3 next_run_at=2026-07-08T21:33:41.163476+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:33:42 INFO     [onshape_export_manager.queue] Claimed queue job id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d
+2026-07-09 00:33:42 INFO     [onshape_export_manager.queue] Claimed queue job id=229eb897-7477-4846-8851-b4b774544c35
+2026-07-09 00:33:42 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=8a8d2cfe-eda5-4ade-9dca-fb4de33bdc0d error=ConfigError: label 'Robotics' references missing accounts: Primary
+2026-07-09 00:33:42 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=229eb897-7477-4846-8851-b4b774544c35 error=ConfigError: label 'Robotics' references missing accounts: Primary
+2026-07-09 00:34:51 INFO     [onshape_export_manager.queue] Queued export job id=27f89456-8be5-4f7a-9aac-e3d99699cbb6 label=A profile=STL reason=
+2026-07-09 00:34:51 INFO     [onshape_export_manager.queue] Queued export job id=66a65a84-f79c-43f8-930a-8b4801aaef00 label=B profile=STL reason=
+2026-07-09 00:34:52 INFO     [onshape_export_manager.queue] Claimed queue job id=27f89456-8be5-4f7a-9aac-e3d99699cbb6
+2026-07-09 00:34:52 INFO     [onshape_export_manager.queue] Claimed queue job id=66a65a84-f79c-43f8-930a-8b4801aaef00
+2026-07-09 00:34:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=66a65a84-f79c-43f8-930a-8b4801aaef00 retry_count=1 next_run_at=2026-07-08T21:34:53.331113+00:00 error=ConfigError: label 'Demo' references missing accounts: Primary
+2026-07-09 00:34:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=27f89456-8be5-4f7a-9aac-e3d99699cbb6 retry_count=1 next_run_at=2026-07-08T21:34:53.333295+00:00 error=ConfigError: label 'Demo' references missing accounts: Primary
+2026-07-09 00:35:58 INFO     [onshape_export_manager.queue] Claimed queue job id=27f89456-8be5-4f7a-9aac-e3d99699cbb6
+2026-07-09 00:35:58 INFO     [onshape_export_manager.queue] Claimed queue job id=66a65a84-f79c-43f8-930a-8b4801aaef00
+2026-07-09 00:35:58 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=27f89456-8be5-4f7a-9aac-e3d99699cbb6 retry_count=2 next_run_at=2026-07-08T21:36:00.223509+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:35:58 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=66a65a84-f79c-43f8-930a-8b4801aaef00 retry_count=2 next_run_at=2026-07-08T21:36:00.225044+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:36:03 INFO     [onshape_export_manager.queue] Claimed queue job id=27f89456-8be5-4f7a-9aac-e3d99699cbb6
+2026-07-09 00:36:03 INFO     [onshape_export_manager.queue] Claimed queue job id=66a65a84-f79c-43f8-930a-8b4801aaef00
+2026-07-09 00:36:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=27f89456-8be5-4f7a-9aac-e3d99699cbb6 retry_count=3 next_run_at=2026-07-08T21:36:07.256855+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:36:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=66a65a84-f79c-43f8-930a-8b4801aaef00 retry_count=3 next_run_at=2026-07-08T21:36:07.263085+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:36:08 INFO     [onshape_export_manager.queue] Claimed queue job id=27f89456-8be5-4f7a-9aac-e3d99699cbb6
+2026-07-09 00:36:08 INFO     [onshape_export_manager.queue] Claimed queue job id=66a65a84-f79c-43f8-930a-8b4801aaef00
+2026-07-09 00:36:08 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=27f89456-8be5-4f7a-9aac-e3d99699cbb6 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:36:08 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=66a65a84-f79c-43f8-930a-8b4801aaef00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:37:07 INFO     [onshape_export_manager.queue] Queued export job id=613ed850-7bf6-471f-8b26-2fd13a73f266 label=A profile=STL reason=
+2026-07-09 00:37:07 INFO     [onshape_export_manager.queue] Queued export job id=9b526384-4059-4905-b711-491f71f3c965 label=B profile=STL reason=
+2026-07-09 00:37:08 INFO     [onshape_export_manager.queue] Claimed queue job id=613ed850-7bf6-471f-8b26-2fd13a73f266
+2026-07-09 00:37:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=613ed850-7bf6-471f-8b26-2fd13a73f266 retry_count=1 next_run_at=2026-07-08T21:37:09.471975+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:37:08 INFO     [onshape_export_manager.queue] Claimed queue job id=9b526384-4059-4905-b711-491f71f3c965
+2026-07-09 00:37:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9b526384-4059-4905-b711-491f71f3c965 retry_count=1 next_run_at=2026-07-08T21:37:09.486862+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:37:13 INFO     [onshape_export_manager.queue] Claimed queue job id=613ed850-7bf6-471f-8b26-2fd13a73f266
+2026-07-09 00:37:13 INFO     [onshape_export_manager.queue] Claimed queue job id=9b526384-4059-4905-b711-491f71f3c965
+2026-07-09 00:37:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=613ed850-7bf6-471f-8b26-2fd13a73f266 retry_count=2 next_run_at=2026-07-08T21:37:15.508515+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:37:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9b526384-4059-4905-b711-491f71f3c965 retry_count=2 next_run_at=2026-07-08T21:37:15.512843+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:37:19 INFO     [onshape_export_manager.queue] Claimed queue job id=613ed850-7bf6-471f-8b26-2fd13a73f266
+2026-07-09 00:37:19 INFO     [onshape_export_manager.queue] Claimed queue job id=9b526384-4059-4905-b711-491f71f3c965
+2026-07-09 00:37:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9b526384-4059-4905-b711-491f71f3c965 retry_count=3 next_run_at=2026-07-08T21:37:23.149362+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 00:37:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=613ed850-7bf6-471f-8b26-2fd13a73f266 retry_count=3 next_run_at=2026-07-08T21:37:23.150492+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:37:24 INFO     [onshape_export_manager.queue] Claimed queue job id=613ed850-7bf6-471f-8b26-2fd13a73f266
+2026-07-09 00:37:24 INFO     [onshape_export_manager.queue] Claimed queue job id=9b526384-4059-4905-b711-491f71f3c965
+2026-07-09 00:37:24 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=613ed850-7bf6-471f-8b26-2fd13a73f266 error=ValueError: unknown or disabled label 'A'
+2026-07-09 00:37:24 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=9b526384-4059-4905-b711-491f71f3c965 error=ValueError: unknown or disabled label 'B'
+2026-07-09 10:13:01 INFO     [onshape_export_manager.queue] Queued export job id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322 label=A profile=STL reason=
+2026-07-09 10:13:01 INFO     [onshape_export_manager.queue] Queued export job id=9c326af3-f45c-4330-8b50-89a0a06fac3a label=B profile=STL reason=
+2026-07-09 10:13:03 INFO     [onshape_export_manager.queue] Claimed queue job id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322
+2026-07-09 10:13:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322 retry_count=1 next_run_at=2026-07-09T07:13:04.073090+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 10:13:03 INFO     [onshape_export_manager.queue] Claimed queue job id=9c326af3-f45c-4330-8b50-89a0a06fac3a
+2026-07-09 10:13:03 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9c326af3-f45c-4330-8b50-89a0a06fac3a retry_count=1 next_run_at=2026-07-09T07:13:04.079945+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 10:13:08 INFO     [onshape_export_manager.queue] Claimed queue job id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322
+2026-07-09 10:13:08 INFO     [onshape_export_manager.queue] Claimed queue job id=9c326af3-f45c-4330-8b50-89a0a06fac3a
+2026-07-09 10:13:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322 retry_count=2 next_run_at=2026-07-09T07:13:10.113018+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 10:13:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9c326af3-f45c-4330-8b50-89a0a06fac3a retry_count=2 next_run_at=2026-07-09T07:13:10.114776+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 10:13:13 INFO     [onshape_export_manager.queue] Claimed queue job id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322
+2026-07-09 10:13:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322 retry_count=3 next_run_at=2026-07-09T07:13:17.123620+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 10:13:13 INFO     [onshape_export_manager.queue] Claimed queue job id=9c326af3-f45c-4330-8b50-89a0a06fac3a
+2026-07-09 10:13:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9c326af3-f45c-4330-8b50-89a0a06fac3a retry_count=3 next_run_at=2026-07-09T07:13:17.132180+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 10:13:18 INFO     [onshape_export_manager.queue] Claimed queue job id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322
+2026-07-09 10:13:18 INFO     [onshape_export_manager.queue] Claimed queue job id=9c326af3-f45c-4330-8b50-89a0a06fac3a
+2026-07-09 10:13:18 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=8ca9bfbd-6ef2-406a-97f6-dbea3ec92322 error=ValueError: unknown or disabled label 'A'
+2026-07-09 10:13:18 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=9c326af3-f45c-4330-8b50-89a0a06fac3a error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:04:16 INFO     [onshape_export_manager.queue] Queued export job id=e177725c-24ef-4215-a780-de5865152999 label=A profile=STL reason=
+2026-07-09 11:04:16 INFO     [onshape_export_manager.queue] Queued export job id=e954f7d1-cefa-421d-878e-061684e1a271 label=B profile=STL reason=
+2026-07-09 11:04:19 INFO     [onshape_export_manager.queue] Claimed queue job id=e177725c-24ef-4215-a780-de5865152999
+2026-07-09 11:04:19 INFO     [onshape_export_manager.queue] Claimed queue job id=e954f7d1-cefa-421d-878e-061684e1a271
+2026-07-09 11:04:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e177725c-24ef-4215-a780-de5865152999 retry_count=1 next_run_at=2026-07-09T08:04:20.469393+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:04:19 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e954f7d1-cefa-421d-878e-061684e1a271 retry_count=1 next_run_at=2026-07-09T08:04:20.469444+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:04:24 INFO     [onshape_export_manager.queue] Claimed queue job id=e177725c-24ef-4215-a780-de5865152999
+2026-07-09 11:04:24 INFO     [onshape_export_manager.queue] Claimed queue job id=e954f7d1-cefa-421d-878e-061684e1a271
+2026-07-09 11:04:24 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e177725c-24ef-4215-a780-de5865152999 retry_count=2 next_run_at=2026-07-09T08:04:26.481516+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:04:24 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e954f7d1-cefa-421d-878e-061684e1a271 retry_count=2 next_run_at=2026-07-09T08:04:26.484969+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:04:29 INFO     [onshape_export_manager.queue] Claimed queue job id=e177725c-24ef-4215-a780-de5865152999
+2026-07-09 11:04:29 INFO     [onshape_export_manager.queue] Claimed queue job id=e954f7d1-cefa-421d-878e-061684e1a271
+2026-07-09 11:04:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e177725c-24ef-4215-a780-de5865152999 retry_count=3 next_run_at=2026-07-09T08:04:33.875393+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:04:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e954f7d1-cefa-421d-878e-061684e1a271 retry_count=3 next_run_at=2026-07-09T08:04:33.876225+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:04:34 INFO     [onshape_export_manager.queue] Claimed queue job id=e177725c-24ef-4215-a780-de5865152999
+2026-07-09 11:04:34 INFO     [onshape_export_manager.queue] Claimed queue job id=e954f7d1-cefa-421d-878e-061684e1a271
+2026-07-09 11:04:34 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=e954f7d1-cefa-421d-878e-061684e1a271 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:04:34 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=e177725c-24ef-4215-a780-de5865152999 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:13:49 INFO     [onshape_export_manager.queue] Queued export job id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 label=testins profile=STEP reason=manual
+2026-07-09 11:13:50 INFO     [onshape_export_manager.queue] Claimed queue job id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74
+2026-07-09 11:13:50 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 retry_count=1 next_run_at=2026-07-09T08:13:51.913511+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:13:55 INFO     [onshape_export_manager.queue] Claimed queue job id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74
+2026-07-09 11:13:55 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 retry_count=2 next_run_at=2026-07-09T08:13:57.919515+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:00 INFO     [onshape_export_manager.queue] Claimed queue job id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74
+2026-07-09 11:14:00 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 retry_count=3 next_run_at=2026-07-09T08:14:04.945854+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:05 INFO     [onshape_export_manager.queue] Claimed queue job id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74
+2026-07-09 11:14:05 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=3d3a6f5a-e4d5-42cc-8eae-b75c843c7c74 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:18 INFO     [onshape_export_manager.queue] Queued export job id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 label=testins profile=STEP reason=manual
+2026-07-09 11:14:20 INFO     [onshape_export_manager.queue] Claimed queue job id=3e49e18e-26a1-400b-897c-a6b1d564b4e1
+2026-07-09 11:14:21 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 retry_count=1 next_run_at=2026-07-09T08:14:22.007844+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:26 INFO     [onshape_export_manager.queue] Claimed queue job id=3e49e18e-26a1-400b-897c-a6b1d564b4e1
+2026-07-09 11:14:26 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 retry_count=2 next_run_at=2026-07-09T08:14:28.019072+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:31 INFO     [onshape_export_manager.queue] Claimed queue job id=3e49e18e-26a1-400b-897c-a6b1d564b4e1
+2026-07-09 11:14:31 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 retry_count=3 next_run_at=2026-07-09T08:14:35.047416+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:36 INFO     [onshape_export_manager.queue] Claimed queue job id=3e49e18e-26a1-400b-897c-a6b1d564b4e1
+2026-07-09 11:14:36 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=3e49e18e-26a1-400b-897c-a6b1d564b4e1 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:14:52 INFO     [onshape_export_manager.queue] Queued export job id=bde809d8-09cf-4f50-9cc3-ee5570adc19f label=testins profile=STEP reason=manual
+2026-07-09 11:14:56 INFO     [onshape_export_manager.queue] Claimed queue job id=bde809d8-09cf-4f50-9cc3-ee5570adc19f
+2026-07-09 11:14:56 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=bde809d8-09cf-4f50-9cc3-ee5570adc19f retry_count=1 next_run_at=2026-07-09T08:14:57.108755+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:01 INFO     [onshape_export_manager.queue] Claimed queue job id=bde809d8-09cf-4f50-9cc3-ee5570adc19f
+2026-07-09 11:15:01 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=bde809d8-09cf-4f50-9cc3-ee5570adc19f retry_count=2 next_run_at=2026-07-09T08:15:03.123085+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:06 INFO     [onshape_export_manager.queue] Claimed queue job id=bde809d8-09cf-4f50-9cc3-ee5570adc19f
+2026-07-09 11:15:06 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=bde809d8-09cf-4f50-9cc3-ee5570adc19f retry_count=3 next_run_at=2026-07-09T08:15:10.142030+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:11 INFO     [onshape_export_manager.queue] Claimed queue job id=bde809d8-09cf-4f50-9cc3-ee5570adc19f
+2026-07-09 11:15:11 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=bde809d8-09cf-4f50-9cc3-ee5570adc19f error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:15 INFO     [onshape_export_manager.queue] Queued export job id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 label=testins profile=STEP reason=manual
+2026-07-09 11:15:16 INFO     [onshape_export_manager.queue] Claimed queue job id=1f4f0ed9-5603-43b9-a9bc-76d22e697224
+2026-07-09 11:15:16 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 retry_count=1 next_run_at=2026-07-09T08:15:17.174911+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:21 INFO     [onshape_export_manager.queue] Claimed queue job id=1f4f0ed9-5603-43b9-a9bc-76d22e697224
+2026-07-09 11:15:21 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 retry_count=2 next_run_at=2026-07-09T08:15:23.184162+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:26 INFO     [onshape_export_manager.queue] Claimed queue job id=1f4f0ed9-5603-43b9-a9bc-76d22e697224
+2026-07-09 11:15:26 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 retry_count=3 next_run_at=2026-07-09T08:15:30.215897+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:15:31 INFO     [onshape_export_manager.queue] Claimed queue job id=1f4f0ed9-5603-43b9-a9bc-76d22e697224
+2026-07-09 11:15:31 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=1f4f0ed9-5603-43b9-a9bc-76d22e697224 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:16:26 INFO     [onshape_export_manager.queue] Queued export job id=ff118aa3-927a-433f-aca3-5d3f86282514 label=testins profile=STEP reason=manual
+2026-07-09 11:16:31 INFO     [onshape_export_manager.queue] Claimed queue job id=ff118aa3-927a-433f-aca3-5d3f86282514
+2026-07-09 11:16:31 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ff118aa3-927a-433f-aca3-5d3f86282514 retry_count=1 next_run_at=2026-07-09T08:16:32.346009+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:16:36 INFO     [onshape_export_manager.queue] Claimed queue job id=ff118aa3-927a-433f-aca3-5d3f86282514
+2026-07-09 11:16:36 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ff118aa3-927a-433f-aca3-5d3f86282514 retry_count=2 next_run_at=2026-07-09T08:16:38.360872+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:16:41 INFO     [onshape_export_manager.queue] Claimed queue job id=ff118aa3-927a-433f-aca3-5d3f86282514
+2026-07-09 11:16:41 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ff118aa3-927a-433f-aca3-5d3f86282514 retry_count=3 next_run_at=2026-07-09T08:16:45.383482+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:16:46 INFO     [onshape_export_manager.queue] Claimed queue job id=ff118aa3-927a-433f-aca3-5d3f86282514
+2026-07-09 11:16:46 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ff118aa3-927a-433f-aca3-5d3f86282514 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:23:44 INFO     [onshape_export_manager.queue] Queued export job id=2164c673-c756-4a0e-8830-49ad1f686044 label=A profile=STL reason=
+2026-07-09 11:23:44 INFO     [onshape_export_manager.queue] Queued export job id=84157937-2438-464b-8a3d-47f38ab54669 label=B profile=STL reason=
+2026-07-09 11:23:47 INFO     [onshape_export_manager.queue] Claimed queue job id=2164c673-c756-4a0e-8830-49ad1f686044
+2026-07-09 11:23:47 INFO     [onshape_export_manager.queue] Claimed queue job id=84157937-2438-464b-8a3d-47f38ab54669
+2026-07-09 11:23:47 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=84157937-2438-464b-8a3d-47f38ab54669 retry_count=1 next_run_at=2026-07-09T08:23:48.109004+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:23:47 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2164c673-c756-4a0e-8830-49ad1f686044 retry_count=1 next_run_at=2026-07-09T08:23:48.110321+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:23:52 INFO     [onshape_export_manager.queue] Claimed queue job id=2164c673-c756-4a0e-8830-49ad1f686044
+2026-07-09 11:23:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2164c673-c756-4a0e-8830-49ad1f686044 retry_count=2 next_run_at=2026-07-09T08:23:54.114189+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:23:52 INFO     [onshape_export_manager.queue] Claimed queue job id=84157937-2438-464b-8a3d-47f38ab54669
+2026-07-09 11:23:52 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=84157937-2438-464b-8a3d-47f38ab54669 retry_count=2 next_run_at=2026-07-09T08:23:54.123183+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:23:57 INFO     [onshape_export_manager.queue] Claimed queue job id=2164c673-c756-4a0e-8830-49ad1f686044
+2026-07-09 11:23:57 INFO     [onshape_export_manager.queue] Claimed queue job id=84157937-2438-464b-8a3d-47f38ab54669
+2026-07-09 11:23:57 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2164c673-c756-4a0e-8830-49ad1f686044 retry_count=3 next_run_at=2026-07-09T08:24:01.763671+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:23:57 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=84157937-2438-464b-8a3d-47f38ab54669 retry_count=3 next_run_at=2026-07-09T08:24:01.764707+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:24:02 INFO     [onshape_export_manager.queue] Claimed queue job id=2164c673-c756-4a0e-8830-49ad1f686044
+2026-07-09 11:24:02 INFO     [onshape_export_manager.queue] Claimed queue job id=84157937-2438-464b-8a3d-47f38ab54669
+2026-07-09 11:24:02 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=2164c673-c756-4a0e-8830-49ad1f686044 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:24:02 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=84157937-2438-464b-8a3d-47f38ab54669 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:24:58 INFO     [onshape_export_manager.queue] Queued export job id=374ccd4b-9fcc-4776-9982-17a35d93fcb0 label=A profile=STL reason=
+2026-07-09 11:24:58 INFO     [onshape_export_manager.queue] Queued export job id=5d01247f-336c-43b5-9077-5fe234133372 label=B profile=STL reason=
+2026-07-09 11:25:02 INFO     [onshape_export_manager.queue] Claimed queue job id=374ccd4b-9fcc-4776-9982-17a35d93fcb0
+2026-07-09 11:25:02 INFO     [onshape_export_manager.queue] Claimed queue job id=5d01247f-336c-43b5-9077-5fe234133372
+2026-07-09 11:25:02 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=374ccd4b-9fcc-4776-9982-17a35d93fcb0 retry_count=1 next_run_at=2026-07-09T08:25:03.474791+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:25:02 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d01247f-336c-43b5-9077-5fe234133372 retry_count=1 next_run_at=2026-07-09T08:25:03.477127+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:37:13 INFO     [onshape_export_manager.queue] Claimed queue job id=374ccd4b-9fcc-4776-9982-17a35d93fcb0
+2026-07-09 11:37:13 INFO     [onshape_export_manager.queue] Claimed queue job id=5d01247f-336c-43b5-9077-5fe234133372
+2026-07-09 11:37:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=374ccd4b-9fcc-4776-9982-17a35d93fcb0 retry_count=2 next_run_at=2026-07-09T08:37:15.404140+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:37:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d01247f-336c-43b5-9077-5fe234133372 retry_count=2 next_run_at=2026-07-09T08:37:15.405943+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:37:18 INFO     [onshape_export_manager.queue] Claimed queue job id=374ccd4b-9fcc-4776-9982-17a35d93fcb0
+2026-07-09 11:37:18 INFO     [onshape_export_manager.queue] Claimed queue job id=5d01247f-336c-43b5-9077-5fe234133372
+2026-07-09 11:37:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=374ccd4b-9fcc-4776-9982-17a35d93fcb0 retry_count=3 next_run_at=2026-07-09T08:37:22.418711+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:37:18 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d01247f-336c-43b5-9077-5fe234133372 retry_count=3 next_run_at=2026-07-09T08:37:22.419022+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:37:23 INFO     [onshape_export_manager.queue] Claimed queue job id=374ccd4b-9fcc-4776-9982-17a35d93fcb0
+2026-07-09 11:37:23 INFO     [onshape_export_manager.queue] Claimed queue job id=5d01247f-336c-43b5-9077-5fe234133372
+2026-07-09 11:37:23 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=374ccd4b-9fcc-4776-9982-17a35d93fcb0 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:37:23 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=5d01247f-336c-43b5-9077-5fe234133372 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:37:38 INFO     [onshape_export_manager.queue] Queued export job id=6d107631-5356-44bd-8112-0c6a4e16b90b label=Electronics profile=STL reason=manual
+2026-07-09 11:37:38 INFO     [onshape_export_manager.queue] Claimed queue job id=6d107631-5356-44bd-8112-0c6a4e16b90b
+2026-07-09 11:37:38 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6d107631-5356-44bd-8112-0c6a4e16b90b retry_count=1 next_run_at=2026-07-09T08:37:39.489430+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:37:43 INFO     [onshape_export_manager.queue] Claimed queue job id=6d107631-5356-44bd-8112-0c6a4e16b90b
+2026-07-09 11:37:43 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6d107631-5356-44bd-8112-0c6a4e16b90b retry_count=2 next_run_at=2026-07-09T08:37:45.496529+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:37:48 INFO     [onshape_export_manager.queue] Claimed queue job id=6d107631-5356-44bd-8112-0c6a4e16b90b
+2026-07-09 11:37:48 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6d107631-5356-44bd-8112-0c6a4e16b90b retry_count=3 next_run_at=2026-07-09T08:37:52.512081+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:37:53 INFO     [onshape_export_manager.queue] Claimed queue job id=6d107631-5356-44bd-8112-0c6a4e16b90b
+2026-07-09 11:37:53 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=6d107631-5356-44bd-8112-0c6a4e16b90b error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:38:15 INFO     [onshape_export_manager.queue] Queued export job id=a4f4f2c7-3503-46f8-bbd9-db88bfd7697b label=A profile=STL reason=
+2026-07-09 11:38:15 INFO     [onshape_export_manager.queue] Queued export job id=5d8c9a93-3c32-4c05-bd16-d50f81690d55 label=B profile=STL reason=
+2026-07-09 11:38:17 INFO     [onshape_export_manager.queue] Claimed queue job id=a4f4f2c7-3503-46f8-bbd9-db88bfd7697b
+2026-07-09 11:38:17 INFO     [onshape_export_manager.queue] Claimed queue job id=5d8c9a93-3c32-4c05-bd16-d50f81690d55
+2026-07-09 11:38:17 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a4f4f2c7-3503-46f8-bbd9-db88bfd7697b retry_count=1 next_run_at=2026-07-09T08:38:18.083493+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 11:38:17 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=5d8c9a93-3c32-4c05-bd16-d50f81690d55 retry_count=1 next_run_at=2026-07-09T08:38:18.085847+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 11:38:54 INFO     [onshape_export_manager.queue] Queued export job id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 label=Electronics profile=STL reason=manual
+2026-07-09 11:38:57 INFO     [onshape_export_manager.queue] Claimed queue job id=ccd08163-54e4-4ec4-8701-8c0af1a135d2
+2026-07-09 11:38:57 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 retry_count=1 next_run_at=2026-07-09T08:38:58.381498+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:39:02 INFO     [onshape_export_manager.queue] Claimed queue job id=ccd08163-54e4-4ec4-8701-8c0af1a135d2
+2026-07-09 11:39:02 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 retry_count=2 next_run_at=2026-07-09T08:39:04.393065+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:39:07 INFO     [onshape_export_manager.queue] Claimed queue job id=ccd08163-54e4-4ec4-8701-8c0af1a135d2
+2026-07-09 11:39:07 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 retry_count=3 next_run_at=2026-07-09T08:39:11.411778+00:00 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 11:39:12 INFO     [onshape_export_manager.queue] Claimed queue job id=ccd08163-54e4-4ec4-8701-8c0af1a135d2
+2026-07-09 11:39:12 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ccd08163-54e4-4ec4-8701-8c0af1a135d2 error=NoEnabledAccountsError: No enabled Onshape accounts are configured.
+2026-07-09 12:27:03 INFO     [onshape_export_manager.queue] Queued export job id=0e296bb9-7525-4e63-a4a3-3122290722e4 label=A profile=STL reason=
+2026-07-09 12:27:03 INFO     [onshape_export_manager.queue] Queued export job id=c82cdad6-16f6-46aa-9142-bdffc38fd7df label=B profile=STL reason=
+2026-07-09 12:27:04 INFO     [onshape_export_manager.queue] Claimed queue job id=0e296bb9-7525-4e63-a4a3-3122290722e4
+2026-07-09 12:27:04 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=0e296bb9-7525-4e63-a4a3-3122290722e4 retry_count=1 next_run_at=2026-07-09T09:27:05.201005+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 12:27:04 INFO     [onshape_export_manager.queue] Claimed queue job id=c82cdad6-16f6-46aa-9142-bdffc38fd7df
+2026-07-09 12:27:04 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=c82cdad6-16f6-46aa-9142-bdffc38fd7df retry_count=1 next_run_at=2026-07-09T09:27:05.210998+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 12:27:08 INFO     [onshape_export_manager.queue] Claimed queue job id=0e296bb9-7525-4e63-a4a3-3122290722e4
+2026-07-09 12:27:08 INFO     [onshape_export_manager.queue] Claimed queue job id=c82cdad6-16f6-46aa-9142-bdffc38fd7df
+2026-07-09 12:27:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=c82cdad6-16f6-46aa-9142-bdffc38fd7df retry_count=2 next_run_at=2026-07-09T09:27:10.054100+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 12:27:08 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=0e296bb9-7525-4e63-a4a3-3122290722e4 retry_count=2 next_run_at=2026-07-09T09:27:10.051040+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 12:27:13 INFO     [onshape_export_manager.queue] Claimed queue job id=0e296bb9-7525-4e63-a4a3-3122290722e4
+2026-07-09 12:27:13 INFO     [onshape_export_manager.queue] Claimed queue job id=c82cdad6-16f6-46aa-9142-bdffc38fd7df
+2026-07-09 12:27:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=0e296bb9-7525-4e63-a4a3-3122290722e4 retry_count=3 next_run_at=2026-07-09T09:27:17.074483+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-09 12:27:13 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=c82cdad6-16f6-46aa-9142-bdffc38fd7df retry_count=3 next_run_at=2026-07-09T09:27:17.080474+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-09 12:27:19 INFO     [onshape_export_manager.queue] Queued export job id=db67c8b3-c8e6-4188-9784-42a4b62fa34b label=Electronics profile=STL reason=manual
+2026-07-09 12:27:22 INFO     [onshape_export_manager.queue] Claimed queue job id=db67c8b3-c8e6-4188-9784-42a4b62fa34b
+2026-07-09 12:27:23 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=db67c8b3-c8e6-4188-9784-42a4b62fa34b retry_count=1 next_run_at=2026-07-09T09:27:24.487073+00:00 error=Onshape API error during fetch documents: HTTP 401 {"message":"Unauthenticated API request", "status":401}
+2026-07-09 12:27:27 INFO     [onshape_export_manager.queue] Claimed queue job id=db67c8b3-c8e6-4188-9784-42a4b62fa34b
+2026-07-09 12:27:28 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=db67c8b3-c8e6-4188-9784-42a4b62fa34b retry_count=2 next_run_at=2026-07-09T09:27:30.384084+00:00 error=Onshape API error during fetch documents: HTTP 401 {"message":"Unauthenticated API request", "status":401}
+2026-07-09 12:27:32 INFO     [onshape_export_manager.queue] Claimed queue job id=db67c8b3-c8e6-4188-9784-42a4b62fa34b
+2026-07-09 12:27:33 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=db67c8b3-c8e6-4188-9784-42a4b62fa34b retry_count=3 next_run_at=2026-07-09T09:27:37.303272+00:00 error=Onshape API error during fetch documents: HTTP 401 {"message":"Unauthenticated API request", "status":401}
+2026-07-09 12:27:37 INFO     [onshape_export_manager.queue] Claimed queue job id=db67c8b3-c8e6-4188-9784-42a4b62fa34b
+2026-07-09 12:27:38 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=db67c8b3-c8e6-4188-9784-42a4b62fa34b error=Onshape API error during fetch documents: HTTP 401 {"message":"Unauthenticated API request", "status":401}
+2026-07-09 12:28:22 INFO     [onshape_export_manager.queue] Queued export job id=57c8e2b8-c4fb-416c-b4fb-afcffb3b83ab label=Electronics profile=STL reason=manual
+2026-07-09 12:28:25 INFO     [onshape_export_manager.queue] Claimed queue job id=57c8e2b8-c4fb-416c-b4fb-afcffb3b83ab
+2026-07-09 12:28:33 INFO     [onshape_export_manager.queue] Completed queue job id=57c8e2b8-c4fb-416c-b4fb-afcffb3b83ab
+2026-07-10 16:03:31 INFO     [onshape_export_manager.queue] Queued export job id=d4ed942c-c2da-4e96-8d2c-b09d958a1614 label=A profile=STL reason=
+2026-07-10 16:03:31 INFO     [onshape_export_manager.queue] Queued export job id=ffedba18-e72f-4cc0-a93c-a9e7d39869a2 label=B profile=STL reason=
+2026-07-10 16:03:31 INFO     [onshape_export_manager.queue] Claimed queue job id=d4ed942c-c2da-4e96-8d2c-b09d958a1614
+2026-07-10 16:03:31 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=d4ed942c-c2da-4e96-8d2c-b09d958a1614 retry_count=1 next_run_at=2026-07-10T13:03:32.943265+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:03:31 INFO     [onshape_export_manager.queue] Claimed queue job id=ffedba18-e72f-4cc0-a93c-a9e7d39869a2
+2026-07-10 16:03:31 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ffedba18-e72f-4cc0-a93c-a9e7d39869a2 retry_count=1 next_run_at=2026-07-10T13:03:32.951240+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:03:35 INFO     [onshape_export_manager.queue] Claimed queue job id=d4ed942c-c2da-4e96-8d2c-b09d958a1614
+2026-07-10 16:03:35 INFO     [onshape_export_manager.queue] Claimed queue job id=ffedba18-e72f-4cc0-a93c-a9e7d39869a2
+2026-07-10 16:03:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=d4ed942c-c2da-4e96-8d2c-b09d958a1614 retry_count=2 next_run_at=2026-07-10T13:03:37.968309+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:03:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ffedba18-e72f-4cc0-a93c-a9e7d39869a2 retry_count=2 next_run_at=2026-07-10T13:03:37.973251+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:05:36 INFO     [onshape_export_manager.queue] Queued export job id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c label=A profile=STL reason=
+2026-07-10 16:05:36 INFO     [onshape_export_manager.queue] Queued export job id=3bd94baf-66ba-4644-b838-5e8afe184606 label=B profile=STL reason=
+2026-07-10 16:05:37 INFO     [onshape_export_manager.queue] Claimed queue job id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c
+2026-07-10 16:05:37 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c retry_count=1 next_run_at=2026-07-10T13:05:38.193608+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:05:37 INFO     [onshape_export_manager.queue] Claimed queue job id=3bd94baf-66ba-4644-b838-5e8afe184606
+2026-07-10 16:05:37 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3bd94baf-66ba-4644-b838-5e8afe184606 retry_count=1 next_run_at=2026-07-10T13:05:38.203265+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:05:41 INFO     [onshape_export_manager.queue] Claimed queue job id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c
+2026-07-10 16:05:41 INFO     [onshape_export_manager.queue] Claimed queue job id=3bd94baf-66ba-4644-b838-5e8afe184606
+2026-07-10 16:05:41 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c retry_count=2 next_run_at=2026-07-10T13:05:43.173237+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:05:41 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3bd94baf-66ba-4644-b838-5e8afe184606 retry_count=2 next_run_at=2026-07-10T13:05:43.180201+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:05:46 INFO     [onshape_export_manager.queue] Claimed queue job id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c
+2026-07-10 16:05:46 INFO     [onshape_export_manager.queue] Claimed queue job id=3bd94baf-66ba-4644-b838-5e8afe184606
+2026-07-10 16:05:46 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c retry_count=3 next_run_at=2026-07-10T13:05:50.187021+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:05:46 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3bd94baf-66ba-4644-b838-5e8afe184606 retry_count=3 next_run_at=2026-07-10T13:05:50.190287+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:05:51 INFO     [onshape_export_manager.queue] Claimed queue job id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c
+2026-07-10 16:05:51 INFO     [onshape_export_manager.queue] Claimed queue job id=3bd94baf-66ba-4644-b838-5e8afe184606
+2026-07-10 16:05:51 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ca39d7cb-8ded-4584-ac8d-2b8529f3705c error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:05:51 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=3bd94baf-66ba-4644-b838-5e8afe184606 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:06:08 INFO     [onshape_export_manager.queue] Queued export job id=55dd68b4-5e42-4edc-9543-f46350afb6ba label=A profile=STL reason=
+2026-07-10 16:06:08 INFO     [onshape_export_manager.queue] Queued export job id=7155b783-bd9d-476c-9508-8930f6733152 label=B profile=STL reason=
+2026-07-10 16:06:11 INFO     [onshape_export_manager.queue] Claimed queue job id=55dd68b4-5e42-4edc-9543-f46350afb6ba
+2026-07-10 16:06:11 INFO     [onshape_export_manager.queue] Claimed queue job id=7155b783-bd9d-476c-9508-8930f6733152
+2026-07-10 16:06:11 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=55dd68b4-5e42-4edc-9543-f46350afb6ba retry_count=1 next_run_at=2026-07-10T13:06:12.249607+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:06:11 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7155b783-bd9d-476c-9508-8930f6733152 retry_count=1 next_run_at=2026-07-10T13:06:12.249717+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:06:12 INFO     [onshape_export_manager.queue] Claimed queue job id=55dd68b4-5e42-4edc-9543-f46350afb6ba
+2026-07-10 16:06:12 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=55dd68b4-5e42-4edc-9543-f46350afb6ba retry_count=2 next_run_at=2026-07-10T13:06:14.272793+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:06:12 INFO     [onshape_export_manager.queue] Claimed queue job id=7155b783-bd9d-476c-9508-8930f6733152
+2026-07-10 16:06:12 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7155b783-bd9d-476c-9508-8930f6733152 retry_count=2 next_run_at=2026-07-10T13:06:14.280338+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:06:16 INFO     [onshape_export_manager.queue] Claimed queue job id=55dd68b4-5e42-4edc-9543-f46350afb6ba
+2026-07-10 16:06:16 INFO     [onshape_export_manager.queue] Claimed queue job id=7155b783-bd9d-476c-9508-8930f6733152
+2026-07-10 16:06:16 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=55dd68b4-5e42-4edc-9543-f46350afb6ba retry_count=3 next_run_at=2026-07-10T13:06:20.261838+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:06:16 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=7155b783-bd9d-476c-9508-8930f6733152 retry_count=3 next_run_at=2026-07-10T13:06:20.263196+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:06:21 INFO     [onshape_export_manager.queue] Claimed queue job id=55dd68b4-5e42-4edc-9543-f46350afb6ba
+2026-07-10 16:06:21 INFO     [onshape_export_manager.queue] Claimed queue job id=7155b783-bd9d-476c-9508-8930f6733152
+2026-07-10 16:06:21 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=55dd68b4-5e42-4edc-9543-f46350afb6ba error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:06:21 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=7155b783-bd9d-476c-9508-8930f6733152 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:11:40 INFO     [onshape_export_manager.queue] Queued export job id=a44852f5-3be8-4dc2-8277-2b2b94c9516c label=A profile=STL reason=
+2026-07-10 16:11:40 INFO     [onshape_export_manager.queue] Queued export job id=a539d744-443f-488b-b4f7-939138d26aed label=B profile=STL reason=
+2026-07-10 16:11:43 INFO     [onshape_export_manager.queue] Claimed queue job id=a44852f5-3be8-4dc2-8277-2b2b94c9516c
+2026-07-10 16:11:43 INFO     [onshape_export_manager.queue] Claimed queue job id=a539d744-443f-488b-b4f7-939138d26aed
+2026-07-10 16:11:44 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a539d744-443f-488b-b4f7-939138d26aed retry_count=1 next_run_at=2026-07-10T13:11:45.002410+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:11:44 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a44852f5-3be8-4dc2-8277-2b2b94c9516c retry_count=1 next_run_at=2026-07-10T13:11:45.002791+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:11:48 INFO     [onshape_export_manager.queue] Claimed queue job id=a44852f5-3be8-4dc2-8277-2b2b94c9516c
+2026-07-10 16:11:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a44852f5-3be8-4dc2-8277-2b2b94c9516c retry_count=2 next_run_at=2026-07-10T13:11:51.002683+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:11:49 INFO     [onshape_export_manager.queue] Claimed queue job id=a539d744-443f-488b-b4f7-939138d26aed
+2026-07-10 16:11:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a539d744-443f-488b-b4f7-939138d26aed retry_count=2 next_run_at=2026-07-10T13:11:51.008240+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:11:54 INFO     [onshape_export_manager.queue] Claimed queue job id=a44852f5-3be8-4dc2-8277-2b2b94c9516c
+2026-07-10 16:11:54 INFO     [onshape_export_manager.queue] Claimed queue job id=a539d744-443f-488b-b4f7-939138d26aed
+2026-07-10 16:11:54 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a44852f5-3be8-4dc2-8277-2b2b94c9516c retry_count=3 next_run_at=2026-07-10T13:11:58.204715+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:11:54 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a539d744-443f-488b-b4f7-939138d26aed retry_count=3 next_run_at=2026-07-10T13:11:58.205738+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:11:59 INFO     [onshape_export_manager.queue] Claimed queue job id=a44852f5-3be8-4dc2-8277-2b2b94c9516c
+2026-07-10 16:11:59 INFO     [onshape_export_manager.queue] Claimed queue job id=a539d744-443f-488b-b4f7-939138d26aed
+2026-07-10 16:11:59 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=a44852f5-3be8-4dc2-8277-2b2b94c9516c error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:11:59 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=a539d744-443f-488b-b4f7-939138d26aed error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:18:35 INFO     [onshape_export_manager.queue] Queued export job id=975c6ea1-6451-4115-aca0-3dbe0f86dc06 label=A profile=STL reason=
+2026-07-10 16:18:35 INFO     [onshape_export_manager.queue] Queued export job id=9614df73-1eea-4e68-a64f-3bf164fd0dfa label=B profile=STL reason=
+2026-07-10 16:18:39 INFO     [onshape_export_manager.queue] Claimed queue job id=975c6ea1-6451-4115-aca0-3dbe0f86dc06
+2026-07-10 16:18:39 INFO     [onshape_export_manager.queue] Claimed queue job id=9614df73-1eea-4e68-a64f-3bf164fd0dfa
+2026-07-10 16:18:39 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=975c6ea1-6451-4115-aca0-3dbe0f86dc06 retry_count=1 next_run_at=2026-07-10T13:18:40.915208+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:18:39 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9614df73-1eea-4e68-a64f-3bf164fd0dfa retry_count=1 next_run_at=2026-07-10T13:18:40.915716+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:18:44 INFO     [onshape_export_manager.queue] Claimed queue job id=975c6ea1-6451-4115-aca0-3dbe0f86dc06
+2026-07-10 16:18:44 INFO     [onshape_export_manager.queue] Claimed queue job id=9614df73-1eea-4e68-a64f-3bf164fd0dfa
+2026-07-10 16:18:44 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=975c6ea1-6451-4115-aca0-3dbe0f86dc06 retry_count=2 next_run_at=2026-07-10T13:18:46.916442+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:18:44 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9614df73-1eea-4e68-a64f-3bf164fd0dfa retry_count=2 next_run_at=2026-07-10T13:18:46.927327+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:18:49 INFO     [onshape_export_manager.queue] Claimed queue job id=975c6ea1-6451-4115-aca0-3dbe0f86dc06
+2026-07-10 16:18:49 INFO     [onshape_export_manager.queue] Claimed queue job id=9614df73-1eea-4e68-a64f-3bf164fd0dfa
+2026-07-10 16:18:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=975c6ea1-6451-4115-aca0-3dbe0f86dc06 retry_count=3 next_run_at=2026-07-10T13:18:53.940866+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:18:49 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=9614df73-1eea-4e68-a64f-3bf164fd0dfa retry_count=3 next_run_at=2026-07-10T13:18:53.944366+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:18:54 INFO     [onshape_export_manager.queue] Claimed queue job id=975c6ea1-6451-4115-aca0-3dbe0f86dc06
+2026-07-10 16:18:54 INFO     [onshape_export_manager.queue] Claimed queue job id=9614df73-1eea-4e68-a64f-3bf164fd0dfa
+2026-07-10 16:18:54 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=975c6ea1-6451-4115-aca0-3dbe0f86dc06 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:18:54 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=9614df73-1eea-4e68-a64f-3bf164fd0dfa error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:19:29 INFO     [onshape_export_manager.queue] Queued export job id=efefd003-6eae-45ca-91d6-8962f09c0270 label=A profile=STL reason=
+2026-07-10 16:19:29 INFO     [onshape_export_manager.queue] Queued export job id=e039f94d-afad-49a0-97a2-9d56d2635203 label=B profile=STL reason=
+2026-07-10 16:19:30 INFO     [onshape_export_manager.queue] Claimed queue job id=efefd003-6eae-45ca-91d6-8962f09c0270
+2026-07-10 16:19:30 INFO     [onshape_export_manager.queue] Claimed queue job id=e039f94d-afad-49a0-97a2-9d56d2635203
+2026-07-10 16:19:30 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=efefd003-6eae-45ca-91d6-8962f09c0270 retry_count=1 next_run_at=2026-07-10T13:19:31.039333+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:19:30 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e039f94d-afad-49a0-97a2-9d56d2635203 retry_count=1 next_run_at=2026-07-10T13:19:31.040130+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:19:35 INFO     [onshape_export_manager.queue] Claimed queue job id=efefd003-6eae-45ca-91d6-8962f09c0270
+2026-07-10 16:19:35 INFO     [onshape_export_manager.queue] Claimed queue job id=e039f94d-afad-49a0-97a2-9d56d2635203
+2026-07-10 16:19:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e039f94d-afad-49a0-97a2-9d56d2635203 retry_count=2 next_run_at=2026-07-10T13:19:37.050492+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:19:35 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=efefd003-6eae-45ca-91d6-8962f09c0270 retry_count=2 next_run_at=2026-07-10T13:19:37.051262+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:19:40 INFO     [onshape_export_manager.queue] Claimed queue job id=efefd003-6eae-45ca-91d6-8962f09c0270
+2026-07-10 16:19:40 INFO     [onshape_export_manager.queue] Claimed queue job id=e039f94d-afad-49a0-97a2-9d56d2635203
+2026-07-10 16:19:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=e039f94d-afad-49a0-97a2-9d56d2635203 retry_count=3 next_run_at=2026-07-10T13:19:44.082491+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:19:40 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=efefd003-6eae-45ca-91d6-8962f09c0270 retry_count=3 next_run_at=2026-07-10T13:19:44.083039+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:19:45 INFO     [onshape_export_manager.queue] Claimed queue job id=efefd003-6eae-45ca-91d6-8962f09c0270
+2026-07-10 16:19:45 INFO     [onshape_export_manager.queue] Claimed queue job id=e039f94d-afad-49a0-97a2-9d56d2635203
+2026-07-10 16:19:45 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=efefd003-6eae-45ca-91d6-8962f09c0270 error=ValueError: unknown or disabled label 'A'
+2026-07-10 16:19:45 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=e039f94d-afad-49a0-97a2-9d56d2635203 error=ValueError: unknown or disabled label 'B'
+2026-07-10 16:23:59 INFO     [onshape_export_manager.queue] Queued export job id=7c321a71-442f-4e79-9c4e-ed78f95225f2 label=testins profile=STEP reason=manual
+2026-07-10 16:23:59 INFO     [onshape_export_manager.queue] Claimed queue job id=7c321a71-442f-4e79-9c4e-ed78f95225f2
+2026-07-10 16:24:09 INFO     [onshape_export_manager.queue] Completed queue job id=7c321a71-442f-4e79-9c4e-ed78f95225f2
+2026-07-10 16:24:53 INFO     [onshape_export_manager.queue] Queued export job id=e3158eab-bf75-4e7e-aedf-7041622eab13 label=testins profile=STEP reason=manual
+2026-07-10 16:24:54 INFO     [onshape_export_manager.queue] Claimed queue job id=e3158eab-bf75-4e7e-aedf-7041622eab13
+2026-07-10 16:24:59 INFO     [onshape_export_manager.queue] Completed queue job id=e3158eab-bf75-4e7e-aedf-7041622eab13
+2026-07-10 16:25:37 INFO     [onshape_export_manager.queue] Queued export job id=e54585ab-b122-467e-844b-0288356a194d label=testins profile=STEP reason=manual
+2026-07-10 16:25:39 INFO     [onshape_export_manager.queue] Claimed queue job id=e54585ab-b122-467e-844b-0288356a194d
+2026-07-10 16:25:43 INFO     [onshape_export_manager.queue] Completed queue job id=e54585ab-b122-467e-844b-0288356a194d
+2026-07-10 16:27:21 INFO     [onshape_export_manager.queue] Queued export job id=16e9d26d-5f2c-4688-a6af-79f8caee6169 label=Tests profile=STEP reason=manual
+2026-07-10 16:27:23 INFO     [onshape_export_manager.queue] Claimed queue job id=16e9d26d-5f2c-4688-a6af-79f8caee6169
+2026-07-10 16:27:27 INFO     [onshape_export_manager.queue] Completed queue job id=16e9d26d-5f2c-4688-a6af-79f8caee6169
+2026-07-10 16:28:49 INFO     [onshape_export_manager.queue] Queued export job id=2ed383ea-f851-45ea-9972-152194888f5b label=Tests profile=STEP reason=manual
+2026-07-10 16:28:50 INFO     [onshape_export_manager.queue] Claimed queue job id=2ed383ea-f851-45ea-9972-152194888f5b
+2026-07-10 16:28:54 INFO     [onshape_export_manager.queue] Completed queue job id=2ed383ea-f851-45ea-9972-152194888f5b
+2026-07-10 16:28:58 INFO     [onshape_export_manager.queue] Queued export job id=6cc901cd-63bb-4912-8921-deef8603ec76 label=Tests profile=STEP reason=manual
+2026-07-10 16:28:59 INFO     [onshape_export_manager.queue] Claimed queue job id=6cc901cd-63bb-4912-8921-deef8603ec76
+2026-07-10 16:29:09 INFO     [onshape_export_manager.queue] Completed queue job id=6cc901cd-63bb-4912-8921-deef8603ec76
+2026-07-10 16:47:01 INFO     [onshape_export_manager.queue] Queued export job id=58e09409-311d-44d2-905a-a3bcfb94adcc label=A profile=STL reason=
+2026-07-10 16:47:01 INFO     [onshape_export_manager.queue] Queued export job id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994 label=B profile=STL reason=
+2026-07-10 16:47:01 INFO     [onshape_export_manager.queue] Claimed queue job id=58e09409-311d-44d2-905a-a3bcfb94adcc
+2026-07-10 16:47:02 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=58e09409-311d-44d2-905a-a3bcfb94adcc retry_count=1 next_run_at=2026-07-10T13:47:03.006627+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:02 INFO     [onshape_export_manager.queue] Claimed queue job id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994
+2026-07-10 16:47:02 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994 retry_count=1 next_run_at=2026-07-10T13:47:03.016041+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:05 INFO     [onshape_export_manager.queue] Claimed queue job id=58e09409-311d-44d2-905a-a3bcfb94adcc
+2026-07-10 16:47:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=58e09409-311d-44d2-905a-a3bcfb94adcc retry_count=2 next_run_at=2026-07-10T13:47:07.105851+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:05 INFO     [onshape_export_manager.queue] Claimed queue job id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994
+2026-07-10 16:47:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994 retry_count=2 next_run_at=2026-07-10T13:47:07.113359+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:07 INFO     [onshape_export_manager.queue] Claimed queue job id=58e09409-311d-44d2-905a-a3bcfb94adcc
+2026-07-10 16:47:07 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=58e09409-311d-44d2-905a-a3bcfb94adcc retry_count=3 next_run_at=2026-07-10T13:47:11.657702+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:07 INFO     [onshape_export_manager.queue] Claimed queue job id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994
+2026-07-10 16:47:07 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994 retry_count=3 next_run_at=2026-07-10T13:47:11.672341+00:00 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:12 INFO     [onshape_export_manager.queue] Claimed queue job id=58e09409-311d-44d2-905a-a3bcfb94adcc
+2026-07-10 16:47:12 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=58e09409-311d-44d2-905a-a3bcfb94adcc error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 16:47:12 INFO     [onshape_export_manager.queue] Claimed queue job id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994
+2026-07-10 16:47:12 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=aa0082b7-0af0-4a74-be0b-1a0a0fdfe994 error=ValidationError: 2 validation errors for ExportProfilesConfig
+profiles.2.formats.0
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/enum
+profiles.4.formats.2
+  Input should be 'stl', 'step', 'parasolid', 'obj', 'iges', 'dxf', 'pdf' or 'custom' [type=enum, input_value='3mf', input_type=str]
+    For further information visit https://errors.pydanti
+2026-07-10 17:19:44 INFO     [onshape_export_manager.queue] Queued export job id=dac143ae-4101-4a39-a5c6-b6877d0867b7 label=A profile=STL reason=
+2026-07-10 17:19:44 INFO     [onshape_export_manager.queue] Queued export job id=048b3dc5-58ab-48df-b911-ecd3df102b0c label=B profile=STL reason=
+2026-07-10 17:20:12 INFO     [onshape_export_manager.queue] Queued export job id=fc1f05b3-7334-454c-95d8-09ee956919d1 label=A profile=STL reason=
+2026-07-10 17:20:12 INFO     [onshape_export_manager.queue] Queued export job id=ddc02e02-eeac-4561-862b-ed809ab006a3 label=B profile=STL reason=
+2026-07-10 17:20:23 INFO     [onshape_export_manager.queue] Claimed queue job id=dac143ae-4101-4a39-a5c6-b6877d0867b7
+2026-07-10 17:20:23 INFO     [onshape_export_manager.queue] Claimed queue job id=048b3dc5-58ab-48df-b911-ecd3df102b0c
+2026-07-10 17:20:23 INFO     [onshape_export_manager.queue] Claimed queue job id=fc1f05b3-7334-454c-95d8-09ee956919d1
+2026-07-10 17:20:23 INFO     [onshape_export_manager.queue] Claimed queue job id=ddc02e02-eeac-4561-862b-ed809ab006a3
+2026-07-10 17:20:23 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddc02e02-eeac-4561-862b-ed809ab006a3 retry_count=1 next_run_at=2026-07-10T14:20:24.399362+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:23 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dac143ae-4101-4a39-a5c6-b6877d0867b7 retry_count=1 next_run_at=2026-07-10T14:20:24.398962+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:23 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fc1f05b3-7334-454c-95d8-09ee956919d1 retry_count=1 next_run_at=2026-07-10T14:20:24.401109+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:23 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=048b3dc5-58ab-48df-b911-ecd3df102b0c retry_count=1 next_run_at=2026-07-10T14:20:24.399752+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:28 INFO     [onshape_export_manager.queue] Claimed queue job id=dac143ae-4101-4a39-a5c6-b6877d0867b7
+2026-07-10 17:20:28 INFO     [onshape_export_manager.queue] Claimed queue job id=048b3dc5-58ab-48df-b911-ecd3df102b0c
+2026-07-10 17:20:28 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dac143ae-4101-4a39-a5c6-b6877d0867b7 retry_count=2 next_run_at=2026-07-10T14:20:30.432056+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:28 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=048b3dc5-58ab-48df-b911-ecd3df102b0c retry_count=2 next_run_at=2026-07-10T14:20:30.432136+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:28 INFO     [onshape_export_manager.queue] Claimed queue job id=fc1f05b3-7334-454c-95d8-09ee956919d1
+2026-07-10 17:20:28 INFO     [onshape_export_manager.queue] Claimed queue job id=ddc02e02-eeac-4561-862b-ed809ab006a3
+2026-07-10 17:20:28 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddc02e02-eeac-4561-862b-ed809ab006a3 retry_count=2 next_run_at=2026-07-10T14:20:30.446268+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:28 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fc1f05b3-7334-454c-95d8-09ee956919d1 retry_count=2 next_run_at=2026-07-10T14:20:30.449308+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:33 INFO     [onshape_export_manager.queue] Claimed queue job id=dac143ae-4101-4a39-a5c6-b6877d0867b7
+2026-07-10 17:20:33 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=dac143ae-4101-4a39-a5c6-b6877d0867b7 retry_count=3 next_run_at=2026-07-10T14:20:37.459979+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:33 INFO     [onshape_export_manager.queue] Claimed queue job id=048b3dc5-58ab-48df-b911-ecd3df102b0c
+2026-07-10 17:20:33 INFO     [onshape_export_manager.queue] Claimed queue job id=fc1f05b3-7334-454c-95d8-09ee956919d1
+2026-07-10 17:20:33 INFO     [onshape_export_manager.queue] Claimed queue job id=ddc02e02-eeac-4561-862b-ed809ab006a3
+2026-07-10 17:20:33 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fc1f05b3-7334-454c-95d8-09ee956919d1 retry_count=3 next_run_at=2026-07-10T14:20:37.469930+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:33 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=048b3dc5-58ab-48df-b911-ecd3df102b0c retry_count=3 next_run_at=2026-07-10T14:20:37.470366+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:33 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ddc02e02-eeac-4561-862b-ed809ab006a3 retry_count=3 next_run_at=2026-07-10T14:20:37.474730+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:38 INFO     [onshape_export_manager.queue] Claimed queue job id=dac143ae-4101-4a39-a5c6-b6877d0867b7
+2026-07-10 17:20:38 INFO     [onshape_export_manager.queue] Claimed queue job id=048b3dc5-58ab-48df-b911-ecd3df102b0c
+2026-07-10 17:20:38 INFO     [onshape_export_manager.queue] Claimed queue job id=fc1f05b3-7334-454c-95d8-09ee956919d1
+2026-07-10 17:20:38 INFO     [onshape_export_manager.queue] Claimed queue job id=ddc02e02-eeac-4561-862b-ed809ab006a3
+2026-07-10 17:20:38 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=048b3dc5-58ab-48df-b911-ecd3df102b0c error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:20:38 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=dac143ae-4101-4a39-a5c6-b6877d0867b7 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:38 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=fc1f05b3-7334-454c-95d8-09ee956919d1 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:20:38 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ddc02e02-eeac-4561-862b-ed809ab006a3 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:33:28 INFO     [onshape_export_manager.queue] Queued export job id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a label=A profile=STL reason=
+2026-07-10 17:33:28 INFO     [onshape_export_manager.queue] Queued export job id=a1c7b2f4-0d5d-4913-8747-649209c27179 label=B profile=STL reason=
+2026-07-10 17:33:29 INFO     [onshape_export_manager.queue] Claimed queue job id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a
+2026-07-10 17:33:29 INFO     [onshape_export_manager.queue] Claimed queue job id=a1c7b2f4-0d5d-4913-8747-649209c27179
+2026-07-10 17:33:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a retry_count=1 next_run_at=2026-07-10T14:33:30.701704+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:33:29 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a1c7b2f4-0d5d-4913-8747-649209c27179 retry_count=1 next_run_at=2026-07-10T14:33:30.702175+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:33:34 INFO     [onshape_export_manager.queue] Claimed queue job id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a
+2026-07-10 17:33:34 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a retry_count=2 next_run_at=2026-07-10T14:33:36.717363+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:33:34 INFO     [onshape_export_manager.queue] Claimed queue job id=a1c7b2f4-0d5d-4913-8747-649209c27179
+2026-07-10 17:33:34 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a1c7b2f4-0d5d-4913-8747-649209c27179 retry_count=2 next_run_at=2026-07-10T14:33:36.723607+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:33:39 INFO     [onshape_export_manager.queue] Claimed queue job id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a
+2026-07-10 17:33:39 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a retry_count=3 next_run_at=2026-07-10T14:33:43.746140+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:33:39 INFO     [onshape_export_manager.queue] Claimed queue job id=a1c7b2f4-0d5d-4913-8747-649209c27179
+2026-07-10 17:33:39 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a1c7b2f4-0d5d-4913-8747-649209c27179 retry_count=3 next_run_at=2026-07-10T14:33:43.757096+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:33:44 INFO     [onshape_export_manager.queue] Claimed queue job id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a
+2026-07-10 17:33:44 INFO     [onshape_export_manager.queue] Claimed queue job id=a1c7b2f4-0d5d-4913-8747-649209c27179
+2026-07-10 17:33:44 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=ac70e010-0238-45b0-ac7f-09bbef5c5c8a error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:33:44 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=a1c7b2f4-0d5d-4913-8747-649209c27179 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:36:03 INFO     [onshape_export_manager.queue] Queued export job id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f label=A profile=STL reason=
+2026-07-10 17:36:03 INFO     [onshape_export_manager.queue] Queued export job id=20a47d2e-6c8a-45fe-b191-2979fb110bf9 label=B profile=STL reason=
+2026-07-10 17:36:04 INFO     [onshape_export_manager.queue] Claimed queue job id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f
+2026-07-10 17:36:04 INFO     [onshape_export_manager.queue] Claimed queue job id=20a47d2e-6c8a-45fe-b191-2979fb110bf9
+2026-07-10 17:36:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=20a47d2e-6c8a-45fe-b191-2979fb110bf9 retry_count=1 next_run_at=2026-07-10T14:36:06.000263+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:36:05 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f retry_count=1 next_run_at=2026-07-10T14:36:05.996403+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:36:10 INFO     [onshape_export_manager.queue] Claimed queue job id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f
+2026-07-10 17:36:10 INFO     [onshape_export_manager.queue] Claimed queue job id=20a47d2e-6c8a-45fe-b191-2979fb110bf9
+2026-07-10 17:36:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=20a47d2e-6c8a-45fe-b191-2979fb110bf9 retry_count=2 next_run_at=2026-07-10T14:36:12.017064+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:36:10 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f retry_count=2 next_run_at=2026-07-10T14:36:12.014669+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:36:15 INFO     [onshape_export_manager.queue] Claimed queue job id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f
+2026-07-10 17:36:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f retry_count=3 next_run_at=2026-07-10T14:36:19.032798+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:36:15 INFO     [onshape_export_manager.queue] Claimed queue job id=20a47d2e-6c8a-45fe-b191-2979fb110bf9
+2026-07-10 17:36:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=20a47d2e-6c8a-45fe-b191-2979fb110bf9 retry_count=3 next_run_at=2026-07-10T14:36:19.038673+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:36:20 INFO     [onshape_export_manager.queue] Claimed queue job id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f
+2026-07-10 17:36:20 INFO     [onshape_export_manager.queue] Claimed queue job id=20a47d2e-6c8a-45fe-b191-2979fb110bf9
+2026-07-10 17:36:20 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=3c7a1e2f-1eda-4deb-b7fb-6126fb53c14f error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:36:20 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=20a47d2e-6c8a-45fe-b191-2979fb110bf9 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:43:07 INFO     [onshape_export_manager.queue] Queued export job id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2 label=A profile=STL reason=
+2026-07-10 17:43:07 INFO     [onshape_export_manager.queue] Queued export job id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250 label=B profile=STL reason=
+2026-07-10 17:43:12 INFO     [onshape_export_manager.queue] Claimed queue job id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2
+2026-07-10 17:43:12 INFO     [onshape_export_manager.queue] Claimed queue job id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250
+2026-07-10 17:43:12 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2 retry_count=1 next_run_at=2026-07-10T14:43:13.201098+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:43:12 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250 retry_count=1 next_run_at=2026-07-10T14:43:13.204811+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:43:17 INFO     [onshape_export_manager.queue] Claimed queue job id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2
+2026-07-10 17:43:17 INFO     [onshape_export_manager.queue] Claimed queue job id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250
+2026-07-10 17:43:17 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250 retry_count=2 next_run_at=2026-07-10T14:43:19.207381+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:43:17 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2 retry_count=2 next_run_at=2026-07-10T14:43:19.206545+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:43:22 INFO     [onshape_export_manager.queue] Claimed queue job id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2
+2026-07-10 17:43:22 INFO     [onshape_export_manager.queue] Claimed queue job id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250
+2026-07-10 17:43:22 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250 retry_count=3 next_run_at=2026-07-10T14:43:26.229424+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:43:22 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2 retry_count=3 next_run_at=2026-07-10T14:43:26.226207+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:43:27 INFO     [onshape_export_manager.queue] Claimed queue job id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2
+2026-07-10 17:43:27 INFO     [onshape_export_manager.queue] Claimed queue job id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250
+2026-07-10 17:43:27 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=6b2e5c77-4938-419e-80bd-4fd03a5f43e2 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:43:27 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=fa327f3a-dfeb-4d57-bc17-3fb3b13d8250 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:45:44 INFO     [onshape_export_manager.queue] Queued export job id=a017d90e-4070-446c-86b6-d327b6f3ff04 label=A profile=STL reason=
+2026-07-10 17:45:44 INFO     [onshape_export_manager.queue] Queued export job id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233 label=B profile=STL reason=
+2026-07-10 17:46:07 INFO     [onshape_export_manager.queue] Queued export job id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b label=A profile=STL reason=
+2026-07-10 17:46:07 INFO     [onshape_export_manager.queue] Queued export job id=b434275c-960e-493a-8e8c-e31ce47b3c96 label=B profile=STL reason=
+2026-07-10 17:46:15 INFO     [onshape_export_manager.queue] Claimed queue job id=a017d90e-4070-446c-86b6-d327b6f3ff04
+2026-07-10 17:46:15 INFO     [onshape_export_manager.queue] Claimed queue job id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233
+2026-07-10 17:46:15 INFO     [onshape_export_manager.queue] Claimed queue job id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b
+2026-07-10 17:46:15 INFO     [onshape_export_manager.queue] Claimed queue job id=b434275c-960e-493a-8e8c-e31ce47b3c96
+2026-07-10 17:46:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b retry_count=1 next_run_at=2026-07-10T14:46:16.869294+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a017d90e-4070-446c-86b6-d327b6f3ff04 retry_count=1 next_run_at=2026-07-10T14:46:16.862305+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b434275c-960e-493a-8e8c-e31ce47b3c96 retry_count=1 next_run_at=2026-07-10T14:46:16.873249+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:15 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233 retry_count=1 next_run_at=2026-07-10T14:46:16.871123+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:20 INFO     [onshape_export_manager.queue] Claimed queue job id=a017d90e-4070-446c-86b6-d327b6f3ff04
+2026-07-10 17:46:20 INFO     [onshape_export_manager.queue] Claimed queue job id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233
+2026-07-10 17:46:20 INFO     [onshape_export_manager.queue] Claimed queue job id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b
+2026-07-10 17:46:20 INFO     [onshape_export_manager.queue] Claimed queue job id=b434275c-960e-493a-8e8c-e31ce47b3c96
+2026-07-10 17:46:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a017d90e-4070-446c-86b6-d327b6f3ff04 retry_count=2 next_run_at=2026-07-10T14:46:22.916310+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b retry_count=2 next_run_at=2026-07-10T14:46:22.914679+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233 retry_count=2 next_run_at=2026-07-10T14:46:22.917424+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:20 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b434275c-960e-493a-8e8c-e31ce47b3c96 retry_count=2 next_run_at=2026-07-10T14:46:22.920819+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:25 INFO     [onshape_export_manager.queue] Claimed queue job id=a017d90e-4070-446c-86b6-d327b6f3ff04
+2026-07-10 17:46:25 INFO     [onshape_export_manager.queue] Claimed queue job id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233
+2026-07-10 17:46:25 INFO     [onshape_export_manager.queue] Claimed queue job id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b
+2026-07-10 17:46:25 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233 retry_count=3 next_run_at=2026-07-10T14:46:29.939625+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:25 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b retry_count=3 next_run_at=2026-07-10T14:46:29.940712+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:25 INFO     [onshape_export_manager.queue] Claimed queue job id=b434275c-960e-493a-8e8c-e31ce47b3c96
+2026-07-10 17:46:25 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=a017d90e-4070-446c-86b6-d327b6f3ff04 retry_count=3 next_run_at=2026-07-10T14:46:29.947764+00:00 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:25 WARNING  [onshape_export_manager.queue] Queue job scheduled for retry id=b434275c-960e-493a-8e8c-e31ce47b3c96 retry_count=3 next_run_at=2026-07-10T14:46:29.957472+00:00 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:30 INFO     [onshape_export_manager.queue] Claimed queue job id=a017d90e-4070-446c-86b6-d327b6f3ff04
+2026-07-10 17:46:30 INFO     [onshape_export_manager.queue] Claimed queue job id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233
+2026-07-10 17:46:30 INFO     [onshape_export_manager.queue] Claimed queue job id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b
+2026-07-10 17:46:30 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=a017d90e-4070-446c-86b6-d327b6f3ff04 error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:30 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=2c0f7e38-dd3a-4e38-aacb-6b8b8b17c233 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:46:30 INFO     [onshape_export_manager.queue] Claimed queue job id=b434275c-960e-493a-8e8c-e31ce47b3c96
+2026-07-10 17:46:30 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=2b3ac9fc-08e6-4cc2-84ab-2534a5acb98b error=ValueError: unknown or disabled label 'A'
+2026-07-10 17:46:30 ERROR    [onshape_export_manager.queue] Queue job permanently failed id=b434275c-960e-493a-8e8c-e31ce47b3c96 error=ValueError: unknown or disabled label 'B'
+2026-07-10 17:48:28 INFO     [onshape_export_manager.queue] Queued export job id=e1a1a2d3-aa40-4ca2-8ea3-eab92b35b326 label=A profile=STL reason=
+2026-07-10 17:48:28 INFO     [onshape_export_manager.queue] Queued export job id=6988ec90-b3c1-49bd-9047-5cc109d3acb5 label=B profile=STL reason=
+2026-07-10 17:48:55 INFO     [onshape_export_manager.queue] Queued export job id=8b32ac05-f9dc-48dd-b749-7cef3c387b4a label=A profile=STL reason=
+2026-07-10 17:48:55 INFO     [onshape_export_manager.queue] Queued export job id=01be3937-8239-422a-be13-af71e648a218 label=B profile=STL reason=
+2026-07-10 17:49:22 INFO     [onshape_export_manager.queue] Queued export job id=5fcd843d-4734-4518-aa1b-b8d0041ee8e9 label=A profile=STL reason=
+2026-07-10 17:49:22 INFO     [onshape_export_manager.queue] Queued export job id=cbabc82d-ddaf-454d-aa9b-e3e7856fcfa8 label=B profile=STL reason=
+2026-07-10 17:49:33 INFO     [onshape_export_manager.queue] Queued export job id=70c46bdc-7c8f-4d85-b265-f82735086965 label=A profile=STL reason=
+2026-07-10 17:49:33 INFO     [onshape_export_manager.queue] Queued export job id=304312be-6df1-4517-9ce0-7092d4915c9b label=B profile=STL reason=

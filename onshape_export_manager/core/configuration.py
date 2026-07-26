@@ -163,6 +163,7 @@ class AppConfig(StrictConfigModel):
     worker_poll_seconds: float = Field(default=5.0, ge=0.5, le=3600.0)
     request_timeout_seconds: int = Field(default=30, ge=1)
     export_timeout_seconds: int = Field(default=120, ge=1)
+    export_retention_days: int = Field(default=0, ge=0, description="Auto-delete exports older than N days. 0 = never.")
     folders: FolderSettingsConfig = Field(default_factory=FolderSettingsConfig)
     retry: RetrySettingsConfig = Field(default_factory=RetrySettingsConfig)
     scheduler: SchedulerSettingsConfig = Field(default_factory=SchedulerSettingsConfig)
@@ -396,7 +397,13 @@ class ConfigManager:
                 read_json(self.export_profiles_file)
             ),
         )
-        validate_cross_references(loaded)
+        # Also collect credential names from organizations for cross-reference validation
+        org_credential_names: set[str] = set()
+        orgs_data = read_json(self.organizations_file)
+        for org in orgs_data.get("organizations", []):
+            for cred in org.get("credentials", []):
+                org_credential_names.add(cred.get("name", ""))
+        validate_cross_references(loaded, extra_account_names=org_credential_names)
         return loaded
 
 
@@ -412,9 +419,11 @@ def ensure_unique(values: list[str], label: str) -> None:
         raise PydanticCustomError("duplicate_value", f"Duplicate {label}: {duplicate_list}")
 
 
-def validate_cross_references(config: LoadedConfig) -> None:
+def validate_cross_references(config: LoadedConfig, *, extra_account_names: set[str] | None = None) -> None:
     """Validate references between labels, accounts, and export profiles."""
     account_names = {account.name for account in config.accounts.accounts}
+    if extra_account_names:
+        account_names.update(extra_account_names)
     profile_names = {profile.name for profile in config.export_profiles.profiles}
 
     errors: list[str] = []
@@ -509,6 +518,19 @@ def default_app_config() -> dict[str, Any]:
             "behind_proxy": False,
             "auto_open_browser": True,
         },
+        "export_retention_days": 0,
+        "bambu": {
+            "enabled": False,
+            "bambu_studio_exe": "",
+            "profile_root": "",
+            "machine_profile": "",
+            "process_profile": "",
+            "output_folder": "",
+        },
+        "notifications": {
+            "enabled": True,
+            "channels": [],
+        },
     }
 
 
@@ -521,44 +543,89 @@ def default_labels_config() -> dict[str, Any]:
 
 
 def default_export_profiles_config() -> dict[str, Any]:
+    """Professional export profile presets for CAD/CAM/3D printing."""
     return {
         "profiles": [
+            # ── Backward-compatible simple aliases ──────────────────────
             default_single_format_profile(
                 "STL",
                 ExportFormat.STL,
-                options={"resolution": "medium"},
+                options={"mode": "binary", "units": "millimeter", "resolution": "medium"},
             ),
             default_single_format_profile(
                 "STEP",
                 ExportFormat.STEP,
-                options={"stepVersionString": "AP242"},
+                options={"stepVersionString": "AP242", "storeInDocument": False},
             ),
-            default_single_format_profile("OBJ", ExportFormat.OBJ),
-            default_single_format_profile("IGES", ExportFormat.IGES),
-            default_single_format_profile("Parasolid", ExportFormat.PARASOLID),
-            default_multi_format_profile(
-                "Mesh Bundle",
-                [ExportFormat.STL, ExportFormat.OBJ],
-                overrides={ExportFormat.STL: {"resolution": "medium"}},
+            # ── STL presets ─────────────────────────────────────────────
+            default_single_format_profile(
+                "STL — 3D Printing (Fine)",
+                ExportFormat.STL,
+                options={"mode": "binary", "units": "millimeter", "resolution": "fine"},
             ),
-            default_multi_format_profile(
-                "CAD Bundle",
-                [ExportFormat.STEP, ExportFormat.PARASOLID, ExportFormat.IGES],
-                overrides={ExportFormat.STEP: {"stepVersionString": "AP242"}},
+            default_single_format_profile(
+                "STL — 3D Printing (Medium)",
+                ExportFormat.STL,
+                options={"mode": "binary", "units": "millimeter", "resolution": "medium"},
             ),
+            default_single_format_profile(
+                "STL — Low Poly",
+                ExportFormat.STL,
+                options={"mode": "binary", "units": "millimeter", "resolution": "coarse"},
+            ),
+            # ── STEP presets ────────────────────────────────────────────
+            default_single_format_profile(
+                "STEP — Maximum Quality (AP242)",
+                ExportFormat.STEP,
+                options={"stepVersionString": "AP242", "storeInDocument": False},
+            ),
+            default_single_format_profile(
+                "STEP — Balanced (AP214)",
+                ExportFormat.STEP,
+                options={"stepVersionString": "AP214", "storeInDocument": False},
+            ),
+            # ── Single-format presets ────────────────────────────────────
+            default_single_format_profile(
+                "3MF",
+                ExportFormat.MF3,
+            ),
+            default_single_format_profile(
+                "Parasolid",
+                ExportFormat.PARASOLID,
+            ),
+            default_single_format_profile(
+                "OBJ",
+                ExportFormat.OBJ,
+            ),
+            default_single_format_profile(
+                "GLTF",
+                ExportFormat.GLTF,
+            ),
+            default_single_format_profile(
+                "DXF",
+                ExportFormat.DXF,
+            ),
+            # ── Multi-format bundles ─────────────────────────────────────
             default_multi_format_profile(
-                "Multi Format",
-                [
-                    ExportFormat.STL,
-                    ExportFormat.STEP,
-                    ExportFormat.OBJ,
-                    ExportFormat.PARASOLID,
-                    ExportFormat.IGES,
-                ],
+                "STL + STEP",
+                [ExportFormat.STL, ExportFormat.STEP],
                 overrides={
                     ExportFormat.STL: {"resolution": "medium"},
                     ExportFormat.STEP: {"stepVersionString": "AP242"},
                 },
+            ),
+            default_multi_format_profile(
+                "Manufacturing Bundle",
+                [ExportFormat.STL, ExportFormat.STEP, ExportFormat.PARASOLID],
+                overrides={
+                    ExportFormat.STL: {"resolution": "fine"},
+                    ExportFormat.STEP: {"stepVersionString": "AP242"},
+                },
+            ),
+            default_multi_format_profile(
+                "Full Export",
+                [ExportFormat.STL, ExportFormat.STEP, ExportFormat.MF3,
+                 ExportFormat.PARASOLID, ExportFormat.OBJ, ExportFormat.GLTF],
             ),
         ]
     }
@@ -623,100 +690,3 @@ def default_multi_format_profile(
         "bambu": default_bambu_settings(),
         "enabled": True,
     }
-
-
-# -- Config file watcher (hot-reload) ---------------------------------------
-
-
-class ConfigWatcher:
-    """Polls config-file mtimes and hot-reloads when files change externally.
-
-    Useful for headless Raspberry Pi deployments where users edit JSON config
-    files directly (via SSH + nano/vim) and expect changes to take effect
-    without a service restart.
-
-    Runs on a daemon thread.  When a change is detected the affected config
-    is re-validated and an event is emitted on the application's EventBus so
-    subscribers (scheduler, UI) can react.
-    """
-
-    def __init__(
-        self,
-        config_manager: ConfigManager,
-        *,
-        poll_seconds: float = 5.0,
-    ) -> None:
-        self._manager = config_manager
-        self._poll_seconds = max(1.0, float(poll_seconds))
-        self._mtimes: dict[str, float] = {}
-        self._thread: threading.Thread | None = None
-        self._stop = threading.Event()
-        self._event_bus = None  # set by the caller after wiring
-
-    def set_event_bus(self, event_bus) -> None:
-        self._event_bus = event_bus
-
-    def start(self) -> None:
-        if self._thread is not None and self._thread.is_alive():
-            return
-        self._snapshot_mtimes()
-        self._stop.clear()
-        self._thread = threading.Thread(
-            target=self._poll_loop, name="oem-config-watcher", daemon=True
-        )
-        self._thread.start()
-
-    def stop(self, *, timeout: float = 5.0) -> None:
-        self._stop.set()
-        if self._thread is not None and self._thread.is_alive():
-            self._thread.join(timeout=timeout)
-
-    # -- internal ----------------------------------------------------------
-
-    def _config_files(self) -> list[Path]:
-        return [
-            self._manager.config_file,
-            self._manager.accounts_file,
-            self._manager.labels_file,
-            self._manager.export_profiles_file,
-            getattr(self._manager, "organizations_file", None),
-        ]
-
-    def _snapshot_mtimes(self) -> None:
-        for path in self._config_files():
-            if path is not None and path.exists():
-                self._mtimes[str(path)] = path.stat().st_mtime
-
-    def _poll_loop(self) -> None:
-        while not self._stop.is_set():
-            changed = False
-            for path in self._config_files():
-                if path is None or not path.exists():
-                    continue
-                key = str(path)
-                try:
-                    current = path.stat().st_mtime
-                except OSError:
-                    continue
-                if key not in self._mtimes or self._mtimes[key] != current:
-                    self._mtimes[key] = current
-                    changed = True
-
-            if changed:
-                try:
-                    self._manager.load()  # re-validates
-                    if self._event_bus is not None:
-                        self._event_bus.emit(
-                            EventType.CONFIG_UPDATED,
-                            "Configuration files changed on disk — reloaded",
-                            severity=EventSeverity.INFO,
-                            data={"source": "file_watcher"},
-                        )
-                except Exception:
-                    pass  # invalid config — keep running with current config
-
-            self._stop.wait(self._poll_seconds)
-
-# Import at bottom to avoid circular imports
-import threading
-from onshape_export_manager.core.events import EventSeverity, EventType

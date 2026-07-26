@@ -1,5 +1,4 @@
 import tempfile
-import time
 import unittest
 from pathlib import Path
 
@@ -27,19 +26,6 @@ class PasswordHashTests(unittest.TestCase):
     def test_empty_password_rejected(self) -> None:
         with self.assertRaises(AuthError):
             auth.hash_password("")
-
-
-class TotpTests(unittest.TestCase):
-    def test_code_round_trip(self) -> None:
-        secret = auth.generate_totp_secret()
-        code = auth.totp_code(secret)
-        self.assertTrue(auth.verify_totp(secret, code))
-        self.assertFalse(auth.verify_totp(secret, "000000", window=0, at=time.time() + 10_000))
-
-    def test_provisioning_uri(self) -> None:
-        uri = auth.totp_provisioning_uri("ABC", account="owner")
-        self.assertTrue(uri.startswith("otpauth://totp/"))
-        self.assertIn("secret=ABC", uri)
 
 
 class AuthServiceTests(unittest.TestCase):
@@ -83,21 +69,6 @@ class AuthServiceTests(unittest.TestCase):
             service.change_password("supersecret", "evenbettersecret")
             self.assertFalse(service.validate_session(token))
             self.assertTrue(service.authenticate("admin", "evenbettersecret"))
-
-    def test_totp_enrollment(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            service = AuthService(_fresh_db(tmp))
-            service.create_owner("admin", "supersecret")
-            self.assertFalse(service.totp_enabled())
-
-            secret = service.begin_totp_enrollment()
-            self.assertFalse(service.confirm_totp("000000"))
-            self.assertTrue(service.confirm_totp(auth.totp_code(secret)))
-            self.assertTrue(service.totp_enabled())
-            self.assertTrue(service.verify_login_totp(auth.totp_code(secret)))
-
-            service.disable_totp()
-            self.assertFalse(service.totp_enabled())
 
 
 if __name__ == "__main__":

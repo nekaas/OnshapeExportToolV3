@@ -9,16 +9,16 @@ from pathlib import Path
 
 
 class ExportFormat(StrEnum):
-    """Supported export formats."""
+    """Export formats — the ones that matter for CAD/CAM/3D printing."""
 
     STL = "stl"
     STEP = "step"
+    MF3 = "3mf"
     PARASOLID = "parasolid"
     OBJ = "obj"
-    IGES = "iges"
+    GLTF = "gltf"
     DXF = "dxf"
-    PDF = "pdf"
-    CUSTOM = "custom"
+    NATIVE = "native"  # Onshape native format backup
 
 
 @dataclass(slots=True)
@@ -85,3 +85,4 @@ class ExportJobRequest:
     start_iso: str
     end_iso: str
     destination: Path | None = None
+    organization: str = ""  # which org this group belongs to (for folder layout)

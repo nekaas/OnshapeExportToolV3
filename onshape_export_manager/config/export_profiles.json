@@ -57,11 +57,78 @@
       },
       "enabled": true,
       "formats": [
-        "obj"
+        "stl"
       ],
-      "name": "OBJ",
+      "name": "STL \u2014 3D Printing (Fine)",
       "options": {
-        "formatName": "OBJ",
+        "mode": "binary",
+        "resolution": "fine",
+        "units": "millimeter"
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl"
+      ],
+      "name": "STL \u2014 3D Printing (Medium)",
+      "options": {
+        "mode": "binary",
+        "resolution": "medium",
+        "units": "millimeter"
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl"
+      ],
+      "name": "STL \u2014 Low Poly",
+      "options": {
+        "mode": "binary",
+        "resolution": "coarse",
+        "units": "millimeter"
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "step"
+      ],
+      "name": "STEP \u2014 Maximum Quality (AP242)",
+      "options": {
+        "formatName": "STEP",
+        "stepVersionString": "AP242",
         "storeInDocument": false
       }
     },
@@ -78,11 +145,33 @@
       },
       "enabled": true,
       "formats": [
-        "iges"
+        "step"
       ],
-      "name": "IGES",
+      "name": "STEP \u2014 Balanced (AP214)",
       "options": {
-        "formatName": "IGES",
+        "formatName": "STEP",
+        "stepVersionString": "AP214",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "3mf"
+      ],
+      "name": "3MF",
+      "options": {
+        "formatName": "3MF",
         "storeInDocument": false
       }
     },
@@ -120,20 +209,12 @@
       },
       "enabled": true,
       "formats": [
-        "stl",
         "obj"
       ],
-      "name": "Mesh Bundle",
+      "name": "OBJ",
       "options": {
-        "obj": {
-          "formatName": "OBJ",
-          "storeInDocument": false
-        },
-        "stl": {
-          "mode": "binary",
-          "resolution": "medium",
-          "units": "millimeter"
-        }
+        "formatName": "OBJ",
+        "storeInDocument": false
       }
     },
     {
@@ -149,24 +230,62 @@
       },
       "enabled": true,
       "formats": [
-        "step",
-        "parasolid",
-        "iges"
+        "gltf"
       ],
-      "name": "CAD Bundle",
+      "name": "GLTF",
       "options": {
-        "iges": {
-          "formatName": "IGES",
-          "storeInDocument": false
-        },
-        "parasolid": {
-          "formatName": "PARASOLID",
-          "storeInDocument": false
-        },
+        "formatName": "GLTF",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "dxf"
+      ],
+      "name": "DXF",
+      "options": {
+        "formatName": "DXF",
+        "storeInDocument": false
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl",
+        "step"
+      ],
+      "name": "STL + STEP",
+      "options": {
         "step": {
           "formatName": "STEP",
           "stepVersionString": "AP242",
           "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "medium",
+          "units": "millimeter"
         }
       }
     },
@@ -185,14 +304,54 @@
       "formats": [
         "stl",
         "step",
-        "obj",
-        "parasolid",
-        "iges"
+        "parasolid"
       ],
-      "name": "Multi Format",
+      "name": "Manufacturing Bundle",
       "options": {
-        "iges": {
-          "formatName": "IGES",
+        "parasolid": {
+          "formatName": "PARASOLID",
+          "storeInDocument": false
+        },
+        "step": {
+          "formatName": "STEP",
+          "stepVersionString": "AP242",
+          "storeInDocument": false
+        },
+        "stl": {
+          "mode": "binary",
+          "resolution": "fine",
+          "units": "millimeter"
+        }
+      }
+    },
+    {
+      "bambu": {
+        "auto_arrange": true,
+        "auto_split_plates": true,
+        "create_3mf": false,
+        "enabled": false,
+        "machine_profile": "",
+        "open_bambu_studio": false,
+        "output_folder": "",
+        "process_profile": ""
+      },
+      "enabled": true,
+      "formats": [
+        "stl",
+        "step",
+        "3mf",
+        "parasolid",
+        "obj",
+        "gltf"
+      ],
+      "name": "Full Export",
+      "options": {
+        "3mf": {
+          "formatName": "3MF",
+          "storeInDocument": false
+        },
+        "gltf": {
+          "formatName": "GLTF",
           "storeInDocument": false
         },
         "obj": {
@@ -205,36 +364,12 @@
         },
         "step": {
           "formatName": "STEP",
-          "stepVersionString": "AP242",
           "storeInDocument": false
         },
         "stl": {
           "mode": "binary",
-          "resolution": "medium",
           "units": "millimeter"
         }
-      }
-    },
-    {
-      "bambu": {
-        "auto_arrange": true,
-        "auto_split_plates": true,
-        "create_3mf": false,
-        "enabled": true,
-        "machine_profile": "",
-        "open_bambu_studio": true,
-        "output_folder": "",
-        "process_profile": ""
-      },
-      "enabled": true,
-      "formats": [
-        "stl"
-      ],
-      "name": "Bambu STL",
-      "options": {
-        "mode": "binary",
-        "resolution": "medium",
-        "units": "millimeter"
       }
     }
   ]

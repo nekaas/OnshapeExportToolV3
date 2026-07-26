@@ -92,9 +92,25 @@ function formatLocalDateTime(value) {
   });
 }
 
-function templateId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
-  return `tpl-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+/* Audio notification stub — uses Web Audio API for a gentle completion chime.
+   Called after export completes, respecting user preference. */
+function playNotificationSound() {
+  try {
+    if (localStorage.getItem("oem-sound") === "off") return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    // Two-tone chime: C5 → E5
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+  } catch (e) { /* silently ignore if audio not available */ }
 }
 
 /* ---------------- App shell ---------------- */
@@ -104,16 +120,14 @@ function appShell() {
     isDark: true,
     collapsed: false,
     mobileOpen: false,
-    connected: false,
     summary: {},
     toasts: [],
     _toastId: 0,
-    palette: { open: false, query: "", groups: [], loading: false },
 
     init() {
       this.isDark = document.documentElement.classList.contains("dark");
       this.collapsed = localStorage.getItem("oem-collapsed") === "1";
-      this.startLiveUpdates();
+      this.startPolling();
       window.addEventListener("keydown", (e) => this.onKey(e));
       window.oem = this; // expose for toasts from other components
     },
@@ -136,67 +150,17 @@ function appShell() {
 
     onKey(e) {
       const meta = e.metaKey || e.ctrlKey;
-      if (meta && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        this.palette.open ? this.closePalette() : this.openPalette();
-      } else if (meta && e.key.toLowerCase() === "b") {
+      if (meta && e.key.toLowerCase() === "b") {
         e.preventDefault();
         this.toggleSidebar();
-      } else if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
-        e.preventDefault();
-        this.openPalette();
       }
     },
 
-    openPalette() {
-      this.palette.open = true;
-      this.$nextTick(() => this.$refs.paletteInput && this.$refs.paletteInput.focus());
-    },
-    closePalette() {
-      this.palette.open = false;
-      this.palette.query = "";
-      this.palette.groups = [];
-    },
-    runSearch() {
-      const q = this.palette.query.trim();
-      if (!q) {
-        this.palette.groups = [];
-        return;
-      }
-      this.palette.loading = true;
-      fetchJSON(`/api/search?q=${encodeURIComponent(q)}`)
-        .then((data) => {
-          this.palette.groups = data.groups || [];
-        })
-        .catch(() => {})
-        .finally(() => (this.palette.loading = false));
-    },
-
-    startLiveUpdates() {
-      if (typeof EventSource !== "undefined") {
-        try {
-          const es = new EventSource("/api/stream");
-          es.onmessage = (ev) => {
-            this.connected = true;
-            try {
-              this.summary = JSON.parse(ev.data);
-            } catch (e) {}
-            window.dispatchEvent(new CustomEvent("oem-summary", { detail: this.summary }));
-          };
-          es.onerror = () => {
-            this.connected = false;
-          };
-          return;
-        } catch (e) {}
-      }
-      // Fallback polling
+    startPolling() {
       const poll = () =>
         fetchJSON("/api/summary")
-          .then((d) => {
-            this.connected = true;
-            this.summary = d;
-          })
-          .catch(() => (this.connected = false));
+          .then((d) => { this.summary = d; })
+          .catch(() => {});
       poll();
       setInterval(poll, 6000);
     },
@@ -215,131 +179,37 @@ function appShell() {
   };
 }
 
-/* ---------------- Dashboard ---------------- */
-function dashboardPage() {
+/* ---------------- Home page ---------------- */
+function homePage() {
   return {
+    icons: ICONS,
     loading: true,
-    metrics: {},
-    cards: [],
+    cards: { orgs: 0, groups: 0, exports: 0, queue: 0, failed: 0 },
     recent: [],
-    healthLegend: [],
-    queueRows: [],
-    _charts: {},
 
     load() {
       this.loading = true;
       fetchJSON("/api/metrics")
         .then((data) => {
-          this.metrics = data;
           this.build(data);
-          this.$nextTick(() => this.renderCharts(data));
         })
-        .catch((e) => window.oem && window.oem.toast("Failed to load metrics", "error", e.message))
+        .catch(() => {})
         .finally(() => (this.loading = false));
-      window.addEventListener("oem-summary", () => this.refreshQuietly());
-      window.addEventListener("oem-theme", () => this.$nextTick(() => this.renderCharts(this.metrics)));
-    },
-
-    refreshQuietly() {
-      fetchJSON("/api/metrics").then((data) => {
-        this.metrics = data;
-        this.build(data);
-        this.renderCharts(data);
-      });
     },
 
     build(d) {
       const s = d.summary || {};
-      this.cards = [
-        { key: "apikeys", label: "API Keys", value: s.accounts ?? 0, icon: ICONS.accounts, badge: `${s.healthy_accounts ?? 0} healthy`, accent: "", href: "/api-keys" },
-        { key: "labels", label: "Groups", value: s.labels ?? 0, icon: ICONS.labels, accent: "", href: "/labels" },
-        { key: "exports", label: "Total Exports", value: s.total_exports ?? 0, icon: ICONS.files, accent: "accent-success", href: "/history" },
-        { key: "queue", label: "In Queue", value: s.queue_size ?? 0, icon: ICONS.queue, accent: "", href: "/export" },
-        { key: "failed", label: "Failed", value: s.failed_exports ?? 0, icon: ICONS.alert, accent: (s.failed_exports ?? 0) > 0 ? "accent-danger" : "", href: "/history" },
-      ];
-      this.recent = d.recent_history || [];
-
-      const health = d.account_health || {};
-      const palette = { healthy: "#34d399", degraded: "#fbbf24", rate_limited: "#fb923c", failed: "#f87171", disabled: "#6b7192" };
-      this.healthLegend = Object.keys(palette)
-        .filter((k) => (health[k] || 0) > 0)
-        .map((k) => ({ label: k.replace("_", " "), count: health[k], color: palette[k] }));
-      if (this.healthLegend.length === 0) this.healthLegend = [{ label: "no accounts", count: 0, color: "#6b7192" }];
-
-      const q = (d.queue && d.queue.counts) || {};
-      const max = Math.max(1, ...Object.values(q));
-      this.queueRows = ["pending", "running", "completed", "failed", "cancelled"].map((k) => ({
-        label: k,
-        count: q[k] || 0,
-        pct: ((q[k] || 0) / max) * 100,
-        cls: "q-" + k,
-      }));
-    },
-
-    renderCharts(d) {
-      if (typeof Chart === "undefined") {
-        setTimeout(() => this.renderCharts(d), 200);
-        return;
-      }
-      const css = getComputedStyle(document.documentElement);
-      const grid = css.getPropertyValue("--border").trim();
-      const text = css.getPropertyValue("--text-muted").trim();
-      Chart.defaults.color = text;
-      Chart.defaults.font.family = "Inter, sans-serif";
-
-      const act = (d.exports && d.exports.activity) || { labels: [], success: [], failed: [] };
-      this.upsertChart("activityChart", {
-        type: "line",
-        data: {
-          labels: act.labels.map((x) => x.slice(5)),
-          datasets: [
-            this.area("Success", act.success, "#34d399"),
-            this.area("Failed", act.failed, "#f87171"),
-          ],
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, animation: false, resizeDelay: 0,
-          interaction: { mode: "index", intersect: false },
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } },
-            y: { grid: { color: grid }, beginAtZero: true, ticks: { precision: 0 } },
-          },
-        },
-      });
-
-      const health = d.account_health || {};
-      const labels = ["healthy", "degraded", "rate_limited", "failed", "disabled"].filter((k) => (health[k] || 0) > 0);
-      const colors = { healthy: "#34d399", degraded: "#fbbf24", rate_limited: "#fb923c", failed: "#f87171", disabled: "#6b7192" };
-      this.upsertChart("healthChart", {
-        type: "doughnut",
-        data: {
-          labels: labels.length ? labels : ["none"],
-          datasets: [{
-            data: labels.length ? labels.map((k) => health[k]) : [1],
-            backgroundColor: labels.length ? labels.map((k) => colors[k]) : ["#2a2d40"],
-            borderWidth: 0, hoverOffset: 6,
-          }],
-        },
-        options: { responsive: true, maintainAspectRatio: false, animation: false, resizeDelay: 0, cutout: "68%", plugins: { legend: { display: false } } },
-      });
-    },
-
-    area(label, data, color) {
-      return {
-        label, data, borderColor: color, backgroundColor: color + "22",
-        fill: true, tension: 0.38, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+      this.cards = {
+        orgs: s.organizations ?? 0,
+        groups: s.labels ?? 0,
+        exports: s.total_exports ?? 0,
+        queue: s.queue_size ?? 0,
+        failed: s.failed_exports ?? 0,
       };
+      this.recent = d.recent_history || [];
     },
 
-    upsertChart(ref, config) {
-      const el = this.$refs[ref];
-      if (!el) return;
-      if (this._charts[ref]) this._charts[ref].destroy();
-      this._charts[ref] = new Chart(el.getContext("2d"), config);
-    },
-
-    formatTime(iso) {
+    relTime(iso) {
       return relativeTime(iso);
     },
   };
@@ -347,74 +217,12 @@ function dashboardPage() {
 
 /* ---------------- Section pages ---------------- */
 const PAGE_CONFIG = {
-  // ── New Phase 0 pages ────────────────────────────────────────────
-  "api-keys": {
-    // Unified view: organizations + credentials merged.
-    // Renders the organizations template (cards with nested creds).
-    endpoint: "/api/organizations",
-    root: "organizations",
-    empty: "No API keys configured yet. Add your Onshape API key to get started.",
-    columns: [],  // card-based, not table
-  },
   export: {
-    // Merged manual-export + queue.  Uses custom template blocks.
-    endpoint: null,
-    root: null,
-    empty: "",
-    columns: [],
-  },
-  // ── Legacy pages (still accessible via URL) ──────────────────────
-  accounts: {
-    endpoint: "/api/accounts", root: "accounts", empty: "No accounts configured yet.",
-    columns: [
-      { key: "name", label: "Name", type: "strong" },
-      { key: "status", label: "Status", type: "badge" },
-      { key: "api_usage", label: "API Usage", type: "number" },
-      { key: "failure_count", label: "Failures", type: "number" },
-      { key: "access_key", label: "Access Key", type: "code" },
-      { key: "last_used", label: "Last Used", type: "time" },
-      { key: "enabled", label: "Enabled", type: "bool" },
-    ],
-  },
-  labels: {
-    endpoint: "/api/labels", root: "labels", empty: "No groups configured yet.",
-    columns: [],  // card-based view, not table
+    endpoint: null, root: null, empty: "", columns: [],
   },
   organizations: {
     endpoint: "/api/tree", root: "organisations", empty: "",
     columns: [],  // tree-based view, not table
-  },
-  "export-profiles": {
-    endpoint: "/api/profiles", root: "profiles", empty: "No export profiles yet.",
-    columns: [
-      { key: "name", label: "Profile", type: "strong" },
-      { key: "formats", label: "Formats", type: "join" },
-      { key: "bambu.enabled", label: "Bambu", type: "bool" },
-      { key: "enabled", label: "Enabled", type: "bool" },
-    ],
-  },
-  queue: {
-    endpoint: "/api/queue", root: "items", empty: "The export queue is empty.",
-    columns: [
-      { key: "label_name", label: "Label", type: "strong" },
-      { key: "profile_name", label: "Profile", type: "text" },
-      { key: "status", label: "Status", type: "badge" },
-      { key: "retry_count", label: "Retries", type: "number" },
-      { key: "next_run_at", label: "Next Run", type: "time" },
-      { key: "last_error", label: "Last Error", type: "text" },
-      { key: "id", label: "Actions", type: "queue-actions" },
-    ],
-  },
-  scheduler: {
-    endpoint: "/api/scheduler", root: "jobs", empty: "No scheduled jobs configured.",
-    columns: [
-      { key: "name", label: "Job", type: "strong" },
-      { key: "label_name", label: "Label", type: "text" },
-      { key: "interval", label: "Interval", type: "text" },
-      { key: "enabled", label: "Enabled", type: "bool" },
-      { key: "next_run_at", label: "Next Run", type: "time" },
-      { key: "last_run_at", label: "Last Run", type: "time" },
-    ],
   },
   history: {
     endpoint: "/api/history?limit=500", root: "history", empty: "No export history yet.",
@@ -440,8 +248,6 @@ function sectionPage(page) {
     filter: "",
     sortKey: null,
     sortDir: "asc",
-    tabs: [],
-    activeTab: "All",
     columns: cfg ? cfg.columns : [],
     emptyText: cfg ? cfg.empty : "Nothing here.",
     hasTable: cfg && cfg.columns && cfg.columns.length > 0,
@@ -453,13 +259,11 @@ function sectionPage(page) {
     activeLog: "app",
     logLines: [],
     // manual export
-    manual: { label: "", profile: "", start: "", end: "", destination: "", mode: "range", preset: "today", templateId: "" },
+    manual: { label: "", profile: "", start: "", end: "", destination: "", mode: "range", preset: "today" },
     preview: null,
     previewBusy: false,
     exportBusy: false,
     worker: { running: false },
-    manualTemplates: [],
-    manualRecentTemplates: [],
     datePresets: [
       { key: "today", label: "Today" },
       { key: "yesterday", label: "Yesterday" },
@@ -472,11 +276,8 @@ function sectionPage(page) {
     _manualPlannerReady: false,
     _manualPickers: {},
     _previewTimer: null,
-    // organizations
-    orgs: [],
-    orgTypes: ["school", "company", "department", "customer", "workshop", "team", "other"],
-    newOrg: { name: "", type: "company", description: "" },
-    credForm: { name: "Primary", environment: "production", access_key: "", secret_key: "", priority: 1 },
+    // retention / cleanup
+    retentionDays: 0,
     // system
     system: {},
     remote: {},
@@ -484,32 +285,12 @@ function sectionPage(page) {
     systemCards: [],
     remoteRows: [],
     backupBusy: false,
-    // activity / live event feed
-    events: [],
-    activityCards: [],
-    activityCategories: [],
-    activitySeverities: [],
-    activityCategory: "",
-    activitySeverity: "",
-    activitySummary: {},
-    wsConnected: false,
-    _ws: null,
-    _activityPoll: null,
     // notifications
     notifChannels: [],
     notifKinds: ["discord", "slack", "teams", "email", "webhook"],
     notifSeverities: ["info", "success", "warning", "error", "critical"],
     notifEnabled: true,
     notifForm: { id: "", name: "", kind: "discord", target: "", min_severity: "info", enabled: true, options: {} },
-    // plugins
-    pluginHooks: [
-      { name: "Export Formats", desc: "Register custom Onshape export translators." },
-      { name: "Storage Providers", desc: "Ship exports to S3, SFTP, NAS, or cloud drives." },
-      { name: "Notifications", desc: "Discord, Slack, Teams, email, and webhooks." },
-      { name: "Post-Processing", desc: "Run slicers, scripts, or conversions after export." },
-      { name: "Validators", desc: "Verify checksums and detect duplicates." },
-      { name: "Reports", desc: "Generate HTML, JSON, CSV, and PDF summaries." },
-    ],
     // settings
     settingsTabs: [
       { slug: "general", label: "General" },
@@ -521,23 +302,15 @@ function sectionPage(page) {
     ],
     settingsActiveTab: "general",
     settingsGroups: [],
-    // label creation form
-    showLabelForm: false,
-    labelForm: { name: "", onshape_id: "", profile: "STL", schedule: "" },
 
     load() {
-      // ── New Phase 0 pages ──────────────────────────────────────
-      if (this.page === "api-keys") return this.loadOrganizations();
-      if (this.page === "export")   return this.loadExportPage();
-      if (this.page === "labels")   return this.loadLabelsPage();
-      // ── Legacy pages ───────────────────────────────────────────
+      if (this.page === "export" || this.page === "manual-export") return this.loadExportPage();
+      if (this.page === "organizations") return; // treeSelector handles loading
       if (this.page === "logs") return this.selectLog(this.activeLog);
       if (this.page === "settings") return this.loadSettings();
       if (this.page === "system") return this.loadSystem();
-      if (this.page === "organizations") return this.loadOrganizations();
-      if (this.page === "activity") return this.loadActivity();
       if (this.page === "notifications") return this.loadNotifications();
-      if (!cfg) return this.loadAux();
+      if (!cfg) return;
       this.loading = true;
       fetchJSON(cfg.endpoint)
         .then((data) => {
@@ -547,113 +320,61 @@ function sectionPage(page) {
         .finally(() => (this.loading = false));
     },
 
-    // ── New: Export page (manual export + queue combined) ────────
+    // ── Export page (manual export + queue combined) ─────────────
     loadExportPage() {
       this.loading = true;
-      this.loadManualTemplates();
+      this.loadLastUsed();
       this.ensureManualWindow();
-      Promise.all([
-        fetchJSON("/api/labels"),
-        fetchJSON("/api/profiles"),
+      // Reuse treeSelector data if already loaded on this page (avoids double fetch)
+      const treePromise = window.__treeData
+        ? Promise.resolve(window.__treeData)
+        : fetchJSON("/api/tree").catch(() => ({ organisations: [] }));
+      const fetches = [
+        treePromise,
+        fetchJSON("/api/profiles").catch(() => ({ profiles: [] })),
         fetchJSON("/api/worker").catch(() => ({ running: false })),
-        fetchJSON("/api/queue").catch(() => ({ items: [] })),
-      ])
-        .then(([labels, profiles, worker, queue]) => {
-          this.rows = labels.labels || [];
+      ];
+      if (this.page === "export") {
+        fetches.push(fetchJSON("/api/queue").catch(() => ({ items: [] })));
+      }
+      Promise.all(fetches)
+        .then((results) => {
+          const tree = results[0], profiles = results[1], worker = results[2];
+          this._treeData = tree; // cache for selectedOrgName()
+          const allGroups = [];
+          for (const org of (tree.organisations || [])) {
+            for (const g of (org.groups || [])) allGroups.push(g);
+          }
+          this.rows = allGroups;
           this.profiles = profiles.profiles || [];
           this.worker = worker || { running: false };
-          this.queueItems = (queue && queue.items) || [];
+          if (results.length > 3) this.queueItems = (results[3] && results[3].items) || [];
           if (this.rows.length && !this.manual.label) {
             this.manual.label = this.rows[0].friendly_name;
           }
-          this.schedulePreview(100);
+          // Only auto-preview if a label is actually selected
+          if (this.manual.label) this.schedulePreview(150);
         })
         .catch((e) => window.oem && window.oem.toast("Failed to load export planner", "error", e.message))
         .finally(() => (this.loading = false));
     },
 
-    // ── Labels page (card view) ──────────────────────────────────
-    loadLabelsPage() {
-      this.loading = true;
-      Promise.all([
-        fetchJSON("/api/labels"),
-        fetchJSON("/api/profiles").catch(() => ({ profiles: [] })),
-      ])
-        .then(([labelsData, profilesData]) => {
-          this.rows = labelsData.labels || [];
-          this.profiles = profilesData.profiles || [];
-        })
-        .catch((e) => window.oem && window.oem.toast("Failed to load labels", "error", e.message))
-        .finally(() => (this.loading = false));
-    },
-
-    createLabel() {
-      const f = this.labelForm;
-      if (!(f.name || "").trim()) return window.oem && window.oem.toast("Label name is required", "error");
-      const body = {
-        friendly_name: f.name.trim(),
-        onshape_label_id: (f.onshape_id || "").trim(),
-        export_profile: f.profile || "STL",
-      };
-      if (f.schedule) body.scheduler = { interval: f.schedule, enabled: true };
-      fetch("/api/labels", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.error) throw new Error(d.error);
-          window.oem && window.oem.toast("Label created", "success", f.name);
-          this.showLabelForm = false;
-          this.labelForm = { name: "", onshape_id: "", profile: "STL", schedule: "" };
-          this.loadLabelsPage();
-        })
-        .catch((e) => window.oem && window.oem.toast("Create failed", "error", e.message));
-    },
-
-    triggerLabelExport(labelName) {
-      if (!labelName) return;
-      fetch("/api/exports/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label: labelName, profile: "", start: new Date().toISOString().slice(0, 10), end: "" }),
-      })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.error) throw new Error(d.error);
-          window.oem && window.oem.toast("Export queued", "success", labelName);
-        })
-        .catch((e) => window.oem && window.oem.toast("Export failed", "error", e.message));
-    },
-
-    loadAux() {
-      // manual-export / export need label list
-      if (this.page === "manual-export" || this.page === "export") {
-        this.loading = true;
-        this.loadManualTemplates();
-        this.ensureManualWindow();
-        const fetches = [
-          fetchJSON("/api/labels"),
-          fetchJSON("/api/profiles"),
-          fetchJSON("/api/worker").catch(() => ({ running: false })),
-        ];
-        if (this.page === "export") {
-          fetches.push(fetchJSON("/api/queue").catch(() => ({ items: [] })));
+    // Resolve which org the selected group belongs to (for destination path)
+    selectedOrgName() {
+      if (!this.manual.label || !this._treeData) return "";
+      for (const org of (this._treeData.organisations || [])) {
+        for (const g of (org.groups || [])) {
+          if (g.friendly_name === this.manual.label) return org.name;
         }
-        Promise.all(fetches)
-          .then(([labels, profiles, worker, queue]) => {
-            this.rows = labels.labels || [];
-            this.profiles = profiles.profiles || [];
-            if (this.rows.length && !this.manual.label) this.manual.label = this.rows[0].friendly_name;
-            this.worker = worker || { running: false };
-            if (queue) this.queueItems = (queue && queue.items) || [];
-            this.schedulePreview(100);
-          })
-          .catch((e) => window.oem && window.oem.toast("Failed to load export planner", "error", e.message))
-          .finally(() => (this.loading = false));
       }
+      return "";
     },
+
+    isExportBusy() { return this.exportBusy || this.previewBusy; },
 
     initManualPlanner() {
       if (this.page !== "manual-export" && this.page !== "export") return;
-      this.loadManualTemplates();
+      this.loadLastUsed();
       this.ensureManualWindow();
       this.initManualFlatpickrs();
       this.syncManualPickers();
@@ -808,6 +529,7 @@ function sectionPage(page) {
 
     schedulePreview(delay = 350) {
       clearTimeout(this._previewTimer);
+      if (!this.manual.label) return; // don't preview without a label selected
       this._previewTimer = setTimeout(() => this.previewExport({ quiet: true }), delay);
     },
 
@@ -844,117 +566,44 @@ function sectionPage(page) {
       if (this.exportBusy) return;
       const label = (this.manual.label || "").trim();
       if (!label) return window.oem && window.oem.toast("Choose a label first", "error");
+      const profileName = this.manual.profile || "default";
       this.exportBusy = true;
+      const body = this.manualRequestBody();
       fetch("/api/exports/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(this.manualRequestBody()),
+        body: JSON.stringify(body),
       })
         .then((r) => r.json())
         .then((d) => {
           if (d.error) throw new Error(d.error);
-          window.oem && window.oem.toast("Export queued", "success", `${d.label} · ${d.profile}`);
-          this.rememberRecentTemplate(this.currentTemplateSnapshot(`${d.label} · ${d.profile}`));
+          const displayName = `${body.label} · ${profileName}`;
+          window.oem && window.oem.toast("Export queued", "success", displayName);
+          this.saveLastUsed();
+          playNotificationSound();
           fetchJSON("/api/worker").then((w) => (this.worker = w || this.worker)).catch(() => {});
         })
         .catch((e) => window.oem && window.oem.toast("Could not queue export", "error", e.message))
         .finally(() => (this.exportBusy = false));
     },
 
-    loadManualTemplates() {
+    saveLastUsed() {
       try {
-        this.manualTemplates = JSON.parse(localStorage.getItem("oem-manual-templates") || "[]");
-        this.manualRecentTemplates = JSON.parse(localStorage.getItem("oem-manual-recents") || "[]");
-      } catch (e) {
-        this.manualTemplates = [];
-        this.manualRecentTemplates = [];
-      }
-    },
-
-    persistManualTemplates() {
-      try {
-        localStorage.setItem("oem-manual-templates", JSON.stringify(this.manualTemplates));
-        localStorage.setItem("oem-manual-recents", JSON.stringify(this.manualRecentTemplates));
+        localStorage.setItem("oem-last-export", JSON.stringify({
+          label: this.manual.label,
+          profile: this.manual.profile,
+          destination: this.manual.destination,
+        }));
       } catch (e) {}
     },
 
-    currentTemplateSnapshot(name) {
-      return {
-        id: templateId(),
-        name,
-        label: this.manual.label,
-        profile: this.manual.profile,
-        start: this.manual.start,
-        end: this.manual.end,
-        destination: this.manual.destination,
-        mode: this.manual.mode,
-        preset: this.manual.preset,
-        favorite: false,
-        updated_at: new Date().toISOString(),
-      };
-    },
-
-    defaultTemplateName() {
-      const selectedLabel = this.rows.find((row) => row.friendly_name === this.manual.label);
-      const profile = this.manual.profile || (selectedLabel && selectedLabel.export_profile) || "Default";
-      const preset = (this.datePresets.find((item) => item.key === this.manual.preset) || {}).label || "Custom";
-      return `${this.manual.label || "Export"} · ${profile} · ${preset}`;
-    },
-
-    saveManualTemplate() {
-      if (!this.manual.label) return window.oem && window.oem.toast("Choose a label first", "error");
-      const name = prompt("Template name", this.defaultTemplateName());
-      if (!name) return;
-      const snapshot = this.currentTemplateSnapshot(name.trim());
-      const existing = this.manualTemplates.findIndex((tpl) => tpl.name === snapshot.name);
-      if (existing >= 0) {
-        snapshot.id = this.manualTemplates[existing].id;
-        snapshot.favorite = this.manualTemplates[existing].favorite === true;
-        this.manualTemplates.splice(existing, 1, snapshot);
-      } else {
-        this.manualTemplates.unshift(snapshot);
-      }
-      this.manualTemplates = this.manualTemplates.slice(0, 30);
-      this.manual.templateId = snapshot.id;
-      this.persistManualTemplates();
-      window.oem && window.oem.toast("Template saved", "success", snapshot.name);
-    },
-
-    applySavedTemplate(id) {
-      const tpl = this.manualTemplates.find((item) => item.id === id);
-      if (tpl) this.applyTemplate(tpl);
-    },
-
-    applyTemplate(tpl) {
-      this.manual.label = tpl.label || this.manual.label;
-      this.manual.profile = tpl.profile || "";
-      this.manual.start = tpl.start || this.manual.start;
-      this.manual.end = tpl.end || this.manual.end;
-      this.manual.destination = tpl.destination || "";
-      this.manual.mode = tpl.mode || "range";
-      this.manual.preset = tpl.preset || "custom";
-      this.manual.templateId = this.manualTemplates.some((item) => item.id === tpl.id) ? tpl.id : "";
-      this.syncManualPickers();
-      this.schedulePreview(50);
-    },
-
-    toggleFavoriteTemplate(id) {
-      const tpl = this.manualTemplates.find((item) => item.id === id);
-      if (!tpl) return;
-      tpl.favorite = tpl.favorite !== true;
-      this.persistManualTemplates();
-      window.oem && window.oem.toast(tpl.favorite ? "Marked favorite" : "Favorite removed", "success", tpl.name);
-    },
-
-    rememberRecentTemplate(tpl) {
-      const normalized = { ...tpl, favorite: false };
-      this.manualRecentTemplates = [
-        normalized,
-        ...this.manualRecentTemplates.filter((item) =>
-          !(item.label === normalized.label && item.profile === normalized.profile && item.start === normalized.start && item.end === normalized.end)
-        ),
-      ].slice(0, 8);
-      this.persistManualTemplates();
+    loadLastUsed() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("oem-last-export") || "{}");
+        if (saved.label) this.manual.label = saved.label;
+        if (saved.profile) this.manual.profile = saved.profile;
+        if (saved.destination) this.manual.destination = saved.destination;
+      } catch (e) {}
     },
 
     onQueueAction(event) {
@@ -978,6 +627,8 @@ function sectionPage(page) {
       // Load all data needed across settings tabs
       this.loading = true;
       this.loadNotifications();
+      // Load retention setting
+      fetchJSON("/api/settings/retention").then(d => { this.retentionDays = d.retention_days || 0; }).catch(() => {});
       Promise.all([
         fetchJSON("/api/metrics"),
         fetchJSON("/api/system").catch(() => ({})),
@@ -1017,7 +668,35 @@ function sectionPage(page) {
     },
 
     switchSettingsTab(slug) {
+      this.settingsActiveTab = slug;
       if (slug === "logs" && this.logLines.length === 0) this.selectLog(this.activeLog || "app");
+      if (slug === "general") this.loadSettings();
+      if (slug === "notifications") this.loadNotifications();
+      if (slug === "backups") this.loadBackups();
+      if (slug === "remote-access") this.loadRemoteAccess();
+    },
+
+    loadBackups() {
+      fetchJSON("/api/backups").then(d => { this.backups = (d && d.backups) || []; }).catch(() => {});
+    },
+
+    loadRemoteAccess() {
+      fetchJSON("/api/remote-access").then(d => {
+        this.remote = d || {};
+        // Build remoteRows if not already built by buildSystem
+        if (!this.remoteRows.length) {
+          const ts = (d.tailscale || {}), cf = (d.cloudflare || {}), https = (d.https || {});
+          const proxies = (d.reverse_proxies || []).filter(p => p.installed).map(p => p.name).join(", ");
+          const badge = (ok, instOnly) => (ok ? "badge-ok" : instOnly ? "badge-warn" : "badge-muted");
+          this.remoteRows = [
+            { k: "Hostname", v: d.hostname || "—" },
+            { k: "Tailscale", badge: ts.connected ? "Connected" : ts.installed ? "Idle" : "Off", cls: badge(ts.connected, ts.installed), v: ts.detail || "" },
+            { k: "Cloudflare Tunnel", badge: cf.connected ? "Connected" : cf.installed ? "Idle" : "Off", cls: badge(cf.connected, cf.installed), v: cf.detail || "" },
+            { k: "HTTPS", badge: https.enabled ? "On" : "Off", cls: https.enabled ? "badge-ok" : "badge-muted", v: (https.letsencrypt_domains || []).join(", ") },
+            { k: "Reverse Proxy", v: proxies || "none detected" },
+          ];
+        }
+      }).catch(() => {});
     },
 
     setTheme(mode) {
@@ -1027,86 +706,29 @@ function sectionPage(page) {
       if (window.oem) { window.oem.isDark = dark; }
     },
 
-    loadOrganizations() {
-      this.loading = true;
-      fetchJSON("/api/organizations")
-        .then((d) => {
-          this.orgs = d.organizations || [];
-          if (d.types) this.orgTypes = d.types;
-        })
-        .catch((e) => window.oem && window.oem.toast("Failed to load organizations", "error", e.message))
-        .finally(() => (this.loading = false));
+    sortBy(key) {
+      if (this.sortKey === key) this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+      else { this.sortKey = key; this.sortDir = "asc"; }
     },
 
-    loadActivity() {
-      this.loading = true;
-      const params = new URLSearchParams({ limit: "200" });
-      if (this.activityCategory) params.set("category", this.activityCategory);
-      if (this.activitySeverity) params.set("severity", this.activitySeverity);
-      fetchJSON(`/api/events?${params.toString()}`)
-        .then((d) => {
-          this.events = d.events || [];
-          this.activityCategories = d.categories || [];
-          this.activitySeverities = d.severities || [];
-          this.activitySummary = d.summary || {};
-          this.buildActivityCards();
-        })
-        .catch((e) => window.oem && window.oem.toast("Failed to load activity", "error", e.message))
-        .finally(() => (this.loading = false));
-      this.connectEventStream();
+    // ── Retention / Cleanup ──────────────────────────────────────────
+    saveRetention() {
+      const days = parseInt(this.retentionDays) || 0;
+      fetch("/api/settings/retention", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ retention_days: Math.max(0, days) }),
+      }).then(r => r.json()).then(d => {
+        this.retentionDays = d.retention_days;
+        if (window.oem) window.oem.toast("Saved", "success", `Retention: ${d.retention_days} days`);
+      }).catch(e => { if (window.oem) window.oem.toast("Save failed", "error", e.message); });
     },
 
-    buildActivityCards() {
-      const s = this.activitySummary || {};
-      this.activityCards = [
-        { key: "total", label: "Total Events", value: s.total ?? 0, icon: ICONS.activity, accent: "" },
-        { key: "warnings", label: "Warnings", value: s.warnings ?? 0, icon: ICONS.alert, accent: (s.warnings ?? 0) > 0 ? "accent-warn" : "" },
-        { key: "errors", label: "Errors", value: s.errors ?? 0, icon: ICONS.alert, accent: (s.errors ?? 0) > 0 ? "accent-danger" : "" },
-        { key: "critical", label: "Critical", value: s.critical ?? 0, icon: ICONS.alert, accent: (s.critical ?? 0) > 0 ? "accent-danger" : "" },
-      ];
-    },
-
-    connectEventStream() {
-      if (this._ws || typeof WebSocket === "undefined") return;
-      try {
-        const proto = location.protocol === "https:" ? "wss:" : "ws:";
-        const ws = new WebSocket(`${proto}//${location.host}/ws/events`);
-        this._ws = ws;
-        ws.onopen = () => (this.wsConnected = true);
-        ws.onmessage = (msg) => {
-          try {
-            const ev = JSON.parse(msg.data);
-            if (this.activityCategory && ev.category !== this.activityCategory) return;
-            if (this.activitySeverity && ev.severity !== this.activitySeverity) return;
-            this.events.unshift(ev);
-            if (this.events.length > 300) this.events.pop();
-          } catch (e) {}
-        };
-        ws.onclose = () => {
-          this.wsConnected = false;
-          this._ws = null;
-          this.startActivityPolling();
-        };
-        ws.onerror = () => {
-          this.wsConnected = false;
-        };
-      } catch (e) {
-        this.startActivityPolling();
-      }
-    },
-
-    startActivityPolling() {
-      if (this._activityPoll || this.page !== "activity") return;
-      this._activityPoll = setInterval(() => {
-        if (this.page !== "activity") {
-          clearInterval(this._activityPoll);
-          this._activityPoll = null;
-          return;
-        }
-        fetchJSON("/api/events/recent?limit=50")
-          .then((d) => (this.events = d.events || this.events))
-          .catch(() => {});
-      }, 6000);
+    runCleanup() {
+      if (window.oem) window.oem.toast("Cleaning up…", "info");
+      fetch("/api/cleanup/run", { method: "POST" }).then(r => r.json()).then(d => {
+        if (d.error) throw new Error(d.error);
+        if (window.oem) window.oem.toast("Cleanup done", "success", `${d.cleaned} folders removed (${d.freed_human})`);
+      }).catch(e => { if (window.oem) window.oem.toast("Cleanup failed", "error", e.message); });
     },
 
     loadNotifications() {
@@ -1188,76 +810,7 @@ function sectionPage(page) {
         .catch((e) => window.oem && window.oem.toast("Test failed", "error", e.message));
     },
 
-    createOrg() {
-      const name = (this.newOrg.name || "").trim();
-      if (!name) return window.oem && window.oem.toast("Organization name is required", "error");
-      this._post("/api/organizations", this.newOrg, "Organization created", () => {
-        this.newOrg = { name: "", type: "company", description: "" };
-        this.loadOrganizations();
-      });
-    },
-
-    deleteOrg(id) {
-      if (!confirm("Delete this organization and all its credentials?")) return;
-      fetch(`/api/organizations/${id}`, { method: "DELETE" })
-        .then((r) => r.json())
-        .then(() => { window.oem && window.oem.toast("Organization deleted", "success"); this.loadOrganizations(); })
-        .catch((e) => window.oem && window.oem.toast("Delete failed", "error", e.message));
-    },
-
-    duplicateOrg(id) {
-      fetch(`/api/organizations/${id}/duplicate`, { method: "POST" })
-        .then((r) => r.json())
-        .then(() => { window.oem && window.oem.toast("Organization duplicated", "success"); this.loadOrganizations(); })
-        .catch((e) => window.oem && window.oem.toast("Duplicate failed", "error", e.message));
-    },
-
-    addCredential(orgId) {
-      if (!(this.credForm.name || "").trim()) return window.oem && window.oem.toast("Credential name required", "error");
-      this._post(`/api/organizations/${orgId}/credentials`, this.credForm, "Credential added", () => {
-        this.credForm = { name: "Primary", environment: "production", access_key: "", secret_key: "", priority: 1 };
-        this.loadOrganizations();
-      });
-    },
-
-    deleteCredential(orgId, credId) {
-      if (!confirm("Delete this credential?")) return;
-      fetch(`/api/organizations/${orgId}/credentials/${credId}`, { method: "DELETE" })
-        .then((r) => r.json())
-        .then(() => { window.oem && window.oem.toast("Credential deleted", "success"); this.loadOrganizations(); })
-        .catch((e) => window.oem && window.oem.toast("Delete failed", "error", e.message));
-    },
-
-    testCredential(orgId, credId) {
-      window.oem && window.oem.toast("Testing connection…", "info");
-      fetch(`/api/organizations/${orgId}/credentials/${credId}/test`, { method: "POST" })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.ok) window.oem && window.oem.toast("Connected", "success", (d.latency_ms || 0) + "ms");
-          else window.oem && window.oem.toast("Connection failed", "error", d.error || "Unknown error");
-        })
-        .catch((e) => window.oem && window.oem.toast("Test failed", "error", e.message));
-    },
-
-    importAccounts() {
-      this._post("/api/organizations/import", {}, "Imported from accounts", () => this.loadOrganizations());
-    },
-
-    healthClass(health) {
-      return { healthy: "badge-ok", degraded: "badge-warn", rate_limited: "badge-warn", failed: "badge-fail" }[health] || "badge-muted";
-    },
-
-    _post(url, body, okMsg, then) {
-      fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.error) throw new Error(d.error);
-          window.oem && window.oem.toast(okMsg, "success");
-          then && then(d);
-        })
-        .catch((e) => window.oem && window.oem.toast("Action failed", "error", e.message));
-    },
-
+    // ── System page ────────────────────────────────────────────────
     loadSystem() {
       this.loading = true;
       Promise.all([
@@ -1331,7 +884,7 @@ function sectionPage(page) {
     },
 
     get canRunExport() {
-      return !!(this.manual.label && this.preview && this.preview.valid && !this.exportBusy);
+      return !!(this.manual.label && !this.exportBusy);
     },
 
     get estimateCards() {
@@ -1362,14 +915,6 @@ function sectionPage(page) {
       return (this.preview && this.preview.timeline) || [];
     },
 
-    get favoriteTemplates() {
-      return this.manualTemplates.filter((tpl) => tpl.favorite).slice(0, 8);
-    },
-
-    get recentTemplates() {
-      return this.manualRecentTemplates.slice(0, 6);
-    },
-
     formatTime(iso) {
       return relativeTime(iso);
     },
@@ -1395,15 +940,11 @@ function sectionPage(page) {
       return "";
     },
 
-    setTab(tab) {
-      this.activeTab = tab;
-    },
-    sortBy(key) {
-      if (this.sortKey === key) this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      else {
-        this.sortKey = key;
-        this.sortDir = "asc";
-      }
+    setTheme(mode) {
+      const dark = mode === "dark";
+      document.documentElement.classList.toggle("dark", dark);
+      try { localStorage.setItem("oem-theme", dark ? "dark" : "light"); } catch (e) {}
+      if (window.oem) { window.oem.isDark = dark; }
     },
 
     get visibleRows() {
@@ -1492,199 +1033,274 @@ function sectionPage(page) {
 
 /* Register with Alpine's registry so initialization never races the
    defer-loaded factory definitions. */
-// -- Tree Selector (Account → Groups hierarchy) ------------------------------
+// -- Tree Selector (Self-contained School accordions) --------------------
 
 let treeSelector = () => ({
   organisations: [],
-  accounts: [],  // backward compat alias
+  accounts: [],
   loading: true,
-  expanded: {},       // org_name → bool
-  selected: {},       // group friendly_name → bool
+  expanded: {},
+  selected: {},
   selectAllOrgs: {},
   icons: ICONS,
 
-  // Group creation form
-  showCreateForm: false,
-  createTargetAccount: "",
+  // ── All forms are INLINE — nothing floats at page level ──────────────
+
+  showNewOrgForm: false,
+  newOrgForm: { name: "", type: "company", description: "" },
+
+  editingOrgId: null,
+  editOrgForm: { name: "", type: "company", description: "" },
+
+  credFormOrgId: null,
+  credForm: { name: "", access_key: "", secret_key: "", environment: "production" },
+
+  groupFormOrgId: null,
   groupForm: { name: "", onshape_id: "", profile: "STL", schedule: "" },
 
-  // Delete confirmation
-  deleteConfirm: null,
+  // Inline delete confirmations (org-level or group-level)
+  orgToDelete: null,
+  orgToDeleteName: "",
+  credToDelete: null,       // "orgId::credId"
+  credToDeleteName: "",
+  groupToDelete: null,
 
-  async init() {
-    await this.loadTree();
-  },
+  async init() { await this.loadTree(); },
 
   async loadTree() {
     this.loading = true;
     try {
       const resp = await fetchJSON("/api/tree");
       this.organisations = resp.organisations || [];
-      this.accounts = this.organisations;  // backward compat
-    } catch (e) {
-      console.warn("Tree load failed", e);
-    }
+      this.accounts = this.organisations;
+      window.__treeData = resp; // shared cache for sectionPage (avoids double fetch)
+    } catch (e) { console.warn("Tree load failed", e); }
     this.loading = false;
   },
 
-  toggle(accountName) {
-    this.expanded[accountName] = !this.expanded[accountName];
+  // ── Expand / Select ──────────────────────────────────────────────────
+
+  toggle(orgName) { this.expanded[orgName] = !this.expanded[orgName]; },
+  toggleOrg(orgName) {
+    const org = this.organisations.find(a => a.name === orgName);
+    if (!org) return;
+    const select = !this.selectAllOrgs[orgName];
+    this.selectAllOrgs[orgName] = select;
+    for (const g of (org.groups || [])) this.selected[g.friendly_name] = select;
+  },
+  toggleAccount(n) { return this.toggleOrg(n); },
+  toggleGroup(n) { this.selected[n] = !this.selected[n]; },
+
+  get selectedCount() { return Object.values(this.selected).filter(Boolean).length; },
+  get selectedLabels() { return Object.keys(this.selected).filter(k => this.selected[k]); },
+
+  // ── Create School (inline at top of list) ───────────────────────────
+
+  async createOrg() {
+    const f = this.newOrgForm;
+    if (!(f.name || "").trim()) { if (window.oem) window.oem.toast("Name required", "error"); return; }
+    try {
+      const r = await fetch("/api/organizations", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: f.name.trim(), type: f.type, description: (f.description || "").trim() }),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Created", "success", d.name);
+      this.showNewOrgForm = false;
+      this.newOrgForm = { name: "", type: "company", description: "" };
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Create org failed", "error", e.message); }
   },
 
-  toggleAccount(accountName) {
-    const acc = this.accounts.find(a => a.name === accountName);
-    if (!acc) return;
-    const select = !this.selectAllAccounts[accountName];
-    this.selectAllAccounts[accountName] = select;
-    for (const g of acc.groups) {
-      this.selected[g.friendly_name] = select;
+  // ── Edit School (inline within the org card) ─────────────────────────
+
+  startEditOrg(org) {
+    this.editingOrgId = org.id;
+    this.editOrgForm = { name: org.name || "", type: org.type || "company", description: org.description || "" };
+  },
+  cancelEditOrg() { this.editingOrgId = null; },
+
+  async saveEditOrg(orgId) {
+    const f = this.editOrgForm;
+    if (!(f.name || "").trim()) { if (window.oem) window.oem.toast("Name required", "error"); return; }
+    try {
+      const r = await fetch(`/api/organizations/${orgId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: f.name.trim(), type: f.type, description: (f.description || "").trim() }),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Updated", "success", d.name);
+      this.editingOrgId = null;
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Edit org failed", "error", e.message); }
+  },
+
+  // ── Delete / Duplicate School ────────────────────────────────────────
+
+  confirmOrgDelete(orgId, orgName) { this.orgToDelete = orgId; this.orgToDeleteName = orgName; },
+  cancelOrgDelete() { this.orgToDelete = null; this.orgToDeleteName = ""; },
+
+  async deleteOrg(orgId) {
+    try {
+      const r = await fetch(`/api/organizations/${orgId}`, { method: "DELETE" });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Deleted", "success", "School removed");
+      this.orgToDelete = null;
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Delete org failed", "error", e.message); }
+  },
+
+  async duplicateOrg(orgId) {
+    try {
+      const r = await fetch(`/api/organizations/${orgId}/duplicate`, { method: "POST" });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Duplicated", "success", d.name);
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Duplicate org failed", "error", e.message); }
+  },
+
+  // ── Credentials (inline within the API Keys section) ─────────────────
+
+  toggleCredForm(orgId) {
+    this.credFormOrgId = (this.credFormOrgId === orgId) ? null : orgId;
+    if (this.credFormOrgId) this.credForm = { name: "", access_key: "", secret_key: "", environment: "production" };
+  },
+
+  async addCredential(orgId) {
+    const f = this.credForm;
+    if (!(f.name || "").trim() || !(f.access_key || "").trim() || !(f.secret_key || "").trim()) {
+      if (window.oem) window.oem.toast("All fields required", "error"); return;
     }
+    try {
+      const r = await fetch(`/api/organizations/${orgId}/credentials`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: f.name.trim(), access_key: f.access_key.trim(), secret_key: f.secret_key.trim(), environment: f.environment }),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Added", "success", d.name);
+      this.credFormOrgId = null;
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Add key failed", "error", e.message); }
   },
 
-  toggleGroup(groupName) {
-    this.selected[groupName] = !this.selected[groupName];
+  confirmCredDelete(orgId, credId, credName) {
+    this.credToDelete = `${orgId}::${credId}`;
+    this.credToDeleteName = credName;
+  },
+  cancelCredDelete() { this.credToDelete = null; this.credToDeleteName = ""; },
+
+  async deleteCredential() {
+    const parts = (this.credToDelete || "").split("::");
+    const orgId = parts[0];
+    const credId = parts.slice(1).join("::");
+    if (!orgId || !credId) return;
+    try {
+      const r = await fetch(`/api/organizations/${orgId}/credentials/${encodeURIComponent(credId)}`, { method: "DELETE" });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      if (window.oem) window.oem.toast("Removed", "success", "API key deleted");
+      this.credToDelete = null;
+      await this.loadTree();
+    } catch (e) { if (window.oem) window.oem.toast("Delete key failed", "error", e.message); }
   },
 
-  get selectedCount() {
-    return Object.values(this.selected).filter(Boolean).length;
+  // ── Groups (inline within the Groups section) ────────────────────────
+
+  toggleGroupForm(orgId) {
+    this.groupFormOrgId = (this.groupFormOrgId === orgId) ? null : orgId;
+    if (this.groupFormOrgId) this.groupForm = { name: "", onshape_id: "", profile: "STL", schedule: "" };
   },
 
-  get selectedAccounts() {
-    return this.accounts.filter(a =>
-      this.selectAllAccounts[a.name] ||
-      a.groups.some(g => this.selected[g.friendly_name])
-    ).length;
-  },
-
-  get selectedLabels() {
-    return Object.keys(this.selected).filter(k => this.selected[k]);
-  },
-
-  // -- Group Management --------------------------------------------------
-
-  openCreateForm(accountName) {
-    this.createTargetAccount = accountName;
-    this.groupForm = { name: "", onshape_id: "", profile: "STL", schedule: "" };
-    this.showCreateForm = true;
-  },
-
-  cancelCreate() {
-    this.showCreateForm = false;
-    this.createTargetAccount = "";
-  },
-
-  async createGroup() {
+  async createGroup(orgId) {
     const f = this.groupForm;
-    if (!(f.name || "").trim()) {
-      if (window.oem) window.oem.toast("Group name is required", "error");
-      return;
-    }
-    if (!(f.onshape_id || "").trim()) {
-      if (window.oem) window.oem.toast("Onshape Label ID is required", "error");
-      return;
-    }
+    if (!(f.name || "").trim()) { if (window.oem) window.oem.toast("Group name required", "error"); return; }
+    if (!(f.onshape_id || "").trim()) { if (window.oem) window.oem.toast("Label ID required", "error"); return; }
+    const org = this.organisations.find(o => o.id === orgId);
+    // Use credential names (not org name) so the tree API can match groups to orgs
+    const credNames = org ? (org.credentials || []).map(c => c.name) : [];
     const body = {
-      friendly_name: f.name.trim(),
-      onshape_label_id: f.onshape_id.trim(),
-      assigned_accounts: this.createTargetAccount ? [this.createTargetAccount] : [],
+      friendly_name: f.name.trim(), onshape_label_id: f.onshape_id.trim(),
+      assigned_accounts: credNames.length ? credNames : (org ? [org.name] : []),
       export_profile: f.profile || "STL",
     };
     if (f.schedule) body.scheduler = { interval: f.schedule, enabled: true };
-
     try {
       const r = await fetch("/api/groups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Created", "success", `Group '${d.friendly_name}' created`);
-      this.showCreateForm = false;
-      this.createTargetAccount = "";
+      if (window.oem) window.oem.toast("Created", "success", d.friendly_name);
+      this.groupFormOrgId = null;
       await this.loadTree();
-    } catch (e) {
-      if (window.oem) window.oem.toast(e.message, "error");
-    }
+    } catch (e) { if (window.oem) window.oem.toast("Create group failed", "error", e.message); }
   },
 
-  confirmDelete(groupName) {
-    this.deleteConfirm = groupName;
-  },
-
-  cancelDelete() {
-    this.deleteConfirm = null;
-  },
+  confirmDelete(groupName) { this.groupToDelete = groupName; },
+  cancelDelete() { this.groupToDelete = null; },
 
   async deleteGroup(groupName) {
     try {
-      const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}`, {
-        method: "DELETE",
-      });
+      const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}`, { method: "DELETE" });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Deleted", "success", `Group '${groupName}' removed`);
-      this.deleteConfirm = null;
-      // Clear selection
+      if (window.oem) window.oem.toast("Deleted", "success", `${groupName} removed`);
+      this.groupToDelete = null;
       this.selected[groupName] = false;
       await this.loadTree();
-    } catch (e) {
-      if (window.oem) window.oem.toast("Error", e.message, "error");
-    }
+    } catch (e) { if (window.oem) window.oem.toast("Delete group failed", "error", e.message); }
   },
 
-  async moveGroup(groupName, targetAccount) {
-    if (!targetAccount) return;
+  async moveGroup(groupName, targetOrgName) {
+    if (!targetOrgName) return;
+    // Resolve org name to its first credential name (backend uses account names)
+    const targetOrg = this.organisations.find(o => o.name === targetOrgName);
+    const credName = (targetOrg && targetOrg.credentials && targetOrg.credentials.length)
+      ? targetOrg.credentials[0].name : targetOrgName;
     try {
       const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}/move`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account: targetAccount }),
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: credName }),
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      if (window.oem) window.oem.toast("Moved", "success", `Group moved to ${targetAccount}`);
+      if (window.oem) window.oem.toast("Moved", "success", `Group moved to ${targetOrgName}`);
       await this.loadTree();
-    } catch (e) {
-      if (window.oem) window.oem.toast(e.message, "error");
-    }
+    } catch (e) { if (window.oem) window.oem.toast("Move group failed", "error", e.message); }
   },
 
-  async toggleGroupEnabled(groupName, enabled) {
+  async toggleGroupEnabled(groupName, currentlyEnabled) {
     try {
+      const newEnabled = currentlyEnabled === false ? true : false;
       const r = await fetch(`/api/groups/${encodeURIComponent(groupName)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !enabled }),
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: newEnabled }),
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
       await this.loadTree();
-    } catch (e) {
-      if (window.oem) window.oem.toast(e.message, "error");
-    }
+    } catch (e) { if (window.oem) window.oem.toast("Toggle group failed", "error", e.message); }
   },
 
-  // -- Export ------------------------------------------------------------
+  // ── Batch Export ─────────────────────────────────────────────────────
 
   queueExport() {
     const labels = this.selectedLabels;
     if (!labels.length) return;
-    fetch("/api/exports/run", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ labels }),
-    })
+    fetch("/api/exports/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ labels }) })
       .then(r => r.json())
       .then(r => {
         if (r.error) throw new Error(r.error);
         if (window.oem) window.oem.toast("Queued", "success", `${r.count} export(s) enqueued`);
         for (const l of labels) this.selected[l] = false;
-        for (const k of Object.keys(this.selectAllAccounts)) this.selectAllAccounts[k] = false;
+        for (const k of Object.keys(this.selectAllOrgs)) this.selectAllOrgs[k] = false;
       })
-      .catch(e => {
-        if (window.oem) window.oem.toast("Export failed: " + e.message, "error");
-      });
+      .catch(e => { if (window.oem) window.oem.toast("Export failed", "error", e.message); });
   },
 });
 

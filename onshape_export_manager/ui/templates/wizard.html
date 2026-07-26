@@ -25,7 +25,7 @@
           remote: {},
           orgTypes: ["school", "company", "department", "customer", "workshop", "team", "other"],
           steps: [
-            "Administrator", "Storage", "Organization", "API Credentials",
+            "Administrator", "Storage", "School", "API Credentials",
             "Labels", "Export Profile", "Test", "Remote Access", "Finish",
           ],
 
@@ -47,7 +47,7 @@
           saveStorage() { this.run(() => post("/api/setup/storage", { path: this.storage.path }).then(() => this.go(3))); },
           createOrg() { this.run(() => post("/api/organizations", this.org).then((d) => { this.org.id = d.id; this.go(4); })); },
           addCred() {
-            if (!this.org.id) return (this.error = "Create an organization first.");
+            if (!this.org.id) return (this.error = "Create a school first.");
             this.run(() => post(`/api/organizations/${this.org.id}/credentials`, this.cred).then((d) => { this.cred.id = d.id; this.go(5); }));
           },
           createLabel() {

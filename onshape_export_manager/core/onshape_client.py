@@ -386,6 +386,7 @@ class OnshapeClient:
             endpoint = f"/partstudios/d/{doc_id}/w/{workspace_id}/e/{element_id}/export/obj"
             body = obj_export_body(save_path.name, options)
         else:
+            # 3MF, Parasolid, GLTF, DXF, Native — all use the translations API
             endpoint = f"/partstudios/d/{doc_id}/w/{workspace_id}/e/{element_id}/translations"
             body = generic_translation_body(save_path.name, export_format, options)
 
@@ -703,13 +704,8 @@ def generic_translation_body(
 
 def translation_format_name(export_format: ExportFormat) -> str:
     """Map internal format values to Onshape translation format names."""
-    mapping = {
-        ExportFormat.IGES: "IGES",
-        ExportFormat.DXF: "DXF",
-        ExportFormat.PARASOLID: "PARASOLID",
-        ExportFormat.CUSTOM: "CUSTOM",
-    }
-    return mapping.get(export_format, export_format.value.upper())
+    # STL has its own dedicated endpoint; STEP and 3MF use the translations API.
+    return export_format.value.upper()
 
 
 # Backwards-compatible private helper name from the proof-of-concept.
